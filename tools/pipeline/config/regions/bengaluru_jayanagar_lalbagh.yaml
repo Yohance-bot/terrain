@@ -1,0 +1,55 @@
+# Milestone 2 region: the Jayanagar to Lalbagh corridor, Bengaluru.
+#
+# This file is the ONLY place the pipeline learns what geography it is working
+# on. Processing a different area later -- another district, or eventually all of
+# Bengaluru -- is a new file in this directory, not a code change. That is the
+# whole point of `03_MAP_AND_TERRITORY_PIPELINE` calling for a pipeline that
+# scales from one district to a city without redesign.
+
+city: bengaluru
+
+# The pipeline area key. Deliberately NOT "jayanagar", so Milestone 2 output
+# publishes alongside the hand-made Milestone 1 data rather than on top of it.
+# Rolling back is then a config change plus a re-seed.
+area: jayanagar_lalbagh
+
+# [south, west, north, east] in EPSG:4326.
+#
+# PROVISIONAL. Covers Lalbagh at the north through Jayanagar and the JP Nagar
+# lakes at the south. Stage 01 prints the extract footprint; check it against
+# satellite imagery and tighten this before trusting any generated territory.
+bbox: [12.900, 77.565, 12.965, 77.610]
+
+# Planar work happens in UTM zone 43N. Every length, area and buffer in this
+# pipeline is computed in metres, never in EPSG:4326 degrees -- `03` is explicit
+# that degree-based area calculations are wrong and must not appear.
+crs_work: EPSG:32643
+
+# What lands in PostGIS, matching the Milestone 1 `territories.geom` column.
+crs_store: EPSG:4326
+
+sources:
+  # Overture is the primary source per `03`. Base carries land use, parks and
+  # water; divisions carries neighbourhood boundaries; transportation carries
+  # the road and rail network used to cut territory borders.
+  overture:
+    # Pinned. Overture only keeps ~60 days of public releases; bump this
+    # deliberately when regenerating, never silently float to "latest".
+    # Catalogue: https://docs.overturemaps.org/release-calendar/
+    release: "2026-07-22.0"
+    themes:
+      - base
+      - divisions
+      - transportation
+
+  # Geofabrik OSM is the documented fallback for anything Overture covers
+  # poorly in Bengaluru. Southern Zone contains Karnataka. Pinned to a dated
+  # extract (not *-latest) so a re-run tomorrow cannot silently change the map.
+  geofabrik:
+    extract_url: https://download.geofabrik.de/asia/india/southern-zone-260804.osm.pbf
+
+# Where published output lands. Consumed by stage 09 and by the backend seed
+# script, which already reads data/territories/{city}/{area}/v{n}/.
+publish:
+  territory_data_root: data/territories
+  version: 1

@@ -1,0 +1,101 @@
+{
+  "critic": "heuristic",
+  "region": "bengaluru_jayanagar_lalbagh",
+  "suggestion_count": 6,
+  "suggestions": [
+    {
+      "confidence": 0.95,
+      "donor_territory_id": "3c2b359c-8723-5399-b02b-d066f0a92258",
+      "id": "sug-0001",
+      "metrics_refs": [
+        "aspect_ratio",
+        "member_territory_ids"
+      ],
+      "op": "transfer_member_parcel",
+      "parcel_id": "028cf389-3b74-5479-be6d-03ca09fc672d",
+      "reason": "strip aspect 3.27; transfer boundary parcel toward neighbour to rebalance proportions",
+      "receiver_territory_id": "dcb7d2ba-20f5-5003-bb5e-837dd70e7a45",
+      "territory_ids": [
+        "3c2b359c-8723-5399-b02b-d066f0a92258",
+        "dcb7d2ba-20f5-5003-bb5e-837dd70e7a45"
+      ]
+    },
+    {
+      "confidence": 0.95,
+      "donor_territory_id": "61bcf239-d77b-517c-8d87-06b1c3dd449f",
+      "id": "sug-0002",
+      "metrics_refs": [
+        "aspect_ratio",
+        "member_territory_ids"
+      ],
+      "op": "transfer_member_parcel",
+      "parcel_id": "01e8f8fa-4338-505f-8a69-58b748db38ca",
+      "reason": "strip aspect 3.60; transfer boundary parcel toward neighbour to rebalance proportions",
+      "receiver_territory_id": "4cb02f65-ee78-5153-b895-2b2f597c5e2d",
+      "territory_ids": [
+        "4cb02f65-ee78-5153-b895-2b2f597c5e2d",
+        "61bcf239-d77b-517c-8d87-06b1c3dd449f"
+      ]
+    },
+    {
+      "confidence": 0.95,
+      "donor_territory_id": "96bb16dc-3915-5bf0-a58e-b4d862e3db25",
+      "id": "sug-0003",
+      "metrics_refs": [
+        "aspect_ratio",
+        "member_territory_ids"
+      ],
+      "op": "transfer_member_parcel",
+      "parcel_id": "0261b112-86ee-5534-bf19-335ee39a9cb4",
+      "reason": "strip aspect 3.06; transfer boundary parcel toward neighbour to rebalance proportions",
+      "receiver_territory_id": "7751553e-850e-5d95-b6b5-e44a53494e97",
+      "territory_ids": [
+        "7751553e-850e-5d95-b6b5-e44a53494e97",
+        "96bb16dc-3915-5bf0-a58e-b4d862e3db25"
+      ]
+    },
+    {
+      "confidence": 0.95,
+      "donor_territory_id": "c548247a-bccc-58be-8be7-b4ca50143be5",
+      "id": "sug-0004",
+      "metrics_refs": [
+        "aspect_ratio",
+        "member_territory_ids"
+      ],
+      "op": "transfer_member_parcel",
+      "parcel_id": "1276612d-43a1-5bae-b990-db6121f6a3b7",
+      "reason": "strip aspect 3.50; transfer boundary parcel toward neighbour to rebalance proportions",
+      "receiver_territory_id": "e02030a3-ed79-57d0-956b-f14dc908330c",
+      "territory_ids": [
+        "c548247a-bccc-58be-8be7-b4ca50143be5",
+        "e02030a3-ed79-57d0-956b-f14dc908330c"
+      ]
+    },
+    {
+      "confidence": 1.0,
+      "id": "sug-0005",
+      "metrics_refs": [
+        "protected",
+        "kind"
+      ],
+      "op": "keep_standalone",
+      "reason": "protected landmark stays a prize territory",
+      "territory_ids": [
+        "37cb9662-1e52-5f07-9824-9ccadb2d26fb"
+      ]
+    },
+    {
+      "confidence": 1.0,
+      "id": "sug-0006",
+      "metrics_refs": [
+        "protected",
+        "kind"
+      ],
+      "op": "keep_standalone",
+      "reason": "protected landmark stays a prize territory",
+      "territory_ids": [
+        "df1ea0ed-0a55-56f3-80c4-9a8d173e674c"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+INTERNAL MVP VISUALIZATION-ONLY REVIEW.
+
+This APPROVED gate was created for the bengaluru_mvp region as part of a
+scoped, explicitly-authorized pipeline task to exercise stages 09-12 for
+internal map visualization only.
+
+- The 49 known Stage 08 "names" failures (bbox-edge naming gaps near
+  Varthur/Whitefield, plus two degenerate slivers near Halanayakanahalli)
+  are temporarily accepted via the allow_validation_exceptions mechanism
+  (see config/regions/bengaluru_mvp.exceptions.json) and are excluded from
+  candidates.geojson -- not renamed, not silently passed.
+- This step writes only to data/pipeline/bengaluru/mvp/published/. It does
+  NOT touch PostGIS, the backend, or any production database.
+- No production publish, backend change, or database change is authorized
+  by this file. Stage 13 (gameplay publish) was NOT run.
+- A full human review against satellite imagery (the checklist in
+  docs/09_TERRITORY_GENERATION_PIPELINE.md) has NOT been performed. Do not
+  treat this region's published/ output as reviewed, production-ready game
+  data.

@@ -1,0 +1,43 @@
+{
+  "area": "mvp",
+  "artifacts": {
+    "boundary_graph": {
+      "path": "data/pipeline/bengaluru/mvp/intermediate/04_boundary_graph.geojson",
+      "present": true,
+      "sha256": "01c11af89986814445b5ff1fe3908fbf00e8a54b7084dda113a91c9c55ab272f"
+    },
+    "faces": {
+      "path": "data/pipeline/bengaluru/mvp/intermediate/05_faces.geojson",
+      "present": true,
+      "sha256": "e4140245333b5fb8f72728586a58e86024fd90e177f74ade59d85078f4b8071e"
+    },
+    "landmarks": {
+      "path": "data/pipeline/bengaluru/mvp/intermediate/03_landmarks.geojson",
+      "present": true,
+      "sha256": "3b28be65104db9fd063e57e2e349520473833f953c66586fb60daa48adbaff6c"
+    },
+    "named": {
+      "path": "data/pipeline/bengaluru/mvp/intermediate/07_named.geojson",
+      "present": true,
+      "sha256": "f324ee138e0fb3fe406dde7b7eb5b385eb4dc9c8182b607ea21d2659d5d8f633"
+    },
+    "normalized": {
+      "path": "data/pipeline/bengaluru/mvp/intermediate/06_normalized.geojson",
+      "present": true,
+      "sha256": "ed1ff97e6da1750afd1f8596ed48702815fd9f8749bf06375e4b279aca8a12b1"
+    },
+    "raw_manifest": {
+      "path": "data/pipeline/bengaluru/mvp/raw/download_manifest.json",
+      "present": true,
+      "sha256": "ea2c231035f0e8b8b2480573972c2b473fd452f774729ddd265d3b25d537fe1d"
+    },
+    "separators": {
+      "path": "data/pipeline/bengaluru/mvp/intermediate/02_separators.geojson",
+      "present": true,
+      "sha256": "8c4e14df681ede31127d40d2ffe63044e415f1328acae42f79baa0062aefe4c4"
+    }
+  },
+  "city": "bengaluru",
+  "pipeline_stages": "01-07",
+  "region": "bengaluru_mvp"
+}

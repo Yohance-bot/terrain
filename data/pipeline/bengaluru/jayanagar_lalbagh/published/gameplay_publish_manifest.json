@@ -1,0 +1,14 @@
+{
+  "area": "jayanagar_lalbagh",
+  "beautified_hash": "16a6f8f18813803fa7381a5fc03e4deb593507d0279f1799379c18233ba3ca1e",
+  "candidate_hash": "16a6f8f18813803fa7381a5fc03e4deb593507d0279f1799379c18233ba3ca1e",
+  "city": "bengaluru",
+  "cluster_candidates_hash": "7d3df8cef36b03a2f400c5e35a5821ade84927486765e1c69ca8e8a62e9b48db",
+  "layer": "gameplay",
+  "parcel_hash": "9aa716bb05c780ee86482b51790c3885e2a6078412fe0e4ad6a94264856caa22",
+  "protected_count": 2,
+  "published_hash": "16a6f8f18813803fa7381a5fc03e4deb593507d0279f1799379c18233ba3ca1e",
+  "region": "bengaluru_jayanagar_lalbagh",
+  "territory_count": 35,
+  "validation_status": "pass"
+}

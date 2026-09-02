@@ -1,0 +1,979 @@
+{
+  "applied": [
+    {
+      "aspect_after": 3.18484,
+      "aspect_before": 3.495907,
+      "confidence": 0.95,
+      "fallback_receiver": false,
+      "id": "sug-0004",
+      "op": "transfer_member_parcel",
+      "parcel_id": "54264509-cde8-5596-899f-7f09dd8215e4",
+      "territory_ids": [
+        "c548247a-bccc-58be-8be7-b4ca50143be5",
+        "e02030a3-ed79-57d0-956b-f14dc908330c"
+      ]
+    }
+  ],
+  "applied_count": 1,
+  "area_rules": {
+    "hard_max_acres": 350.0,
+    "hard_max_m2": 1416399.74784,
+    "target_max_acres": 300.0,
+    "target_max_m2": 1214056.92672
+  },
+  "candidates_hash": "7d3df8cef36b03a2f400c5e35a5821ade84927486765e1c69ca8e8a62e9b48db",
+  "input_count": 35,
+  "output_count": 35,
+  "skipped": [
+    {
+      "id": "sug-0001",
+      "op": "transfer_member_parcel",
+      "reason": "no_improving_transfer",
+      "territory_ids": [
+        "3c2b359c-8723-5399-b02b-d066f0a92258",
+        "dcb7d2ba-20f5-5003-bb5e-837dd70e7a45"
+      ]
+    },
+    {
+      "id": "sug-0002",
+      "op": "transfer_member_parcel",
+      "reason": "no_improving_transfer",
+      "territory_ids": [
+        "61bcf239-d77b-517c-8d87-06b1c3dd449f",
+        "4cb02f65-ee78-5153-b895-2b2f597c5e2d"
+      ]
+    },
+    {
+      "id": "sug-0003",
+      "op": "transfer_member_parcel",
+      "reason": "no_improving_transfer",
+      "territory_ids": [
+        "96bb16dc-3915-5bf0-a58e-b4d862e3db25",
+        "7751553e-850e-5d95-b6b5-e44a53494e97"
+      ]
+    }
+  ],
+  "skipped_count": 3,
+  "soft_flag_count": 3,
+  "soft_flags": [
+    {
+      "confidence": 1.0,
+      "id": "sug-0005",
+      "op": "keep_standalone",
+      "reason": "protected landmark stays a prize territory",
+      "territory_ids": [
+        "37cb9662-1e52-5f07-9824-9ccadb2d26fb"
+      ]
+    },
+    {
+      "confidence": 1.0,
+      "id": "sug-0006",
+      "op": "keep_standalone",
+      "reason": "protected landmark stays a prize territory",
+      "territory_ids": [
+        "df1ea0ed-0a55-56f3-80c4-9a8d173e674c"
+      ]
+    },
+    {
+      "corner_budget": {
+        "applied": [
+          {
+            "op": "drop_vertex",
+            "owner_count": 1,
+            "seed_territory_id": "c548247a-bccc-58be-8be7-b4ca50143be5",
+            "territory_ids": [
+              "c548247a-bccc-58be-8be7-b4ca50143be5"
+            ],
+            "turn": 0.0,
+            "vertex": [
+              15663613,
+              28654256
+            ]
+          },
+          {
+            "op": "drop_vertex",
+            "owner_count": 1,
+            "seed_territory_id": "c548247a-bccc-58be-8be7-b4ca50143be5",
+            "territory_ids": [
+              "c548247a-bccc-58be-8be7-b4ca50143be5"
+            ],
+            "turn": 0.0,
+            "vertex": [
+              15663657,
+              28649902
+            ]
+          },
+          {
+            "op": "drop_vertex",
+            "owner_count": 1,
+            "seed_territory_id": "c548247a-bccc-58be-8be7-b4ca50143be5",
+            "territory_ids": [
+              "c548247a-bccc-58be-8be7-b4ca50143be5"
+            ],
+            "turn": 0.0,
+            "vertex": [
+              15663565,
+              28658974
+            ]
+          },
+          {
+            "op": "drop_vertex",
+            "owner_count": 1,
+            "seed_territory_id": "c548247a-bccc-58be-8be7-b4ca50143be5",
+            "territory_ids": [
+              "c548247a-bccc-58be-8be7-b4ca50143be5"
+            ],
+            "turn": 0.0,
+            "vertex": [
+              15663660,
+              28649608
+            ]
+          },
+          {
+            "op": "drop_vertex",
+            "owner_count": 1,
+            "seed_territory_id": "c548247a-bccc-58be-8be7-b4ca50143be5",
+            "territory_ids": [
+              "c548247a-bccc-58be-8be7-b4ca50143be5"
+            ],
+            "turn": 0.0,
+            "vertex": [
+              15663667,
+              28648915
+            ]
+          },
+          {
+            "op": "drop_vertex",
+            "owner_count": 1,
+            "seed_territory_id": "c548247a-bccc-58be-8be7-b4ca50143be5",
+            "territory_ids": [
+              "c548247a-bccc-58be-8be7-b4ca50143be5"
+            ],
+            "turn": 0.0,
+            "vertex": [
+              15663564,
+              28659075
+            ]
+          },
+          {
+            "op": "drop_vertex",
+            "owner_count": 1,
+            "seed_territory_id": "c548247a-bccc-58be-8be7-b4ca50143be5",
+            "territory_ids": [
+              "c548247a-bccc-58be-8be7-b4ca50143be5"
+            ],
+            "turn": 0.0,
+            "vertex": [
+              15663563,
+              28659164
+            ]
+          },
+          {
+            "op": "drop_vertex",
+            "owner_count": 1,
+            "seed_territory_id": "c548247a-bccc-58be-8be7-b4ca50143be5",
+            "territory_ids": [
+              "c548247a-bccc-58be-8be7-b4ca50143be5"
+            ],
+            "turn": 0.0,
+            "vertex": [
+              15663559,
+              28659569
+            ]
+          },
+          {
+            "op": "drop_vertex",
+            "owner_count": 1,
+            "seed_territory_id": "c548247a-bccc-58be-8be7-b4ca50143be5",
+            "territory_ids": [
+              "c548247a-bccc-58be-8be7-b4ca50143be5"
+            ],
+            "turn": 0.0,
+            "vertex": [
+              15663679,
+              28647754
+            ]
+          },
+          {
+            "op": "drop_vertex",
+            "owner_count": 1,
+            "seed_territory_id": "c548247a-bccc-58be-8be7-b4ca50143be5",
+            "territory_ids": [
+              "c548247a-bccc-58be-8be7-b4ca50143be5"
+            ],
+            "turn": 0.0,
+            "vertex": [
+              15663699,
+              28645808
+            ]
+          },
+          {
+            "op": "drop_vertex",
+            "owner_count": 1,
+            "seed_territory_id": "c548247a-bccc-58be-8be7-b4ca50143be5",
+            "territory_ids": [
+              "c548247a-bccc-58be-8be7-b4ca50143be5"
+            ],
+            "turn": 0.0,
+            "vertex": [
+              15663709,
+              28644851
+            ]
+          },
+          {
+            "op": "drop_vertex",
+            "owner_count": 1,
+            "seed_territory_id": "c548247a-bccc-58be-8be7-b4ca50143be5",
+            "territory_ids": [
+              "c548247a-bccc-58be-8be7-b4ca50143be5"
+            ],
+            "turn": 0.0,
+            "vertex": [
+              15663712,
+              28644555
+            ]
+          },
+          {
+            "op": "drop_vertex",
+            "owner_count": 1,
+            "seed_territory_id": "c548247a-bccc-58be-8be7-b4ca50143be5",
+            "territory_ids": [
+              "c548247a-bccc-58be-8be7-b4ca50143be5"
+            ],
+            "turn": 0.0,
+            "vertex": [
+              15663718,
+              28643925
+            ]
+          },
+          {
+            "op": "drop_vertex",
+            "owner_count": 1,
+            "seed_territory_id": "c548247a-bccc-58be-8be7-b4ca50143be5",
+            "territory_ids": [
+              "c548247a-bccc-58be-8be7-b4ca50143be5"
+            ],
+            "turn": 0.0,
+            "vertex": [
+              15663720,
+              28643729
+            ]
+          },
+          {
+            "op": "drop_vertex",
+            "owner_count": 1,
+            "seed_territory_id": "c548247a-bccc-58be-8be7-b4ca50143be5",
+            "territory_ids": [
+              "c548247a-bccc-58be-8be7-b4ca50143be5"
+            ],
+            "turn": 0.0,
+            "vertex": [
+              15663722,
+              28643577
+            ]
+          },
+          {
+            "op": "drop_vertex",
+            "owner_count": 1,
+            "seed_territory_id": "dcb7d2ba-20f5-5003-bb5e-837dd70e7a45",
+            "territory_ids": [
+              "dcb7d2ba-20f5-5003-bb5e-837dd70e7a45"
+            ],
+            "turn": 0.0,
+            "vertex": [
+              15602713,
+              28549736
+            ]
+          },
+          {
+            "op": "drop_vertex",
+            "owner_count": 1,
+            "seed_territory_id": "324154bc-2dbc-5af3-b978-9642a6fa7d26",
+            "territory_ids": [
+              "324154bc-2dbc-5af3-b978-9642a6fa7d26"
+            ],
+            "turn": 0.0,
+            "vertex": [
+              15576506,
+              28549472
+            ]
+          },
+          {
+            "op": "drop_vertex",
+            "owner_count": 1,
+            "seed_territory_id": "324154bc-2dbc-5af3-b978-9642a6fa7d26",
+            "territory_ids": [
+              "324154bc-2dbc-5af3-b978-9642a6fa7d26"
+            ],
+            "turn": 0.0,
+            "vertex": [
+              15576875,
+              28549476
+            ]
+          },
+          {
+            "op": "drop_vertex",
+            "owner_count": 1,
+            "seed_territory_id": "324154bc-2dbc-5af3-b978-9642a6fa7d26",
+            "territory_ids": [
+              "324154bc-2dbc-5af3-b978-9642a6fa7d26"
+            ],
+            "turn": 0.0,
+            "vertex": [
+              15577753,
+              28549485
+            ]
+          },
+          {
+            "op": "drop_vertex",
+            "owner_count": 1,
+            "seed_territory_id": "324154bc-2dbc-5af3-b978-9642a6fa7d26",
+            "territory_ids": [
+              "324154bc-2dbc-5af3-b978-9642a6fa7d26"
+            ],
+            "turn": 0.0,
+            "vertex": [
+              15578213,
+              28549489
+            ]
+          },
+          {
+            "op": "drop_vertex",
+            "owner_count": 1,
+            "seed_territory_id": "324154bc-2dbc-5af3-b978-9642a6fa7d26",
+            "territory_ids": [
+              "324154bc-2dbc-5af3-b978-9642a6fa7d26"
+            ],
+            "turn": 0.0,
+            "vertex": [
+              15578681,
+              28549494
+            ]
+          },
+          {
+            "op": "drop_vertex",
+            "owner_count": 1,
+            "seed_territory_id": "324154bc-2dbc-5af3-b978-9642a6fa7d26",
+            "territory_ids": [
+              "324154bc-2dbc-5af3-b978-9642a6fa7d26"
+            ],
+            "turn": 0.0,
+            "vertex": [
+              15579891,
+              28549506
+            ]
+          },
+          {
+            "op": "drop_vertex",
+            "owner_count": 1,
+            "seed_territory_id": "324154bc-2dbc-5af3-b978-9642a6fa7d26",
+            "territory_ids": [
+              "324154bc-2dbc-5af3-b978-9642a6fa7d26"
+            ],
+            "turn": 0.0,
+            "vertex": [
+              15580404,
+              28549511
+            ]
+          },
+          {
+            "op": "drop_vertex",
+            "owner_count": 1,
+            "seed_territory_id": "1926ad7c-2963-5768-a443-a7d127c45997",
+            "territory_ids": [
+              "1926ad7c-2963-5768-a443-a7d127c45997"
+            ],
+            "turn": 0.0,
+            "vertex": [
+              15664416,
+              28575586
+            ]
+          },
+          {
+            "op": "drop_vertex",
+            "owner_count": 1,
+            "seed_territory_id": "1926ad7c-2963-5768-a443-a7d127c45997",
+            "territory_ids": [
+              "1926ad7c-2963-5768-a443-a7d127c45997"
+            ],
+            "turn": 0.0,
+            "vertex": [
+              15664429,
+              28574217
+            ]
+          },
+          {
+            "op": "drop_vertex",
+            "owner_count": 1,
+            "seed_territory_id": "1926ad7c-2963-5768-a443-a7d127c45997",
+            "territory_ids": [
+              "1926ad7c-2963-5768-a443-a7d127c45997"
+            ],
+            "turn": 0.0,
+            "vertex": [
+              15664358,
+              28581246
+            ]
+          },
+          {
+            "op": "drop_vertex",
+            "owner_count": 1,
+            "seed_territory_id": "18e17d85-7643-5b2f-b43b-d586f76856c8",
+            "territory_ids": [
+              "18e17d85-7643-5b2f-b43b-d586f76856c8"
+            ],
+            "turn": 0.0,
+            "vertex": [
+              15566285,
+              28615313
+            ]
+          },
+          {
+            "op": "drop_vertex",
+            "owner_count": 1,
+            "seed_territory_id": "18e17d85-7643-5b2f-b43b-d586f76856c8",
+            "territory_ids": [
+              "18e17d85-7643-5b2f-b43b-d586f76856c8"
+            ],
+            "turn": 0.0,
+            "vertex": [
+              15566327,
+              28611137
+            ]
+          },
+          {
+            "op": "drop_vertex",
+            "owner_count": 1,
+            "seed_territory_id": "18e17d85-7643-5b2f-b43b-d586f76856c8",
+            "territory_ids": [
+              "18e17d85-7643-5b2f-b43b-d586f76856c8"
+            ],
+            "turn": 0.0,
+            "vertex": [
+              15566329,
+              28610924
+            ]
+          },
+          {
+            "op": "drop_vertex",
+            "owner_count": 1,
+            "seed_territory_id": "18e17d85-7643-5b2f-b43b-d586f76856c8",
+            "territory_ids": [
+              "18e17d85-7643-5b2f-b43b-d586f76856c8"
+            ],
+            "turn": 0.0,
+            "vertex": [
+              15566371,
+              28606759
+            ]
+          },
+          {
+            "op": "drop_vertex",
+            "owner_count": 1,
+            "seed_territory_id": "0c84237a-e7f1-5be9-a9d7-00ef3e0c4643",
+            "territory_ids": [
+              "0c84237a-e7f1-5be9-a9d7-00ef3e0c4643"
+            ],
+            "turn": 0.0,
+            "vertex": [
+              15664005,
+              28615819
+            ]
+          },
+          {
+            "op": "drop_vertex",
+            "owner_count": 1,
+            "seed_territory_id": "0c84237a-e7f1-5be9-a9d7-00ef3e0c4643",
+            "territory_ids": [
+              "0c84237a-e7f1-5be9-a9d7-00ef3e0c4643"
+            ],
+            "turn": 0.0,
+            "vertex": [
+              15664036,
+              28612784
+            ]
+          },
+          {
+            "op": "drop_vertex",
+            "owner_count": 1,
+            "seed_territory_id": "e02030a3-ed79-57d0-956b-f14dc908330c",
+            "territory_ids": [
+              "e02030a3-ed79-57d0-956b-f14dc908330c"
+            ],
+            "turn": 0.0,
+            "vertex": [
+              15663871,
+              28628913
+            ]
+          },
+          {
+            "op": "drop_vertex",
+            "owner_count": 1,
+            "seed_territory_id": "e02030a3-ed79-57d0-956b-f14dc908330c",
+            "territory_ids": [
+              "e02030a3-ed79-57d0-956b-f14dc908330c"
+            ],
+            "turn": 0.0,
+            "vertex": [
+              15663824,
+              28633614
+            ]
+          },
+          {
+            "op": "drop_vertex",
+            "owner_count": 1,
+            "seed_territory_id": "e02030a3-ed79-57d0-956b-f14dc908330c",
+            "territory_ids": [
+              "e02030a3-ed79-57d0-956b-f14dc908330c"
+            ],
+            "turn": 0.0,
+            "vertex": [
+              15663813,
+              28634652
+            ]
+          },
+          {
+            "op": "drop_vertex",
+            "owner_count": 1,
+            "seed_territory_id": "e02030a3-ed79-57d0-956b-f14dc908330c",
+            "territory_ids": [
+              "e02030a3-ed79-57d0-956b-f14dc908330c"
+            ],
+            "turn": 0.0,
+            "vertex": [
+              15663808,
+              28635154
+            ]
+          },
+          {
+            "op": "drop_vertex",
+            "owner_count": 1,
+            "seed_territory_id": "e02030a3-ed79-57d0-956b-f14dc908330c",
+            "territory_ids": [
+              "e02030a3-ed79-57d0-956b-f14dc908330c"
+            ],
+            "turn": 0.0,
+            "vertex": [
+              15663804,
+              28635496
+            ]
+          },
+          {
+            "op": "drop_vertex",
+            "owner_count": 1,
+            "seed_territory_id": "e02030a3-ed79-57d0-956b-f14dc908330c",
+            "territory_ids": [
+              "e02030a3-ed79-57d0-956b-f14dc908330c"
+            ],
+            "turn": 0.0,
+            "vertex": [
+              15663801,
+              28635773
+            ]
+          },
+          {
+            "op": "drop_vertex",
+            "owner_count": 1,
+            "seed_territory_id": "e02030a3-ed79-57d0-956b-f14dc908330c",
+            "territory_ids": [
+              "e02030a3-ed79-57d0-956b-f14dc908330c"
+            ],
+            "turn": 0.0,
+            "vertex": [
+              15663797,
+              28636190
+            ]
+          },
+          {
+            "op": "drop_vertex",
+            "owner_count": 1,
+            "seed_territory_id": "e02030a3-ed79-57d0-956b-f14dc908330c",
+            "territory_ids": [
+              "e02030a3-ed79-57d0-956b-f14dc908330c"
+            ],
+            "turn": 0.0,
+            "vertex": [
+              15663882,
+              28627873
+            ]
+          },
+          {
+            "op": "drop_vertex",
+            "owner_count": 1,
+            "seed_territory_id": "e02030a3-ed79-57d0-956b-f14dc908330c",
+            "territory_ids": [
+              "e02030a3-ed79-57d0-956b-f14dc908330c"
+            ],
+            "turn": 0.0,
+            "vertex": [
+              15663796,
+              28636321
+            ]
+          },
+          {
+            "op": "drop_vertex",
+            "owner_count": 1,
+            "seed_territory_id": "e02030a3-ed79-57d0-956b-f14dc908330c",
+            "territory_ids": [
+              "e02030a3-ed79-57d0-956b-f14dc908330c"
+            ],
+            "turn": 0.0,
+            "vertex": [
+              15663777,
+              28638176
+            ]
+          },
+          {
+            "op": "drop_vertex",
+            "owner_count": 1,
+            "seed_territory_id": "e02030a3-ed79-57d0-956b-f14dc908330c",
+            "territory_ids": [
+              "e02030a3-ed79-57d0-956b-f14dc908330c"
+            ],
+            "turn": 0.0,
+            "vertex": [
+              15663883,
+              28627830
+            ]
+          },
+          {
+            "op": "drop_vertex",
+            "owner_count": 1,
+            "seed_territory_id": "e02030a3-ed79-57d0-956b-f14dc908330c",
+            "territory_ids": [
+              "e02030a3-ed79-57d0-956b-f14dc908330c"
+            ],
+            "turn": 0.0,
+            "vertex": [
+              15663767,
+              28639180
+            ]
+          },
+          {
+            "op": "drop_vertex",
+            "owner_count": 1,
+            "seed_territory_id": "e02030a3-ed79-57d0-956b-f14dc908330c",
+            "territory_ids": [
+              "e02030a3-ed79-57d0-956b-f14dc908330c"
+            ],
+            "turn": 0.0,
+            "vertex": [
+              15663765,
+              28639390
+            ]
+          },
+          {
+            "op": "drop_vertex",
+            "owner_count": 1,
+            "seed_territory_id": "e02030a3-ed79-57d0-956b-f14dc908330c",
+            "territory_ids": [
+              "e02030a3-ed79-57d0-956b-f14dc908330c"
+            ],
+            "turn": 0.0,
+            "vertex": [
+              15663762,
+              28639643
+            ]
+          },
+          {
+            "op": "drop_vertex",
+            "owner_count": 1,
+            "seed_territory_id": "18e17d85-7643-5b2f-b43b-d586f76856c8",
+            "territory_ids": [
+              "18e17d85-7643-5b2f-b43b-d586f76856c8"
+            ],
+            "turn": 0.0,
+            "vertex": [
+              15566489,
+              28595040
+            ]
+          },
+          {
+            "op": "drop_vertex",
+            "owner_count": 1,
+            "seed_territory_id": "18e17d85-7643-5b2f-b43b-d586f76856c8",
+            "territory_ids": [
+              "18e17d85-7643-5b2f-b43b-d586f76856c8"
+            ],
+            "turn": 0.0,
+            "vertex": [
+              15566476,
+              28596288
+            ]
+          },
+          {
+            "op": "drop_vertex",
+            "owner_count": 1,
+            "seed_territory_id": "18e17d85-7643-5b2f-b43b-d586f76856c8",
+            "territory_ids": [
+              "18e17d85-7643-5b2f-b43b-d586f76856c8"
+            ],
+            "turn": 0.0,
+            "vertex": [
+              15566469,
+              28597020
+            ]
+          },
+          {
+            "op": "drop_vertex",
+            "owner_count": 1,
+            "seed_territory_id": "18e17d85-7643-5b2f-b43b-d586f76856c8",
+            "territory_ids": [
+              "18e17d85-7643-5b2f-b43b-d586f76856c8"
+            ],
+            "turn": 0.0,
+            "vertex": [
+              15566463,
+              28597567
+            ]
+          },
+          {
+            "count": 33,
+            "max_exterior_corners": 10,
+            "op": "corner_budget_soft_over"
+          }
+        ],
+        "applied_count": 51,
+        "input_count": 35,
+        "junctions_removed": 0,
+        "merges": 0,
+        "output_count": 35,
+        "still_over_budget": [
+          {
+            "corners": 168,
+            "max_exterior_corners": 10,
+            "slug": "s-g-palya",
+            "territory_id": "0c84237a-e7f1-5be9-a9d7-00ef3e0c4643",
+            "total_exterior_corners": 168
+          },
+          {
+            "corners": 176,
+            "max_exterior_corners": 10,
+            "slug": "dharmagiri-ward",
+            "territory_id": "18e17d85-7643-5b2f-b43b-d586f76856c8",
+            "total_exterior_corners": 176
+          },
+          {
+            "corners": 166,
+            "max_exterior_corners": 10,
+            "slug": "viswamanava-kuvempu-ward",
+            "territory_id": "1926ad7c-2963-5768-a443-a7d127c45997",
+            "total_exterior_corners": 166
+          },
+          {
+            "corners": 150,
+            "max_exterior_corners": 10,
+            "slug": "sunkenahalli-2",
+            "territory_id": "23e54dc5-113d-5319-941f-79cf7051eab9",
+            "total_exterior_corners": 150
+          },
+          {
+            "corners": 212,
+            "max_exterior_corners": 10,
+            "slug": "jp-nagar-3rd-phase",
+            "territory_id": "31b33f40-1b24-55d9-9078-36772d14d453",
+            "total_exterior_corners": 212
+          },
+          {
+            "corners": 112,
+            "max_exterior_corners": 10,
+            "slug": "yelachenahalli",
+            "territory_id": "324154bc-2dbc-5af3-b978-9642a6fa7d26",
+            "total_exterior_corners": 112
+          },
+          {
+            "corners": 138,
+            "max_exterior_corners": 10,
+            "slug": "n-r-colony",
+            "territory_id": "35b3cd77-3b9d-5647-9bce-2fdf015e8422",
+            "total_exterior_corners": 138
+          },
+          {
+            "corners": 287,
+            "max_exterior_corners": 10,
+            "slug": "sarakki",
+            "territory_id": "3c2b359c-8723-5399-b02b-d066f0a92258",
+            "total_exterior_corners": 287
+          },
+          {
+            "corners": 295,
+            "max_exterior_corners": 10,
+            "slug": "jayanagar-7th-block",
+            "territory_id": "409be123-d3b5-58da-9d7a-89e8c9b9847d",
+            "total_exterior_corners": 295
+          },
+          {
+            "corners": 212,
+            "max_exterior_corners": 10,
+            "slug": "d-v-gundappa-ward",
+            "territory_id": "48a9eeac-303c-52db-92f8-a7580686fd9c",
+            "total_exterior_corners": 212
+          },
+          {
+            "corners": 233,
+            "max_exterior_corners": 10,
+            "slug": "abdul-kalam-nagar",
+            "territory_id": "4cb02f65-ee78-5153-b895-2b2f597c5e2d",
+            "total_exterior_corners": 233
+          },
+          {
+            "corners": 176,
+            "max_exterior_corners": 10,
+            "slug": "jp-nagar-1st-phase",
+            "territory_id": "61575140-2837-5ef4-bd43-ea598245436d",
+            "total_exterior_corners": 176
+          },
+          {
+            "corners": 202,
+            "max_exterior_corners": 10,
+            "slug": "jayanagar-4t-block",
+            "territory_id": "61bcf239-d77b-517c-8d87-06b1c3dd449f",
+            "total_exterior_corners": 202
+          },
+          {
+            "corners": 218,
+            "max_exterior_corners": 10,
+            "slug": "marenahalli-south",
+            "territory_id": "64f43a1e-4733-5561-bddd-aedb3a2c2e9a",
+            "total_exterior_corners": 218
+          },
+          {
+            "corners": 189,
+            "max_exterior_corners": 10,
+            "slug": "kanakanapalya",
+            "territory_id": "6f7baf6a-6204-5194-bb3f-602b1c225f58",
+            "total_exterior_corners": 232
+          },
+          {
+            "corners": 114,
+            "max_exterior_corners": 10,
+            "slug": "k-r-market",
+            "territory_id": "74a73762-154c-5635-89cf-182cd0cf0c7a",
+            "total_exterior_corners": 114
+          },
+          {
+            "corners": 221,
+            "max_exterior_corners": 10,
+            "slug": "shanthinagar",
+            "territory_id": "7751553e-850e-5d95-b6b5-e44a53494e97",
+            "total_exterior_corners": 221
+          },
+          {
+            "corners": 246,
+            "max_exterior_corners": 10,
+            "slug": "hombegowda-nagara",
+            "territory_id": "7bdc0127-d2dd-54ce-993b-928875ac741d",
+            "total_exterior_corners": 271
+          },
+          {
+            "corners": 150,
+            "max_exterior_corners": 10,
+            "slug": "ashokanagar",
+            "territory_id": "96bb16dc-3915-5bf0-a58e-b4d862e3db25",
+            "total_exterior_corners": 150
+          },
+          {
+            "corners": 193,
+            "max_exterior_corners": 10,
+            "slug": "banashankari-temple-ward",
+            "territory_id": "9edcc5b0-9741-5709-add8-cee09db5fba7",
+            "total_exterior_corners": 193
+          },
+          {
+            "corners": 152,
+            "max_exterior_corners": 10,
+            "slug": "bhel-ward",
+            "territory_id": "a2f11b32-4b43-5a84-ae5b-dc92140cae8f",
+            "total_exterior_corners": 210
+          },
+          {
+            "corners": 259,
+            "max_exterior_corners": 10,
+            "slug": "jayanagar-4th-block",
+            "territory_id": "b0d2af0c-6819-5919-aa86-5a6c8d29b277",
+            "total_exterior_corners": 259
+          },
+          {
+            "corners": 263,
+            "max_exterior_corners": 10,
+            "slug": "sunkenahalli",
+            "territory_id": "b6027fc2-e64f-51b6-b8ee-73d8e4d36cc9",
+            "total_exterior_corners": 263
+          },
+          {
+            "corners": 248,
+            "max_exterior_corners": 10,
+            "slug": "v-v-puram",
+            "territory_id": "bbb6acfa-20e3-514d-843c-1489889c22fc",
+            "total_exterior_corners": 248
+          },
+          {
+            "corners": 228,
+            "max_exterior_corners": 10,
+            "slug": "silverjubilee-park-ward",
+            "territory_id": "c1970d7d-dbc3-58cf-bd22-ce53cfe7f402",
+            "total_exterior_corners": 228
+          },
+          {
+            "corners": 170,
+            "max_exterior_corners": 10,
+            "slug": "vinayakanagar",
+            "territory_id": "c548247a-bccc-58be-8be7-b4ca50143be5",
+            "total_exterior_corners": 170
+          },
+          {
+            "corners": 196,
+            "max_exterior_corners": 10,
+            "slug": "bilekahalli",
+            "territory_id": "c8669b0d-26f2-50a8-8611-fab528c83ccd",
+            "total_exterior_corners": 196
+          },
+          {
+            "corners": 210,
+            "max_exterior_corners": 10,
+            "slug": "tilak-nagara",
+            "territory_id": "cabd8c7b-1cde-5715-9584-a84ab9b8ba16",
+            "total_exterior_corners": 210
+          },
+          {
+            "corners": 246,
+            "max_exterior_corners": 10,
+            "slug": "jayanagar-2nd-block",
+            "territory_id": "ce1bca80-9adf-50db-936e-f79967d7bf43",
+            "total_exterior_corners": 281
+          },
+          {
+            "corners": 157,
+            "max_exterior_corners": 10,
+            "slug": "j-p-nagar",
+            "territory_id": "d2cb7275-462c-53ef-ab21-031a4aaad428",
+            "total_exterior_corners": 157
+          },
+          {
+            "corners": 167,
+            "max_exterior_corners": 10,
+            "slug": "kengal-hanumanthaiah-south",
+            "territory_id": "dcb7d2ba-20f5-5003-bb5e-837dd70e7a45",
+            "total_exterior_corners": 167
+          },
+          {
+            "corners": 282,
+            "max_exterior_corners": 10,
+            "slug": "yediyuru",
+            "territory_id": "dcf3fde9-e029-5ad0-9f7f-190ef591e24d",
+            "total_exterior_corners": 282
+          },
+          {
+            "corners": 183,
+            "max_exterior_corners": 10,
+            "slug": "lakkasandra",
+            "territory_id": "e02030a3-ed79-57d0-956b-f14dc908330c",
+            "total_exterior_corners": 204
+          }
+        ],
+        "vertices_removed": 50
+      }
+    }
+  ],
+  "suggestions_hash": "9c495744a455ac2fe183c19894a0bbe20a536e96a3e79fa28f32871fd659e743"
+}

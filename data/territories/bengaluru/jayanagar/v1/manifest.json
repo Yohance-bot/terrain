@@ -1,0 +1,97 @@
+{
+  "city": "bengaluru",
+  "area": "jayanagar",
+  "version": 1,
+  "attribution": "\u00a9 OpenStreetMap contributors",
+  "license": "ODbL",
+  "territories": [
+    {
+      "id": "badcf4ee-3bb9-50c1-8086-e0d7e51c55c9",
+      "slug": "jayanagar-4th-block",
+      "name": "Jayanagar 4th Block",
+      "kind": "block",
+      "version": 1,
+      "city": "bengaluru",
+      "area": "jayanagar",
+      "approx_km2": 0.5702,
+      "verified": false
+    },
+    {
+      "id": "b32a7407-6fb2-52da-bb84-92dcc351e25c",
+      "slug": "jayanagar-9th-block",
+      "name": "Jayanagar 9th Block",
+      "kind": "block",
+      "version": 1,
+      "city": "bengaluru",
+      "area": "jayanagar",
+      "approx_km2": 0.554,
+      "verified": false
+    },
+    {
+      "id": "b498ec01-b351-5bca-9f40-168e42aebf3c",
+      "slug": "krishna-rao-park",
+      "name": "Krishna Rao Park",
+      "kind": "park",
+      "version": 1,
+      "city": "bengaluru",
+      "area": "jayanagar",
+      "approx_km2": 0.0838,
+      "verified": false
+    },
+    {
+      "id": "c71f6ead-d6ed-5520-941c-0147b06f3f8f",
+      "slug": "lalbagh",
+      "name": "Lalbagh Botanical Garden",
+      "kind": "park",
+      "version": 1,
+      "city": "bengaluru",
+      "area": "jayanagar",
+      "approx_km2": 0.9374,
+      "verified": false
+    },
+    {
+      "id": "76de4388-8752-5c31-80b3-4ad885cd2dd6",
+      "slug": "madhavan-park",
+      "name": "Madhavan Park",
+      "kind": "park",
+      "version": 1,
+      "city": "bengaluru",
+      "area": "jayanagar",
+      "approx_km2": 0.0077,
+      "verified": false
+    },
+    {
+      "id": "3763f20b-ffec-56f6-9a08-38fa0382055c",
+      "slug": "puttenahalli-lake",
+      "name": "Puttenahalli Lake",
+      "kind": "lake",
+      "version": 1,
+      "city": "bengaluru",
+      "area": "jayanagar",
+      "approx_km2": 0.0872,
+      "verified": false
+    },
+    {
+      "id": "f204e9c5-c0fa-5b91-bff5-a10efeb40e96",
+      "slug": "ragigudda",
+      "name": "Ragigudda",
+      "kind": "landmark",
+      "version": 1,
+      "city": "bengaluru",
+      "area": "jayanagar",
+      "approx_km2": 0.0035,
+      "verified": false
+    },
+    {
+      "id": "fffd3011-02ab-55f0-b5fb-71758f842b98",
+      "slug": "sarakki-lake",
+      "name": "Sarakki Lake",
+      "kind": "lake",
+      "version": 1,
+      "city": "bengaluru",
+      "area": "jayanagar",
+      "approx_km2": 0.2203,
+      "verified": false
+    }
+  ]
+}

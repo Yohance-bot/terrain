@@ -1,0 +1,5922 @@
+{
+  "excluded_known_exceptions": {
+    "count": 49,
+    "features": [
+      {
+        "area_m2": 0.562,
+        "name_source": "unnamed",
+        "reason": "Degenerate geometry sliver (~0.6-0.7 sq m) near Halanayakanahalli, unrelated to the bbox edge -- normalize_sizes (stage 06) merge residue below the size floor. Accepted for internal MVP visualization review; not a real place, excluded rather than named.",
+        "slug": "unnamed-792033-1428154",
+        "territory_id": "ce621698-024b-57ad-9b58-1c251e346bff"
+      },
+      {
+        "area_m2": 0.676,
+        "name_source": "unnamed",
+        "reason": "Degenerate geometry sliver (~0.6-0.7 sq m) near Halanayakanahalli, unrelated to the bbox edge -- normalize_sizes (stage 06) merge residue below the size floor. Accepted for internal MVP visualization review; not a real place, excluded rather than named.",
+        "slug": "unnamed-792033-1428154-2",
+        "territory_id": "1ef35182-8fe4-5118-bf31-d9619d2ceb42"
+      },
+      {
+        "area_m2": 438906.26,
+        "name_source": "unnamed",
+        "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs.",
+        "slug": "unnamed-799979-1434219",
+        "territory_id": "8f84b38e-709b-549d-918a-28ef820a0730"
+      },
+      {
+        "area_m2": 9490.505,
+        "name_source": "unnamed",
+        "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs.",
+        "slug": "unnamed-800013-1433880",
+        "territory_id": "44a84490-64ec-52cc-a1d7-cdbcdb577a31"
+      },
+      {
+        "area_m2": 461762.499,
+        "name_source": "unnamed",
+        "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs.",
+        "slug": "unnamed-800016-1433310",
+        "territory_id": "ff57ccf3-0275-51d5-aae6-f53880981224"
+      },
+      {
+        "area_m2": 10242.468,
+        "name_source": "unnamed",
+        "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs.",
+        "slug": "unnamed-800056-1432320",
+        "territory_id": "245d3de6-8fa7-503a-a26b-90302f2b684e"
+      },
+      {
+        "area_m2": 7462.229,
+        "name_source": "unnamed",
+        "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs.",
+        "slug": "unnamed-800119-1433915",
+        "territory_id": "f24ce1c9-0274-504e-b59f-c5d92879d8f8"
+      },
+      {
+        "area_m2": 6278.846,
+        "name_source": "unnamed",
+        "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs.",
+        "slug": "unnamed-800136-1432224",
+        "territory_id": "573c22c0-248d-5960-97c4-7fbedc8dd7dc"
+      },
+      {
+        "area_m2": 10114.535,
+        "name_source": "unnamed",
+        "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs.",
+        "slug": "unnamed-800198-1431809",
+        "territory_id": "ed64a6dd-a52b-55e7-8866-0a9df114d4b2"
+      },
+      {
+        "area_m2": 34969.341,
+        "name_source": "unnamed",
+        "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs.",
+        "slug": "unnamed-800258-1431903",
+        "territory_id": "62a7922c-54c2-5f0e-8c6e-970c334c3180"
+      },
+      {
+        "area_m2": 9844.013,
+        "name_source": "unnamed",
+        "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs.",
+        "slug": "unnamed-800263-1431707",
+        "territory_id": "f64fd1ee-8bf2-5717-bddc-30f4b70ebf9e"
+      },
+      {
+        "area_m2": 392882.7,
+        "name_source": "unnamed",
+        "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs.",
+        "slug": "unnamed-800392-1431233",
+        "territory_id": "67562539-1b55-56aa-a7a2-948fdc5c6f1d"
+      },
+      {
+        "area_m2": 184243.033,
+        "name_source": "unnamed",
+        "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs.",
+        "slug": "unnamed-800405-1433194",
+        "territory_id": "513c09b0-8633-5a36-bcd0-01541958ebc1"
+      },
+      {
+        "area_m2": 7190.636,
+        "name_source": "unnamed",
+        "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs.",
+        "slug": "unnamed-800460-1433360",
+        "territory_id": "a2fd5f98-4aa2-54c2-9311-2e2099e137de"
+      },
+      {
+        "area_m2": 42220.343,
+        "name_source": "unnamed",
+        "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs.",
+        "slug": "unnamed-800475-1433509",
+        "territory_id": "c897869d-d516-52fc-a039-2bc984e060c3"
+      },
+      {
+        "area_m2": 8290.829,
+        "name_source": "unnamed",
+        "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs.",
+        "slug": "unnamed-800512-1433370",
+        "territory_id": "6584db1b-aa84-5943-b82d-04c97258e860"
+      },
+      {
+        "area_m2": 6906.441,
+        "name_source": "unnamed",
+        "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs.",
+        "slug": "unnamed-800516-1433452",
+        "territory_id": "9f2d440b-3838-5d77-a811-dd8bfd7050f2"
+      },
+      {
+        "area_m2": 360793.124,
+        "name_source": "unnamed",
+        "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs.",
+        "slug": "unnamed-800546-1433704",
+        "territory_id": "4bc99ead-e3af-5bb1-bf0f-58bcab422968"
+      },
+      {
+        "area_m2": 8003.829,
+        "name_source": "unnamed",
+        "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs.",
+        "slug": "unnamed-800565-1433258",
+        "territory_id": "ff8c800f-c367-57ce-a3a0-97b9c702fb61"
+      },
+      {
+        "area_m2": 9590.338,
+        "name_source": "unnamed",
+        "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs.",
+        "slug": "unnamed-800597-1433401",
+        "territory_id": "5cc55132-12ce-5c7a-a268-053108d681e9"
+      },
+      {
+        "area_m2": 5164.144,
+        "name_source": "unnamed",
+        "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs.",
+        "slug": "unnamed-800614-1433292",
+        "territory_id": "d1a87ccf-ebb6-526c-8b9a-bef12bb5ce99"
+      },
+      {
+        "area_m2": 516564.169,
+        "name_source": "unnamed",
+        "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs.",
+        "slug": "unnamed-800628-1431842",
+        "territory_id": "6679a066-faba-5ccf-b8e4-a416cc624a60"
+      },
+      {
+        "area_m2": 8362.826,
+        "name_source": "unnamed",
+        "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs.",
+        "slug": "unnamed-800632-1434494",
+        "territory_id": "745c1c59-5b50-50dc-8243-f7c5ed210f4f"
+      },
+      {
+        "area_m2": 10131.807,
+        "name_source": "unnamed",
+        "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs.",
+        "slug": "unnamed-800665-1433333",
+        "territory_id": "9a548942-aa46-5c84-aa16-fb7faf8e8fdd"
+      },
+      {
+        "area_m2": 5701.449,
+        "name_source": "unnamed",
+        "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs.",
+        "slug": "unnamed-800727-1433364",
+        "territory_id": "28415f4c-8fb5-590b-a0f4-5edab0e3f4be"
+      },
+      {
+        "area_m2": 111850.149,
+        "name_source": "unnamed",
+        "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs.",
+        "slug": "unnamed-800788-1431097",
+        "territory_id": "7c25d43f-13bb-52ac-b535-c16f33d75b81"
+      },
+      {
+        "area_m2": 68379.433,
+        "name_source": "unnamed",
+        "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs.",
+        "slug": "unnamed-800823-1433273",
+        "territory_id": "8081f229-3f49-5412-9f14-85cc51c3ab61"
+      },
+      {
+        "area_m2": 336626.381,
+        "name_source": "unnamed",
+        "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs.",
+        "slug": "unnamed-800853-1434298",
+        "territory_id": "fa90bc93-5d89-5d35-9c6a-60ce8c824271"
+      },
+      {
+        "area_m2": 22183.555,
+        "name_source": "unnamed",
+        "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs.",
+        "slug": "unnamed-800932-1433727",
+        "territory_id": "2b9be180-1130-5deb-b2d6-440ec2b16716"
+      },
+      {
+        "area_m2": 5953.736,
+        "name_source": "unnamed",
+        "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs.",
+        "slug": "unnamed-800940-1433872",
+        "territory_id": "d6052194-af1a-50a1-be70-3452bdc8a3b1"
+      },
+      {
+        "area_m2": 35587.616,
+        "name_source": "unnamed",
+        "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs.",
+        "slug": "unnamed-800987-1433517",
+        "territory_id": "6c0ad496-c2b6-5048-820f-ca2d628f28e5"
+      },
+      {
+        "area_m2": 48345.653,
+        "name_source": "unnamed",
+        "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs.",
+        "slug": "unnamed-801042-1438069",
+        "territory_id": "4c080942-1901-5ea2-ab9d-93f1b8fb8edf"
+      },
+      {
+        "area_m2": 55628.032,
+        "name_source": "unnamed",
+        "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs.",
+        "slug": "unnamed-801091-1430907",
+        "territory_id": "275cd3c7-0ada-5096-9c83-eef68b13accc"
+      },
+      {
+        "area_m2": 6335.768,
+        "name_source": "unnamed",
+        "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs.",
+        "slug": "unnamed-801103-1434109",
+        "territory_id": "4ad76541-8062-51ae-9e94-eeced9716cba"
+      },
+      {
+        "area_m2": 26879.932,
+        "name_source": "unnamed",
+        "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs.",
+        "slug": "unnamed-801180-1434581",
+        "territory_id": "7b7d8a11-5629-566c-9c69-cc1001b7137d"
+      },
+      {
+        "area_m2": 528045.164,
+        "name_source": "unnamed",
+        "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs.",
+        "slug": "unnamed-801254-1434987",
+        "territory_id": "a7f9a4b3-a85e-511e-9b97-e66987758fc4"
+      },
+      {
+        "area_m2": 5483.001,
+        "name_source": "unnamed",
+        "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs.",
+        "slug": "unnamed-801261-1430959",
+        "territory_id": "370822b1-4c5c-57a0-abc7-f401e0ffca68"
+      },
+      {
+        "area_m2": 1616629.871,
+        "name_source": "unnamed",
+        "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs.",
+        "slug": "unnamed-801263-1432063",
+        "territory_id": "dbc388db-8b5e-5d02-ae06-e8fdc860e41a"
+      },
+      {
+        "area_m2": 745066.545,
+        "name_source": "unnamed",
+        "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs.",
+        "slug": "unnamed-801316-1433403",
+        "territory_id": "4facb0d5-264f-5d23-863b-74056cb062b6"
+      },
+      {
+        "area_m2": 340368.769,
+        "name_source": "unnamed",
+        "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs.",
+        "slug": "unnamed-801348-1437852",
+        "territory_id": "c29f0a7e-0953-53e1-8265-9964773ec43e"
+      },
+      {
+        "area_m2": 113204.64,
+        "name_source": "unnamed",
+        "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs.",
+        "slug": "unnamed-801365-1437310",
+        "territory_id": "408849b2-cb6f-5b38-9f53-19707ae79f22"
+      },
+      {
+        "area_m2": 241245.057,
+        "name_source": "unnamed",
+        "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs.",
+        "slug": "unnamed-801430-1434425",
+        "territory_id": "5dc6aa4d-a96d-5171-8c5f-bee107b449af"
+      },
+      {
+        "area_m2": 159041.159,
+        "name_source": "unnamed",
+        "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs.",
+        "slug": "unnamed-801459-1432669",
+        "territory_id": "cccd1170-518d-59da-b1ef-4c0fc50cb48b"
+      },
+      {
+        "area_m2": 247346.34,
+        "name_source": "unnamed",
+        "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs.",
+        "slug": "unnamed-801463-1431128",
+        "territory_id": "d73b1e06-226b-5d35-a21a-693e564f6899"
+      },
+      {
+        "area_m2": 35063.377,
+        "name_source": "unnamed",
+        "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs.",
+        "slug": "unnamed-801498-1432332",
+        "territory_id": "6e186faa-5e57-5f58-bbb5-842e6726ee86"
+      },
+      {
+        "area_m2": 481856.868,
+        "name_source": "unnamed",
+        "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs.",
+        "slug": "unnamed-801522-1436340",
+        "territory_id": "ccc3dd21-ef80-5e1f-baaa-df5137acc76a"
+      },
+      {
+        "area_m2": 48096.238,
+        "name_source": "unnamed",
+        "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs.",
+        "slug": "unnamed-801533-1432172",
+        "territory_id": "1e699af2-99e7-5598-b872-f694e187d6c9"
+      },
+      {
+        "area_m2": 9588.557,
+        "name_source": "unnamed",
+        "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs.",
+        "slug": "unnamed-801568-1437085",
+        "territory_id": "2a4f5fd8-0515-5f4c-a1f0-4e6d0349356e"
+      },
+      {
+        "area_m2": 5767.852,
+        "name_source": "unnamed",
+        "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs.",
+        "slug": "unnamed-801619-1433142",
+        "territory_id": "3f748c74-da07-5c2e-b506-e72191c9cd75"
+      }
+    ],
+    "unused_exceptions": [
+      "0afd7acb-c8b4-5c2a-badb-39e6f2433e10",
+      "0c295981-bdcc-5216-922f-079d40fa229d",
+      "1e699af2-99e7-5598-b872-f694e187d6c9",
+      "1ef35182-8fe4-5118-bf31-d9619d2ceb42",
+      "204834b5-215e-5c69-975e-5cdecc77936a",
+      "245d3de6-8fa7-503a-a26b-90302f2b684e",
+      "258afd5f-60ac-5a14-81c5-015e159d68a1",
+      "275cd3c7-0ada-5096-9c83-eef68b13accc",
+      "28415f4c-8fb5-590b-a0f4-5edab0e3f4be",
+      "28d54504-3883-5508-8628-838447495e78",
+      "2a4f5fd8-0515-5f4c-a1f0-4e6d0349356e",
+      "2b9be180-1130-5deb-b2d6-440ec2b16716",
+      "370822b1-4c5c-57a0-abc7-f401e0ffca68",
+      "3f748c74-da07-5c2e-b506-e72191c9cd75",
+      "408849b2-cb6f-5b38-9f53-19707ae79f22",
+      "44a84490-64ec-52cc-a1d7-cdbcdb577a31",
+      "4ad76541-8062-51ae-9e94-eeced9716cba",
+      "4b7eaeda-0bcb-5d2d-9120-3ab4a865cbd3",
+      "4bc99ead-e3af-5bb1-bf0f-58bcab422968",
+      "4c080942-1901-5ea2-ab9d-93f1b8fb8edf",
+      "4facb0d5-264f-5d23-863b-74056cb062b6",
+      "513c09b0-8633-5a36-bcd0-01541958ebc1",
+      "573c22c0-248d-5960-97c4-7fbedc8dd7dc",
+      "5935d925-2e28-5181-a2a7-43789a92c4a0",
+      "5c13a58f-e12e-5888-a5d6-9f4122c3a078",
+      "5cc55132-12ce-5c7a-a268-053108d681e9",
+      "5dc6aa4d-a96d-5171-8c5f-bee107b449af",
+      "5f936195-9cce-52de-a0f4-0553a7f3a403",
+      "62a7922c-54c2-5f0e-8c6e-970c334c3180",
+      "6584db1b-aa84-5943-b82d-04c97258e860",
+      "6679a066-faba-5ccf-b8e4-a416cc624a60",
+      "67562539-1b55-56aa-a7a2-948fdc5c6f1d",
+      "6c0ad496-c2b6-5048-820f-ca2d628f28e5",
+      "6e186faa-5e57-5f58-bbb5-842e6726ee86",
+      "734ae1e7-f1ac-5527-9737-0540efc83c41",
+      "74548fcc-63f4-5e9c-944f-c02d8f70d6ce",
+      "745c1c59-5b50-50dc-8243-f7c5ed210f4f",
+      "767d6cf6-9105-5cd8-9bb9-bfaff9fefd3f",
+      "7b7d8a11-5629-566c-9c69-cc1001b7137d",
+      "7c25d43f-13bb-52ac-b535-c16f33d75b81",
+      "8081f229-3f49-5412-9f14-85cc51c3ab61",
+      "87f6d5b5-4073-5d9e-bcb7-94e50e2ba108",
+      "8f84b38e-709b-549d-918a-28ef820a0730",
+      "9a548942-aa46-5c84-aa16-fb7faf8e8fdd",
+      "9d3b7335-a251-5ab3-8c87-7efac79da9dd",
+      "9f2d440b-3838-5d77-a811-dd8bfd7050f2",
+      "a2fd5f98-4aa2-54c2-9311-2e2099e137de",
+      "a7f9a4b3-a85e-511e-9b97-e66987758fc4",
+      "agaram-71",
+      "agaram-72",
+      "ambalipura-lower-lake",
+      "ambalipura-upper-lake",
+      "asc-war-memorial",
+      "b3892213-841b-59a2-83ad-2b30e244aed1",
+      "bhoganahalli-lake",
+      "c2672e00-db52-55da-bb49-8625c6cf5ca2",
+      "c29f0a7e-0953-53e1-8265-9964773ec43e",
+      "c897869d-d516-52fc-a039-2bc984e060c3",
+      "carmelaram-lake",
+      "carmelaram-theology-college",
+      "ccc3dd21-ef80-5e1f-baaa-df5137acc76a",
+      "cccd1170-518d-59da-b1ef-4c0fc50cb48b",
+      "ce621698-024b-57ad-9b58-1c251e346bff",
+      "chikka-bellanduru-lake",
+      "d065d6e8-5e12-5112-8b20-2f04e9b4a253",
+      "d1a87ccf-ebb6-526c-8b9a-bef12bb5ce99",
+      "d2253a8b-3ff7-5c41-bbcb-ed3b12dee5b8",
+      "d6052194-af1a-50a1-be70-3452bdc8a3b1",
+      "d73b1e06-226b-5d35-a21a-693e564f6899",
+      "dbc388db-8b5e-5d02-ae06-e8fdc860e41a",
+      "dc4057a0-520d-5505-a872-e13a941d9db0",
+      "e0dcf5be-8f22-55a6-a4fc-8b4e7e7d4fd3",
+      "east-garden",
+      "ed64a6dd-a52b-55e7-8866-0a9df114d4b2",
+      "f1fe3bf8-4f39-5263-903b-b4f97950595c",
+      "f24ce1c9-0274-504e-b59f-c5d92879d8f8",
+      "f3ef5b22-fdfd-5700-8c4b-9a26f848cfb4",
+      "f47ea4c0-9e31-569d-a8ad-3f900fd3532d",
+      "f64fd1ee-8bf2-5717-bddc-30f4b70ebf9e",
+      "fa90bc93-5d89-5d35-9c6a-60ce8c824271",
+      "ff57ccf3-0275-51d5-aae6-f53880981224",
+      "ff8c800f-c367-57ce-a3a0-97b9c702fb61",
+      "gunjur-135",
+      "gunjur-136",
+      "hoysala-nagara-central-75",
+      "institute-of-aerospace-medicine-iam",
+      "kadiranpalaya-kere",
+      "kadugodi-reserved-forest",
+      "karnataka-reddyjana-sangha-medical-college",
+      "kundalahalli-83",
+      "nallurahalli-park",
+      "panathur-120",
+      "ramanayakanahalli-8",
+      "sector-1-59",
+      "vibhootipura-31"
+    ]
+  },
+  "fingerprint_path": "data/pipeline/bengaluru/mvp/staging/chain_fingerprint.json",
+  "hard": {
+    "failures": [],
+    "passed": true
+  },
+  "metrics": {
+    "aoi_area_m2": 263497842.851,
+    "coverage_ratio": 1.0,
+    "feature_count": 8484,
+    "gap_m2": 0.012051,
+    "geodesic_area_m2": 263161665.888,
+    "overlap_m2": 0.003315,
+    "projected_area_m2": 263497842.842,
+    "protected_count": 12
+  },
+  "soft": {
+    "by_name_source": {
+      "landmark": 12,
+      "place": 8472
+    },
+    "needs_review": [
+      {
+        "area_m2": 0.01,
+        "name": "A Adugodi",
+        "name_source": "place",
+        "slug": "a-adugodi"
+      },
+      {
+        "area_m2": 0.012,
+        "name": "A Adugodi",
+        "name_source": "place",
+        "slug": "a-adugodi-2"
+      },
+      {
+        "area_m2": 703.618,
+        "name": "A Adugodi",
+        "name_source": "place",
+        "slug": "a-adugodi-3"
+      },
+      {
+        "area_m2": 1225.379,
+        "name": "A Adugodi",
+        "name_source": "place",
+        "slug": "a-adugodi-4"
+      },
+      {
+        "area_m2": 1916.776,
+        "name": "A Adugodi",
+        "name_source": "place",
+        "slug": "a-adugodi-5"
+      },
+      {
+        "area_m2": 2221.212,
+        "name": "A Adugodi",
+        "name_source": "place",
+        "slug": "a-adugodi-6"
+      },
+      {
+        "area_m2": 0.691,
+        "name": "Abdul Kalam Nagar",
+        "name_source": "place",
+        "slug": "abdul-kalam-nagar"
+      },
+      {
+        "area_m2": 3.996,
+        "name": "Abdul Kalam Nagar",
+        "name_source": "place",
+        "slug": "abdul-kalam-nagar-2"
+      },
+      {
+        "area_m2": 336867.92,
+        "name": "Adarsh Palm Retreat",
+        "name_source": "place",
+        "slug": "adarsh-palm-retreat-15"
+      },
+      {
+        "area_m2": 0.37,
+        "name": "Agaram",
+        "name_source": "place",
+        "slug": "agaram"
+      },
+      {
+        "area_m2": 4.669,
+        "name": "Agaram",
+        "name_source": "place",
+        "slug": "agaram-10"
+      },
+      {
+        "area_m2": 983.376,
+        "name": "Agaram",
+        "name_source": "place",
+        "slug": "agaram-11"
+      },
+      {
+        "area_m2": 0.589,
+        "name": "Agaram",
+        "name_source": "place",
+        "slug": "agaram-2"
+      },
+      {
+        "area_m2": 0.872,
+        "name": "Agaram",
+        "name_source": "place",
+        "slug": "agaram-3"
+      },
+      {
+        "area_m2": 1.237,
+        "name": "Agaram",
+        "name_source": "place",
+        "slug": "agaram-4"
+      },
+      {
+        "area_m2": 1.337,
+        "name": "Agaram",
+        "name_source": "place",
+        "slug": "agaram-5"
+      },
+      {
+        "area_m2": 1.352,
+        "name": "Agaram",
+        "name_source": "place",
+        "slug": "agaram-6"
+      },
+      {
+        "area_m2": 318948.343,
+        "name": "Agaram",
+        "name_source": "place",
+        "slug": "agaram-67"
+      },
+      {
+        "area_m2": 449102.286,
+        "name": "Agaram",
+        "name_source": "place",
+        "slug": "agaram-68"
+      },
+      {
+        "area_m2": 453817.39,
+        "name": "Agaram",
+        "name_source": "place",
+        "slug": "agaram-69"
+      },
+      {
+        "area_m2": 1.539,
+        "name": "Agaram",
+        "name_source": "place",
+        "slug": "agaram-7"
+      },
+      {
+        "area_m2": 830946.637,
+        "name": "Agaram",
+        "name_source": "place",
+        "slug": "agaram-70"
+      },
+      {
+        "area_m2": 3787724.659,
+        "name": "Agaram",
+        "name_source": "place",
+        "slug": "agaram-71"
+      },
+      {
+        "area_m2": 4001527.303,
+        "name": "Agaram",
+        "name_source": "place",
+        "slug": "agaram-72"
+      },
+      {
+        "area_m2": 1.587,
+        "name": "Agaram",
+        "name_source": "place",
+        "slug": "agaram-8"
+      },
+      {
+        "area_m2": 2.631,
+        "name": "Agaram",
+        "name_source": "place",
+        "slug": "agaram-9"
+      },
+      {
+        "area_m2": 297601.999,
+        "name": "Alanahalli Thippasandra",
+        "name_source": "place",
+        "slug": "alanahalli-thippasandra-27"
+      },
+      {
+        "area_m2": 337079.286,
+        "name": "Alanahalli Thippasandra",
+        "name_source": "place",
+        "slug": "alanahalli-thippasandra-28"
+      },
+      {
+        "area_m2": 1039229.711,
+        "name": "Alanahalli Thippasandra",
+        "name_source": "place",
+        "slug": "alanahalli-thippasandra-29"
+      },
+      {
+        "area_m2": 653279.493,
+        "name": "Alembic City",
+        "name_source": "place",
+        "slug": "alembic-city"
+      },
+      {
+        "area_m2": 0.837,
+        "name": "Ambedkarnagar",
+        "name_source": "place",
+        "slug": "ambedkarnagar"
+      },
+      {
+        "area_m2": 0.318,
+        "name": "Arakere",
+        "name_source": "place",
+        "slug": "arakere"
+      },
+      {
+        "area_m2": 0.004,
+        "name": "Ashokanagar",
+        "name_source": "place",
+        "slug": "ashokanagar"
+      },
+      {
+        "area_m2": 102.204,
+        "name": "Ashokanagar",
+        "name_source": "place",
+        "slug": "ashokanagar-10"
+      },
+      {
+        "area_m2": 992.685,
+        "name": "Ashokanagar",
+        "name_source": "place",
+        "slug": "ashokanagar-11"
+      },
+      {
+        "area_m2": 1825.249,
+        "name": "Ashokanagar",
+        "name_source": "place",
+        "slug": "ashokanagar-12"
+      },
+      {
+        "area_m2": 2783.418,
+        "name": "Ashokanagar",
+        "name_source": "place",
+        "slug": "ashokanagar-13"
+      },
+      {
+        "area_m2": 3981.985,
+        "name": "Ashokanagar",
+        "name_source": "place",
+        "slug": "ashokanagar-14"
+      },
+      {
+        "area_m2": 0.097,
+        "name": "Ashokanagar",
+        "name_source": "place",
+        "slug": "ashokanagar-2"
+      },
+      {
+        "area_m2": 0.34,
+        "name": "Ashokanagar",
+        "name_source": "place",
+        "slug": "ashokanagar-3"
+      },
+      {
+        "area_m2": 0.457,
+        "name": "Ashokanagar",
+        "name_source": "place",
+        "slug": "ashokanagar-4"
+      },
+      {
+        "area_m2": 0.482,
+        "name": "Ashokanagar",
+        "name_source": "place",
+        "slug": "ashokanagar-5"
+      },
+      {
+        "area_m2": 0.655,
+        "name": "Ashokanagar",
+        "name_source": "place",
+        "slug": "ashokanagar-6"
+      },
+      {
+        "area_m2": 1.536,
+        "name": "Ashokanagar",
+        "name_source": "place",
+        "slug": "ashokanagar-7"
+      },
+      {
+        "area_m2": 2.508,
+        "name": "Ashokanagar",
+        "name_source": "place",
+        "slug": "ashokanagar-8"
+      },
+      {
+        "area_m2": 4.358,
+        "name": "Ashokanagar",
+        "name_source": "place",
+        "slug": "ashokanagar-9"
+      },
+      {
+        "area_m2": 4.823,
+        "name": "Ashwath Nagar",
+        "name_source": "place",
+        "slug": "ashwath-nagar"
+      },
+      {
+        "area_m2": 687276.103,
+        "name": "Ashwath Nagar",
+        "name_source": "place",
+        "slug": "ashwath-nagar-43"
+      },
+      {
+        "area_m2": 2.509,
+        "name": "Banashankari Temple Ward",
+        "name_source": "place",
+        "slug": "banashankari-temple-ward"
+      },
+      {
+        "area_m2": 1.404,
+        "name": "Belathur",
+        "name_source": "place",
+        "slug": "belathur"
+      },
+      {
+        "area_m2": 1402290.871,
+        "name": "Belathur",
+        "name_source": "place",
+        "slug": "belathur-21"
+      },
+      {
+        "area_m2": 2.97,
+        "name": "Bellandur",
+        "name_source": "place",
+        "slug": "bellandur"
+      },
+      {
+        "area_m2": 545.38,
+        "name": "Bellandur",
+        "name_source": "place",
+        "slug": "bellandur-2"
+      },
+      {
+        "area_m2": 2074.144,
+        "name": "Bellandur",
+        "name_source": "place",
+        "slug": "bellandur-3"
+      },
+      {
+        "area_m2": 603033.72,
+        "name": "Bellandur",
+        "name_source": "place",
+        "slug": "bellandur-41"
+      },
+      {
+        "area_m2": 0.002,
+        "name": "Bharath Aikya Ward",
+        "name_source": "place",
+        "slug": "bharath-aikya-ward"
+      },
+      {
+        "area_m2": 0.007,
+        "name": "Bharath Aikya Ward",
+        "name_source": "place",
+        "slug": "bharath-aikya-ward-2"
+      },
+      {
+        "area_m2": 0.099,
+        "name": "Bharath Aikya Ward",
+        "name_source": "place",
+        "slug": "bharath-aikya-ward-3"
+      },
+      {
+        "area_m2": 0.167,
+        "name": "Bharath Aikya Ward",
+        "name_source": "place",
+        "slug": "bharath-aikya-ward-4"
+      },
+      {
+        "area_m2": 0.277,
+        "name": "Bharath Aikya Ward",
+        "name_source": "place",
+        "slug": "bharath-aikya-ward-5"
+      },
+      {
+        "area_m2": 411776.241,
+        "name": "Bharath Aikya Ward",
+        "name_source": "place",
+        "slug": "bharath-aikya-ward-58"
+      },
+      {
+        "area_m2": 423066.349,
+        "name": "Bharath Aikya Ward",
+        "name_source": "place",
+        "slug": "bharath-aikya-ward-59"
+      },
+      {
+        "area_m2": 0.47,
+        "name": "Bharath Aikya Ward",
+        "name_source": "place",
+        "slug": "bharath-aikya-ward-6"
+      },
+      {
+        "area_m2": 426506.55,
+        "name": "Bharath Aikya Ward",
+        "name_source": "place",
+        "slug": "bharath-aikya-ward-60"
+      },
+      {
+        "area_m2": 750759.952,
+        "name": "Bharath Aikya Ward",
+        "name_source": "place",
+        "slug": "bharath-aikya-ward-61"
+      },
+      {
+        "area_m2": 0.614,
+        "name": "Bharath Aikya Ward",
+        "name_source": "place",
+        "slug": "bharath-aikya-ward-7"
+      },
+      {
+        "area_m2": 0.803,
+        "name": "Bharath Aikya Ward",
+        "name_source": "place",
+        "slug": "bharath-aikya-ward-8"
+      },
+      {
+        "area_m2": 0.134,
+        "name": "Bharathi Nagar",
+        "name_source": "place",
+        "slug": "bharathi-nagar"
+      },
+      {
+        "area_m2": 2.084,
+        "name": "Bharathi Nagar",
+        "name_source": "place",
+        "slug": "bharathi-nagar-2"
+      },
+      {
+        "area_m2": 2.568,
+        "name": "Bharathi Nagar",
+        "name_source": "place",
+        "slug": "bharathi-nagar-3"
+      },
+      {
+        "area_m2": 15.656,
+        "name": "Bharathi Nagar",
+        "name_source": "place",
+        "slug": "bharathi-nagar-4"
+      },
+      {
+        "area_m2": 3922.557,
+        "name": "Bheereshwara Nagar",
+        "name_source": "place",
+        "slug": "bheereshwara-nagar"
+      },
+      {
+        "area_m2": 250064.274,
+        "name": "Bheereshwara Nagar",
+        "name_source": "place",
+        "slug": "bheereshwara-nagar-20"
+      },
+      {
+        "area_m2": 0.046,
+        "name": "BHEL Ward",
+        "name_source": "place",
+        "slug": "bhel-ward"
+      },
+      {
+        "area_m2": 0.494,
+        "name": "BHEL Ward",
+        "name_source": "place",
+        "slug": "bhel-ward-2"
+      },
+      {
+        "area_m2": 0.509,
+        "name": "BHEL Ward",
+        "name_source": "place",
+        "slug": "bhel-ward-3"
+      },
+      {
+        "area_m2": 4260.84,
+        "name": "Bilekahalli",
+        "name_source": "place",
+        "slug": "bilekahalli"
+      },
+      {
+        "area_m2": 3.802,
+        "name": "Bommanahalli",
+        "name_source": "place",
+        "slug": "bommanahalli"
+      },
+      {
+        "area_m2": 2455.885,
+        "name": "Bommanahalli",
+        "name_source": "place",
+        "slug": "bommanahalli-2"
+      },
+      {
+        "area_m2": 2915.958,
+        "name": "Bommanahalli",
+        "name_source": "place",
+        "slug": "bommanahalli-3"
+      },
+      {
+        "area_m2": 0.185,
+        "name": "Byrasandra",
+        "name_source": "place",
+        "slug": "byrasandra"
+      },
+      {
+        "area_m2": 1.558,
+        "name": "Byrasandra",
+        "name_source": "place",
+        "slug": "byrasandra-2"
+      },
+      {
+        "area_m2": 1.778,
+        "name": "Chamarajpet",
+        "name_source": "place",
+        "slug": "chamarajpet"
+      },
+      {
+        "area_m2": 961688.624,
+        "name": "Chambenahalli",
+        "name_source": "place",
+        "slug": "chambenahalli-2"
+      },
+      {
+        "area_m2": 0.8,
+        "name": "Chandranagara",
+        "name_source": "place",
+        "slug": "chandranagara"
+      },
+      {
+        "area_m2": 1.277,
+        "name": "Chandranagara",
+        "name_source": "place",
+        "slug": "chandranagara-2"
+      },
+      {
+        "area_m2": 1.336,
+        "name": "Chandranagara",
+        "name_source": "place",
+        "slug": "chandranagara-3"
+      },
+      {
+        "area_m2": 0.703,
+        "name": "Channasandra",
+        "name_source": "place",
+        "slug": "channasandra"
+      },
+      {
+        "area_m2": 292942.029,
+        "name": "Channasandra",
+        "name_source": "place",
+        "slug": "channasandra-44"
+      },
+      {
+        "area_m2": 457139.343,
+        "name": "Channasandra",
+        "name_source": "place",
+        "slug": "channasandra-45"
+      },
+      {
+        "area_m2": 0.085,
+        "name": "Chickpete",
+        "name_source": "place",
+        "slug": "chickpete"
+      },
+      {
+        "area_m2": 0.624,
+        "name": "Chickpete",
+        "name_source": "place",
+        "slug": "chickpete-10"
+      },
+      {
+        "area_m2": 0.71,
+        "name": "Chickpete",
+        "name_source": "place",
+        "slug": "chickpete-11"
+      },
+      {
+        "area_m2": 0.711,
+        "name": "Chickpete",
+        "name_source": "place",
+        "slug": "chickpete-12"
+      },
+      {
+        "area_m2": 0.736,
+        "name": "Chickpete",
+        "name_source": "place",
+        "slug": "chickpete-13"
+      },
+      {
+        "area_m2": 0.87,
+        "name": "Chickpete",
+        "name_source": "place",
+        "slug": "chickpete-14"
+      },
+      {
+        "area_m2": 0.941,
+        "name": "Chickpete",
+        "name_source": "place",
+        "slug": "chickpete-15"
+      },
+      {
+        "area_m2": 1.197,
+        "name": "Chickpete",
+        "name_source": "place",
+        "slug": "chickpete-16"
+      },
+      {
+        "area_m2": 1.983,
+        "name": "Chickpete",
+        "name_source": "place",
+        "slug": "chickpete-17"
+      },
+      {
+        "area_m2": 2.17,
+        "name": "Chickpete",
+        "name_source": "place",
+        "slug": "chickpete-18"
+      },
+      {
+        "area_m2": 2.184,
+        "name": "Chickpete",
+        "name_source": "place",
+        "slug": "chickpete-19"
+      },
+      {
+        "area_m2": 0.125,
+        "name": "Chickpete",
+        "name_source": "place",
+        "slug": "chickpete-2"
+      },
+      {
+        "area_m2": 2.471,
+        "name": "Chickpete",
+        "name_source": "place",
+        "slug": "chickpete-20"
+      },
+      {
+        "area_m2": 2.766,
+        "name": "Chickpete",
+        "name_source": "place",
+        "slug": "chickpete-21"
+      },
+      {
+        "area_m2": 2.874,
+        "name": "Chickpete",
+        "name_source": "place",
+        "slug": "chickpete-22"
+      },
+      {
+        "area_m2": 2.961,
+        "name": "Chickpete",
+        "name_source": "place",
+        "slug": "chickpete-23"
+      },
+      {
+        "area_m2": 3.242,
+        "name": "Chickpete",
+        "name_source": "place",
+        "slug": "chickpete-24"
+      },
+      {
+        "area_m2": 4.029,
+        "name": "Chickpete",
+        "name_source": "place",
+        "slug": "chickpete-25"
+      },
+      {
+        "area_m2": 0.137,
+        "name": "Chickpete",
+        "name_source": "place",
+        "slug": "chickpete-3"
+      },
+      {
+        "area_m2": 0.154,
+        "name": "Chickpete",
+        "name_source": "place",
+        "slug": "chickpete-4"
+      },
+      {
+        "area_m2": 0.22,
+        "name": "Chickpete",
+        "name_source": "place",
+        "slug": "chickpete-5"
+      },
+      {
+        "area_m2": 0.235,
+        "name": "Chickpete",
+        "name_source": "place",
+        "slug": "chickpete-6"
+      },
+      {
+        "area_m2": 0.28,
+        "name": "Chickpete",
+        "name_source": "place",
+        "slug": "chickpete-7"
+      },
+      {
+        "area_m2": 0.341,
+        "name": "Chickpete",
+        "name_source": "place",
+        "slug": "chickpete-8"
+      },
+      {
+        "area_m2": 0.616,
+        "name": "Chickpete",
+        "name_source": "place",
+        "slug": "chickpete-9"
+      },
+      {
+        "area_m2": 0.151,
+        "name": "Chikka Adugodi",
+        "name_source": "place",
+        "slug": "chikka-adugodi"
+      },
+      {
+        "area_m2": 0.893,
+        "name": "Chikka Adugodi",
+        "name_source": "place",
+        "slug": "chikka-adugodi-2"
+      },
+      {
+        "area_m2": 1.322,
+        "name": "Chikka Adugodi",
+        "name_source": "place",
+        "slug": "chikka-adugodi-3"
+      },
+      {
+        "area_m2": 1.577,
+        "name": "Chikka Adugodi",
+        "name_source": "place",
+        "slug": "chikka-adugodi-4"
+      },
+      {
+        "area_m2": 1.706,
+        "name": "Chikka Adugodi",
+        "name_source": "place",
+        "slug": "chikka-adugodi-5"
+      },
+      {
+        "area_m2": 1.979,
+        "name": "Chikka Adugodi",
+        "name_source": "place",
+        "slug": "chikka-adugodi-6"
+      },
+      {
+        "area_m2": 2.782,
+        "name": "Chikka Adugodi",
+        "name_source": "place",
+        "slug": "chikka-adugodi-7"
+      },
+      {
+        "area_m2": 0.487,
+        "name": "Chikkakanneli",
+        "name_source": "place",
+        "slug": "chikkakanneli"
+      },
+      {
+        "area_m2": 595876.562,
+        "name": "Chikkakanneli",
+        "name_source": "place",
+        "slug": "chikkakanneli-13"
+      },
+      {
+        "area_m2": 0.875,
+        "name": "Chikkakanneli",
+        "name_source": "place",
+        "slug": "chikkakanneli-2"
+      },
+      {
+        "area_m2": 2.513,
+        "name": "Chikkakanneli",
+        "name_source": "place",
+        "slug": "chikkakanneli-3"
+      },
+      {
+        "area_m2": 3.051,
+        "name": "Chikkakanneli",
+        "name_source": "place",
+        "slug": "chikkakanneli-4"
+      },
+      {
+        "area_m2": 11.574,
+        "name": "Chikkakanneli",
+        "name_source": "place",
+        "slug": "chikkakanneli-5"
+      },
+      {
+        "area_m2": 960.268,
+        "name": "Chikkakanneli",
+        "name_source": "place",
+        "slug": "chikkakanneli-6"
+      },
+      {
+        "area_m2": 6.975,
+        "name": "Chikkanayakanahalli",
+        "name_source": "place",
+        "slug": "chikkanayakanahalli"
+      },
+      {
+        "area_m2": 2.912,
+        "name": "Chikkavaderapura",
+        "name_source": "place",
+        "slug": "chikkavaderapura"
+      },
+      {
+        "area_m2": 367155.97,
+        "name": "Chikkavaderapura",
+        "name_source": "place",
+        "slug": "chikkavaderapura-8"
+      },
+      {
+        "area_m2": 600100.704,
+        "name": "Chikkavaderapura",
+        "name_source": "place",
+        "slug": "chikkavaderapura-9"
+      },
+      {
+        "area_m2": 0.037,
+        "name": "Cottonpete",
+        "name_source": "place",
+        "slug": "cottonpete"
+      },
+      {
+        "area_m2": 0.155,
+        "name": "Cottonpete",
+        "name_source": "place",
+        "slug": "cottonpete-2"
+      },
+      {
+        "area_m2": 1.947,
+        "name": "Cottonpete",
+        "name_source": "place",
+        "slug": "cottonpete-3"
+      },
+      {
+        "area_m2": 2.089,
+        "name": "Cottonpete",
+        "name_source": "place",
+        "slug": "cottonpete-4"
+      },
+      {
+        "area_m2": 2.383,
+        "name": "Cottonpete",
+        "name_source": "place",
+        "slug": "cottonpete-5"
+      },
+      {
+        "area_m2": 4.735,
+        "name": "Cottonpete",
+        "name_source": "place",
+        "slug": "cottonpete-6"
+      },
+      {
+        "area_m2": 5.161,
+        "name": "Cottonpete",
+        "name_source": "place",
+        "slug": "cottonpete-7"
+      },
+      {
+        "area_m2": 13.804,
+        "name": "Cottonpete",
+        "name_source": "place",
+        "slug": "cottonpete-8"
+      },
+      {
+        "area_m2": 789.894,
+        "name": "Cottonpete",
+        "name_source": "place",
+        "slug": "cottonpete-9"
+      },
+      {
+        "area_m2": 349756.99,
+        "name": "Cox Town",
+        "name_source": "place",
+        "slug": "cox-town-19"
+      },
+      {
+        "area_m2": 1789.336,
+        "name": "Defence Colony",
+        "name_source": "place",
+        "slug": "defence-colony"
+      },
+      {
+        "area_m2": 4389.152,
+        "name": "Defence Colony",
+        "name_source": "place",
+        "slug": "defence-colony-2"
+      },
+      {
+        "area_m2": 0.019,
+        "name": "Devagiri Temple Ward",
+        "name_source": "place",
+        "slug": "devagiri-temple-ward"
+      },
+      {
+        "area_m2": 3118.369,
+        "name": "Devagiri Temple Ward",
+        "name_source": "place",
+        "slug": "devagiri-temple-ward-2"
+      },
+      {
+        "area_m2": 0.548,
+        "name": "Devaraj Urs Ward",
+        "name_source": "place",
+        "slug": "devaraj-urs-ward"
+      },
+      {
+        "area_m2": 2.401,
+        "name": "Dharmaraya Swamy Temple Ward",
+        "name_source": "place",
+        "slug": "dharmaraya-swamy-temple-ward"
+      },
+      {
+        "area_m2": 3620.671,
+        "name": "Dharmaraya Swamy Temple Ward",
+        "name_source": "place",
+        "slug": "dharmaraya-swamy-temple-ward-2"
+      },
+      {
+        "area_m2": 4918.338,
+        "name": "Dharmaraya Swamy Temple Ward",
+        "name_source": "place",
+        "slug": "dharmaraya-swamy-temple-ward-3"
+      },
+      {
+        "area_m2": 0.356,
+        "name": "Dodda Nekkundi",
+        "name_source": "place",
+        "slug": "dodda-nekkundi"
+      },
+      {
+        "area_m2": 0.606,
+        "name": "Dodda Nekkundi",
+        "name_source": "place",
+        "slug": "dodda-nekkundi-2"
+      },
+      {
+        "area_m2": 2.607,
+        "name": "Dodda Nekkundi",
+        "name_source": "place",
+        "slug": "dodda-nekkundi-3"
+      },
+      {
+        "area_m2": 3.07,
+        "name": "Dodda Nekkundi",
+        "name_source": "place",
+        "slug": "dodda-nekkundi-4"
+      },
+      {
+        "area_m2": 3.569,
+        "name": "Dodda Nekkundi",
+        "name_source": "place",
+        "slug": "dodda-nekkundi-5"
+      },
+      {
+        "area_m2": 4.273,
+        "name": "Dodda Nekkundi",
+        "name_source": "place",
+        "slug": "dodda-nekkundi-6"
+      },
+      {
+        "area_m2": 1923.991,
+        "name": "Dodda Nekkundi",
+        "name_source": "place",
+        "slug": "dodda-nekkundi-7"
+      },
+      {
+        "area_m2": 3438.48,
+        "name": "Dodda Nekkundi",
+        "name_source": "place",
+        "slug": "dodda-nekkundi-8"
+      },
+      {
+        "area_m2": 876107.467,
+        "name": "Dodda Nekkundi",
+        "name_source": "place",
+        "slug": "dodda-nekkundi-84"
+      },
+      {
+        "area_m2": 0.282,
+        "name": "Domluru",
+        "name_source": "place",
+        "slug": "domluru"
+      },
+      {
+        "area_m2": 0.806,
+        "name": "Domluru",
+        "name_source": "place",
+        "slug": "domluru-2"
+      },
+      {
+        "area_m2": 1792.51,
+        "name": "Domluru",
+        "name_source": "place",
+        "slug": "domluru-3"
+      },
+      {
+        "area_m2": 3170.435,
+        "name": "Domluru",
+        "name_source": "place",
+        "slug": "domluru-4"
+      },
+      {
+        "area_m2": 4632.241,
+        "name": "Domluru",
+        "name_source": "place",
+        "slug": "domluru-5"
+      },
+      {
+        "area_m2": 1202.183,
+        "name": "Doresanipalya",
+        "name_source": "place",
+        "slug": "doresanipalya"
+      },
+      {
+        "area_m2": 3743.6,
+        "name": "Doresanipalya",
+        "name_source": "place",
+        "slug": "doresanipalya-2"
+      },
+      {
+        "area_m2": 668486.417,
+        "name": "Doresanipalya",
+        "name_source": "place",
+        "slug": "doresanipalya-38"
+      },
+      {
+        "area_m2": 4619.707,
+        "name": "Ganesh Mandira Ward",
+        "name_source": "place",
+        "slug": "ganesh-mandira-ward"
+      },
+      {
+        "area_m2": 0.226,
+        "name": "Garudachar Palya",
+        "name_source": "place",
+        "slug": "garudachar-palya"
+      },
+      {
+        "area_m2": 0.464,
+        "name": "Garudachar Palya",
+        "name_source": "place",
+        "slug": "garudachar-palya-2"
+      },
+      {
+        "area_m2": 1.075,
+        "name": "Garudachar Palya",
+        "name_source": "place",
+        "slug": "garudachar-palya-3"
+      },
+      {
+        "area_m2": 1.697,
+        "name": "Garudachar Palya",
+        "name_source": "place",
+        "slug": "garudachar-palya-4"
+      },
+      {
+        "area_m2": 335654.02,
+        "name": "Garudachar Palya",
+        "name_source": "place",
+        "slug": "garudachar-palya-46"
+      },
+      {
+        "area_m2": 2.5,
+        "name": "Garudachar Palya",
+        "name_source": "place",
+        "slug": "garudachar-palya-5"
+      },
+      {
+        "area_m2": 2.527,
+        "name": "Garudachar Palya",
+        "name_source": "place",
+        "slug": "garudachar-palya-6"
+      },
+      {
+        "area_m2": 4.265,
+        "name": "Garudachar Palya",
+        "name_source": "place",
+        "slug": "garudachar-palya-7"
+      },
+      {
+        "area_m2": 4.928,
+        "name": "Garudachar Palya",
+        "name_source": "place",
+        "slug": "garudachar-palya-8"
+      },
+      {
+        "area_m2": 0.519,
+        "name": "Garvebavi Palya",
+        "name_source": "place",
+        "slug": "garvebavi-palya"
+      },
+      {
+        "area_m2": 1.437,
+        "name": "Garvebavi Palya",
+        "name_source": "place",
+        "slug": "garvebavi-palya-2"
+      },
+      {
+        "area_m2": 1.724,
+        "name": "Garvebavi Palya",
+        "name_source": "place",
+        "slug": "garvebavi-palya-3"
+      },
+      {
+        "area_m2": 1.767,
+        "name": "Garvebavi Palya",
+        "name_source": "place",
+        "slug": "garvebavi-palya-4"
+      },
+      {
+        "area_m2": 1531.175,
+        "name": "Garvebavi Palya",
+        "name_source": "place",
+        "slug": "garvebavi-palya-5"
+      },
+      {
+        "area_m2": 0.077,
+        "name": "Gopalpura",
+        "name_source": "place",
+        "slug": "gopalpura"
+      },
+      {
+        "area_m2": 2.242,
+        "name": "Gopalpura",
+        "name_source": "place",
+        "slug": "gopalpura-2"
+      },
+      {
+        "area_m2": 4.218,
+        "name": "Gopalpura",
+        "name_source": "place",
+        "slug": "gopalpura-3"
+      },
+      {
+        "area_m2": 0.02,
+        "name": "Gunjur",
+        "name_source": "place",
+        "slug": "gunjur"
+      },
+      {
+        "area_m2": 1.505,
+        "name": "Gunjur",
+        "name_source": "place",
+        "slug": "gunjur-10"
+      },
+      {
+        "area_m2": 1.594,
+        "name": "Gunjur",
+        "name_source": "place",
+        "slug": "gunjur-11"
+      },
+      {
+        "area_m2": 1.68,
+        "name": "Gunjur",
+        "name_source": "place",
+        "slug": "gunjur-12"
+      },
+      {
+        "area_m2": 261903.015,
+        "name": "Gunjur",
+        "name_source": "place",
+        "slug": "gunjur-124"
+      },
+      {
+        "area_m2": 284397.897,
+        "name": "Gunjur",
+        "name_source": "place",
+        "slug": "gunjur-125"
+      },
+      {
+        "area_m2": 304175.103,
+        "name": "Gunjur",
+        "name_source": "place",
+        "slug": "gunjur-126"
+      },
+      {
+        "area_m2": 353501.922,
+        "name": "Gunjur",
+        "name_source": "place",
+        "slug": "gunjur-127"
+      },
+      {
+        "area_m2": 362930.585,
+        "name": "Gunjur",
+        "name_source": "place",
+        "slug": "gunjur-128"
+      },
+      {
+        "area_m2": 464750.328,
+        "name": "Gunjur",
+        "name_source": "place",
+        "slug": "gunjur-129"
+      },
+      {
+        "area_m2": 1.86,
+        "name": "Gunjur",
+        "name_source": "place",
+        "slug": "gunjur-13"
+      },
+      {
+        "area_m2": 570275.976,
+        "name": "Gunjur",
+        "name_source": "place",
+        "slug": "gunjur-130"
+      },
+      {
+        "area_m2": 606250.86,
+        "name": "Gunjur",
+        "name_source": "place",
+        "slug": "gunjur-131"
+      },
+      {
+        "area_m2": 937560.97,
+        "name": "Gunjur",
+        "name_source": "place",
+        "slug": "gunjur-132"
+      },
+      {
+        "area_m2": 1002507.064,
+        "name": "Gunjur",
+        "name_source": "place",
+        "slug": "gunjur-133"
+      },
+      {
+        "area_m2": 1299407.044,
+        "name": "Gunjur",
+        "name_source": "place",
+        "slug": "gunjur-134"
+      },
+      {
+        "area_m2": 1467092.112,
+        "name": "Gunjur",
+        "name_source": "place",
+        "slug": "gunjur-135"
+      },
+      {
+        "area_m2": 1578243.906,
+        "name": "Gunjur",
+        "name_source": "place",
+        "slug": "gunjur-136"
+      },
+      {
+        "area_m2": 2.082,
+        "name": "Gunjur",
+        "name_source": "place",
+        "slug": "gunjur-14"
+      },
+      {
+        "area_m2": 2.861,
+        "name": "Gunjur",
+        "name_source": "place",
+        "slug": "gunjur-15"
+      },
+      {
+        "area_m2": 4.316,
+        "name": "Gunjur",
+        "name_source": "place",
+        "slug": "gunjur-16"
+      },
+      {
+        "area_m2": 12.083,
+        "name": "Gunjur",
+        "name_source": "place",
+        "slug": "gunjur-17"
+      },
+      {
+        "area_m2": 1345.633,
+        "name": "Gunjur",
+        "name_source": "place",
+        "slug": "gunjur-18"
+      },
+      {
+        "area_m2": 0.079,
+        "name": "Gunjur",
+        "name_source": "place",
+        "slug": "gunjur-2"
+      },
+      {
+        "area_m2": 0.113,
+        "name": "Gunjur",
+        "name_source": "place",
+        "slug": "gunjur-3"
+      },
+      {
+        "area_m2": 0.173,
+        "name": "Gunjur",
+        "name_source": "place",
+        "slug": "gunjur-4"
+      },
+      {
+        "area_m2": 0.36,
+        "name": "Gunjur",
+        "name_source": "place",
+        "slug": "gunjur-5"
+      },
+      {
+        "area_m2": 0.391,
+        "name": "Gunjur",
+        "name_source": "place",
+        "slug": "gunjur-6"
+      },
+      {
+        "area_m2": 1.11,
+        "name": "Gunjur",
+        "name_source": "place",
+        "slug": "gunjur-7"
+      },
+      {
+        "area_m2": 1.249,
+        "name": "Gunjur",
+        "name_source": "place",
+        "slug": "gunjur-8"
+      },
+      {
+        "area_m2": 1.501,
+        "name": "Gunjur",
+        "name_source": "place",
+        "slug": "gunjur-9"
+      },
+      {
+        "area_m2": 0.549,
+        "name": "Hadosiddapura",
+        "name_source": "place",
+        "slug": "hadosiddapura"
+      },
+      {
+        "area_m2": 1.355,
+        "name": "Hagaduru",
+        "name_source": "place",
+        "slug": "hagaduru"
+      },
+      {
+        "area_m2": 1.662,
+        "name": "Hagaduru",
+        "name_source": "place",
+        "slug": "hagaduru-2"
+      },
+      {
+        "area_m2": 1.83,
+        "name": "Hagaduru",
+        "name_source": "place",
+        "slug": "hagaduru-3"
+      },
+      {
+        "area_m2": 260180.977,
+        "name": "Hagaduru",
+        "name_source": "place",
+        "slug": "hagaduru-67"
+      },
+      {
+        "area_m2": 283556.089,
+        "name": "Hagaduru",
+        "name_source": "place",
+        "slug": "hagaduru-68"
+      },
+      {
+        "area_m2": 481684.572,
+        "name": "Hagaduru",
+        "name_source": "place",
+        "slug": "hagaduru-69"
+      },
+      {
+        "area_m2": 930226.182,
+        "name": "Hagaduru",
+        "name_source": "place",
+        "slug": "hagaduru-70"
+      },
+      {
+        "area_m2": 1191794.421,
+        "name": "Hagaduru",
+        "name_source": "place",
+        "slug": "hagaduru-71"
+      },
+      {
+        "area_m2": 587275.236,
+        "name": "Halanayakanahalli",
+        "name_source": "place",
+        "slug": "halanayakanahalli-42"
+      },
+      {
+        "area_m2": 1.292,
+        "name": "Halasuru",
+        "name_source": "place",
+        "slug": "halasuru"
+      },
+      {
+        "area_m2": 1.993,
+        "name": "Halasuru",
+        "name_source": "place",
+        "slug": "halasuru-2"
+      },
+      {
+        "area_m2": 6.026,
+        "name": "Halasuru",
+        "name_source": "place",
+        "slug": "halasuru-3"
+      },
+      {
+        "area_m2": 0.201,
+        "name": "Heggondanahalli",
+        "name_source": "place",
+        "slug": "heggondanahalli"
+      },
+      {
+        "area_m2": 563325.374,
+        "name": "Heggondanahalli",
+        "name_source": "place",
+        "slug": "heggondanahalli-14"
+      },
+      {
+        "area_m2": 0.406,
+        "name": "Heggondanahalli",
+        "name_source": "place",
+        "slug": "heggondanahalli-2"
+      },
+      {
+        "area_m2": 0.004,
+        "name": "Hombegowda Nagara",
+        "name_source": "place",
+        "slug": "hombegowda-nagara"
+      },
+      {
+        "area_m2": 1.668,
+        "name": "Hombegowda Nagara",
+        "name_source": "place",
+        "slug": "hombegowda-nagara-10"
+      },
+      {
+        "area_m2": 4.034,
+        "name": "Hombegowda Nagara",
+        "name_source": "place",
+        "slug": "hombegowda-nagara-11"
+      },
+      {
+        "area_m2": 8.008,
+        "name": "Hombegowda Nagara",
+        "name_source": "place",
+        "slug": "hombegowda-nagara-12"
+      },
+      {
+        "area_m2": 2237.154,
+        "name": "Hombegowda Nagara",
+        "name_source": "place",
+        "slug": "hombegowda-nagara-13"
+      },
+      {
+        "area_m2": 0.014,
+        "name": "Hombegowda Nagara",
+        "name_source": "place",
+        "slug": "hombegowda-nagara-2"
+      },
+      {
+        "area_m2": 0.07,
+        "name": "Hombegowda Nagara",
+        "name_source": "place",
+        "slug": "hombegowda-nagara-3"
+      },
+      {
+        "area_m2": 0.149,
+        "name": "Hombegowda Nagara",
+        "name_source": "place",
+        "slug": "hombegowda-nagara-4"
+      },
+      {
+        "area_m2": 0.224,
+        "name": "Hombegowda Nagara",
+        "name_source": "place",
+        "slug": "hombegowda-nagara-5"
+      },
+      {
+        "area_m2": 0.248,
+        "name": "Hombegowda Nagara",
+        "name_source": "place",
+        "slug": "hombegowda-nagara-6"
+      },
+      {
+        "area_m2": 0.296,
+        "name": "Hombegowda Nagara",
+        "name_source": "place",
+        "slug": "hombegowda-nagara-7"
+      },
+      {
+        "area_m2": 0.503,
+        "name": "Hombegowda Nagara",
+        "name_source": "place",
+        "slug": "hombegowda-nagara-8"
+      },
+      {
+        "area_m2": 1.17,
+        "name": "Hombegowda Nagara",
+        "name_source": "place",
+        "slug": "hombegowda-nagara-9"
+      },
+      {
+        "area_m2": 1.912,
+        "name": "Hoodi",
+        "name_source": "place",
+        "slug": "hoodi"
+      },
+      {
+        "area_m2": 334129.763,
+        "name": "Hoodi",
+        "name_source": "place",
+        "slug": "hoodi-16"
+      },
+      {
+        "area_m2": 2.701,
+        "name": "Hoodi",
+        "name_source": "place",
+        "slug": "hoodi-2"
+      },
+      {
+        "area_m2": 321154.99,
+        "name": "Hosapalya",
+        "name_source": "place",
+        "slug": "hosapalya-37"
+      },
+      {
+        "area_m2": 0.022,
+        "name": "Hoysala Nagara Central",
+        "name_source": "place",
+        "slug": "hoysala-nagara-central"
+      },
+      {
+        "area_m2": 0.615,
+        "name": "Hoysala Nagara Central",
+        "name_source": "place",
+        "slug": "hoysala-nagara-central-2"
+      },
+      {
+        "area_m2": 0.891,
+        "name": "Hoysala Nagara Central",
+        "name_source": "place",
+        "slug": "hoysala-nagara-central-3"
+      },
+      {
+        "area_m2": 2.451,
+        "name": "Hoysala Nagara Central",
+        "name_source": "place",
+        "slug": "hoysala-nagara-central-4"
+      },
+      {
+        "area_m2": 5.729,
+        "name": "Hoysala Nagara Central",
+        "name_source": "place",
+        "slug": "hoysala-nagara-central-5"
+      },
+      {
+        "area_m2": 5.929,
+        "name": "Hoysala Nagara Central",
+        "name_source": "place",
+        "slug": "hoysala-nagara-central-6"
+      },
+      {
+        "area_m2": 2487.745,
+        "name": "Hoysala Nagara Central",
+        "name_source": "place",
+        "slug": "hoysala-nagara-central-7"
+      },
+      {
+        "area_m2": 1773226.568,
+        "name": "Hoysala Nagara Central",
+        "name_source": "place",
+        "slug": "hoysala-nagara-central-75"
+      },
+      {
+        "area_m2": 2606.15,
+        "name": "Hoysala Nagara Central",
+        "name_source": "place",
+        "slug": "hoysala-nagara-central-8"
+      },
+      {
+        "area_m2": 0.003,
+        "name": "HSR Layout",
+        "name_source": "place",
+        "slug": "hsr-layout"
+      },
+      {
+        "area_m2": 0.26,
+        "name": "HSR Layout",
+        "name_source": "place",
+        "slug": "hsr-layout-2"
+      },
+      {
+        "area_m2": 1.052,
+        "name": "HSR Layout",
+        "name_source": "place",
+        "slug": "hsr-layout-3"
+      },
+      {
+        "area_m2": 1.481,
+        "name": "HSR Layout",
+        "name_source": "place",
+        "slug": "hsr-layout-4"
+      },
+      {
+        "area_m2": 1.529,
+        "name": "HSR Layout",
+        "name_source": "place",
+        "slug": "hsr-layout-5"
+      },
+      {
+        "area_m2": 2.153,
+        "name": "HSR Layout",
+        "name_source": "place",
+        "slug": "hsr-layout-6"
+      },
+      {
+        "area_m2": 2.461,
+        "name": "HSR Layout",
+        "name_source": "place",
+        "slug": "hsr-layout-7"
+      },
+      {
+        "area_m2": 3.575,
+        "name": "HSR Layout",
+        "name_source": "place",
+        "slug": "hsr-layout-8"
+      },
+      {
+        "area_m2": 3.932,
+        "name": "HSR Layout",
+        "name_source": "place",
+        "slug": "hsr-layout-9"
+      },
+      {
+        "area_m2": 2.614,
+        "name": "Iblur",
+        "name_source": "place",
+        "slug": "iblur"
+      },
+      {
+        "area_m2": 448.099,
+        "name": "Iblur",
+        "name_source": "place",
+        "slug": "iblur-2"
+      },
+      {
+        "area_m2": 1.784,
+        "name": "Indiranagar",
+        "name_source": "place",
+        "slug": "indiranagar"
+      },
+      {
+        "area_m2": 767.437,
+        "name": "Indiranagar",
+        "name_source": "place",
+        "slug": "indiranagar-10"
+      },
+      {
+        "area_m2": 407488.065,
+        "name": "Indiranagar",
+        "name_source": "place",
+        "slug": "indiranagar-100"
+      },
+      {
+        "area_m2": 488068.609,
+        "name": "Indiranagar",
+        "name_source": "place",
+        "slug": "indiranagar-101"
+      },
+      {
+        "area_m2": 1256.812,
+        "name": "Indiranagar",
+        "name_source": "place",
+        "slug": "indiranagar-11"
+      },
+      {
+        "area_m2": 3459.473,
+        "name": "Indiranagar",
+        "name_source": "place",
+        "slug": "indiranagar-12"
+      },
+      {
+        "area_m2": 1.881,
+        "name": "Indiranagar",
+        "name_source": "place",
+        "slug": "indiranagar-2"
+      },
+      {
+        "area_m2": 0.285,
+        "name": "Indiranagar 2nd Stage",
+        "name_source": "place",
+        "slug": "indiranagar-2nd-stage"
+      },
+      {
+        "area_m2": 3.207,
+        "name": "Indiranagar 2nd Stage",
+        "name_source": "place",
+        "slug": "indiranagar-2nd-stage-2"
+      },
+      {
+        "area_m2": 3.867,
+        "name": "Indiranagar 2nd Stage",
+        "name_source": "place",
+        "slug": "indiranagar-2nd-stage-3"
+      },
+      {
+        "area_m2": 1.904,
+        "name": "Indiranagar",
+        "name_source": "place",
+        "slug": "indiranagar-3"
+      },
+      {
+        "area_m2": 1.918,
+        "name": "Indiranagar",
+        "name_source": "place",
+        "slug": "indiranagar-4"
+      },
+      {
+        "area_m2": 2.064,
+        "name": "Indiranagar",
+        "name_source": "place",
+        "slug": "indiranagar-5"
+      },
+      {
+        "area_m2": 2.118,
+        "name": "Indiranagar",
+        "name_source": "place",
+        "slug": "indiranagar-6"
+      },
+      {
+        "area_m2": 3.434,
+        "name": "Indiranagar",
+        "name_source": "place",
+        "slug": "indiranagar-7"
+      },
+      {
+        "area_m2": 3.654,
+        "name": "Indiranagar",
+        "name_source": "place",
+        "slug": "indiranagar-8"
+      },
+      {
+        "area_m2": 448.813,
+        "name": "Indiranagar",
+        "name_source": "place",
+        "slug": "indiranagar-9"
+      },
+      {
+        "area_m2": 0.135,
+        "name": "J.P Nagar",
+        "name_source": "place",
+        "slug": "j-p-nagar"
+      },
+      {
+        "area_m2": 4.737,
+        "name": "J.P Nagar",
+        "name_source": "place",
+        "slug": "j-p-nagar-10"
+      },
+      {
+        "area_m2": 8.265,
+        "name": "J.P Nagar",
+        "name_source": "place",
+        "slug": "j-p-nagar-11"
+      },
+      {
+        "area_m2": 19.571,
+        "name": "J.P Nagar",
+        "name_source": "place",
+        "slug": "j-p-nagar-12"
+      },
+      {
+        "area_m2": 0.27,
+        "name": "J.P Nagar",
+        "name_source": "place",
+        "slug": "j-p-nagar-2"
+      },
+      {
+        "area_m2": 0.337,
+        "name": "J.P Nagar",
+        "name_source": "place",
+        "slug": "j-p-nagar-3"
+      },
+      {
+        "area_m2": 0.575,
+        "name": "J.P Nagar",
+        "name_source": "place",
+        "slug": "j-p-nagar-4"
+      },
+      {
+        "area_m2": 0.606,
+        "name": "J.P Nagar",
+        "name_source": "place",
+        "slug": "j-p-nagar-5"
+      },
+      {
+        "area_m2": 1.511,
+        "name": "J.P Nagar",
+        "name_source": "place",
+        "slug": "j-p-nagar-6"
+      },
+      {
+        "area_m2": 2.351,
+        "name": "J.P Nagar",
+        "name_source": "place",
+        "slug": "j-p-nagar-7"
+      },
+      {
+        "area_m2": 2.368,
+        "name": "J.P Nagar",
+        "name_source": "place",
+        "slug": "j-p-nagar-8"
+      },
+      {
+        "area_m2": 2.41,
+        "name": "J.P Nagar",
+        "name_source": "place",
+        "slug": "j-p-nagar-9"
+      },
+      {
+        "area_m2": 0.026,
+        "name": "Jagadish Nagar",
+        "name_source": "place",
+        "slug": "jagadish-nagar"
+      },
+      {
+        "area_m2": 0.084,
+        "name": "Jagadish Nagar",
+        "name_source": "place",
+        "slug": "jagadish-nagar-2"
+      },
+      {
+        "area_m2": 0.09,
+        "name": "Jagadish Nagar",
+        "name_source": "place",
+        "slug": "jagadish-nagar-3"
+      },
+      {
+        "area_m2": 0.102,
+        "name": "Jagadish Nagar",
+        "name_source": "place",
+        "slug": "jagadish-nagar-4"
+      },
+      {
+        "area_m2": 1.605,
+        "name": "Jakkasandra",
+        "name_source": "place",
+        "slug": "jakkasandra"
+      },
+      {
+        "area_m2": 1856.749,
+        "name": "Jakkasandra",
+        "name_source": "place",
+        "slug": "jakkasandra-2"
+      },
+      {
+        "area_m2": 2916.954,
+        "name": "Jakkasandra",
+        "name_source": "place",
+        "slug": "jakkasandra-3"
+      },
+      {
+        "area_m2": 3000.865,
+        "name": "Jakkasandra",
+        "name_source": "place",
+        "slug": "jakkasandra-4"
+      },
+      {
+        "area_m2": 0.837,
+        "name": "Jayanagar 3 East Block",
+        "name_source": "place",
+        "slug": "jayanagar-3-east-block"
+      },
+      {
+        "area_m2": 2045.647,
+        "name": "Jayanagar 3 East Block",
+        "name_source": "place",
+        "slug": "jayanagar-3-east-block-2"
+      },
+      {
+        "area_m2": 1758.726,
+        "name": "Jayanagar 4T Block",
+        "name_source": "place",
+        "slug": "jayanagar-4t-block"
+      },
+      {
+        "area_m2": 1179.352,
+        "name": "Jayanagar 4th Block",
+        "name_source": "place",
+        "slug": "jayanagar-4th-block"
+      },
+      {
+        "area_m2": 0.026,
+        "name": "Jayanagar 6th Block",
+        "name_source": "place",
+        "slug": "jayanagar-6th-block"
+      },
+      {
+        "area_m2": 1595.05,
+        "name": "Jayanagar 6th Block",
+        "name_source": "place",
+        "slug": "jayanagar-6th-block-2"
+      },
+      {
+        "area_m2": 3398.303,
+        "name": "Jayanagar 7th Block",
+        "name_source": "place",
+        "slug": "jayanagar-7th-block"
+      },
+      {
+        "area_m2": 3832.81,
+        "name": "Jayanagar 7th Block",
+        "name_source": "place",
+        "slug": "jayanagar-7th-block-2"
+      },
+      {
+        "area_m2": 2860.069,
+        "name": "Jayanagar East",
+        "name_source": "place",
+        "slug": "jayanagar-east"
+      },
+      {
+        "area_m2": 0.572,
+        "name": "Jeevan Bhimanagar",
+        "name_source": "place",
+        "slug": "jeevan-bhimanagar"
+      },
+      {
+        "area_m2": 353.763,
+        "name": "Jeevan Bhimanagar",
+        "name_source": "place",
+        "slug": "jeevan-bhimanagar-2"
+      },
+      {
+        "area_m2": 672.468,
+        "name": "Jeevan Bhimanagar",
+        "name_source": "place",
+        "slug": "jeevan-bhimanagar-3"
+      },
+      {
+        "area_m2": 1542.403,
+        "name": "Jeevan Bhimanagar",
+        "name_source": "place",
+        "slug": "jeevan-bhimanagar-4"
+      },
+      {
+        "area_m2": 572900.101,
+        "name": "Jeevan Bhimanagar",
+        "name_source": "place",
+        "slug": "jeevan-bhimanagar-59"
+      },
+      {
+        "area_m2": 657145.887,
+        "name": "Jeevan Bhimanagar",
+        "name_source": "place",
+        "slug": "jeevan-bhimanagar-60"
+      },
+      {
+        "area_m2": 0.443,
+        "name": "Jeevanahalli",
+        "name_source": "place",
+        "slug": "jeevanahalli"
+      },
+      {
+        "area_m2": 1.849,
+        "name": "Jeevanahalli",
+        "name_source": "place",
+        "slug": "jeevanahalli-2"
+      },
+      {
+        "area_m2": 4.204,
+        "name": "Jeevanahalli",
+        "name_source": "place",
+        "slug": "jeevanahalli-3"
+      },
+      {
+        "area_m2": 5.548,
+        "name": "Jeevanahalli",
+        "name_source": "place",
+        "slug": "jeevanahalli-4"
+      },
+      {
+        "area_m2": 8.161,
+        "name": "Jeevanahalli",
+        "name_source": "place",
+        "slug": "jeevanahalli-5"
+      },
+      {
+        "area_m2": 8.239,
+        "name": "Jeevanahalli",
+        "name_source": "place",
+        "slug": "jeevanahalli-6"
+      },
+      {
+        "area_m2": 2156.738,
+        "name": "Jogpalya",
+        "name_source": "place",
+        "slug": "jogpalya"
+      },
+      {
+        "area_m2": 2661.439,
+        "name": "Jogpalya",
+        "name_source": "place",
+        "slug": "jogpalya-2"
+      },
+      {
+        "area_m2": 2.568,
+        "name": "JP Nagar 1st Phase",
+        "name_source": "place",
+        "slug": "jp-nagar-1st-phase"
+      },
+      {
+        "area_m2": 3.28,
+        "name": "JP Nagar 1st Phase",
+        "name_source": "place",
+        "slug": "jp-nagar-1st-phase-2"
+      },
+      {
+        "area_m2": 259455.423,
+        "name": "JP Nagar 1st Phase",
+        "name_source": "place",
+        "slug": "jp-nagar-1st-phase-59"
+      },
+      {
+        "area_m2": 1.504,
+        "name": "JP Nagar 4th Phase",
+        "name_source": "place",
+        "slug": "jp-nagar-4th-phase"
+      },
+      {
+        "area_m2": 2.819,
+        "name": "K Kamaraj Ward",
+        "name_source": "place",
+        "slug": "k-kamaraj-ward"
+      },
+      {
+        "area_m2": 3970.817,
+        "name": "K Kamaraj Ward",
+        "name_source": "place",
+        "slug": "k-kamaraj-ward-10"
+      },
+      {
+        "area_m2": 3.683,
+        "name": "K Kamaraj Ward",
+        "name_source": "place",
+        "slug": "k-kamaraj-ward-2"
+      },
+      {
+        "area_m2": 426.455,
+        "name": "K Kamaraj Ward",
+        "name_source": "place",
+        "slug": "k-kamaraj-ward-3"
+      },
+      {
+        "area_m2": 1275.487,
+        "name": "K Kamaraj Ward",
+        "name_source": "place",
+        "slug": "k-kamaraj-ward-4"
+      },
+      {
+        "area_m2": 1375.363,
+        "name": "K Kamaraj Ward",
+        "name_source": "place",
+        "slug": "k-kamaraj-ward-5"
+      },
+      {
+        "area_m2": 2298.301,
+        "name": "K Kamaraj Ward",
+        "name_source": "place",
+        "slug": "k-kamaraj-ward-6"
+      },
+      {
+        "area_m2": 269131.089,
+        "name": "K Kamaraj Ward",
+        "name_source": "place",
+        "slug": "k-kamaraj-ward-63"
+      },
+      {
+        "area_m2": 2496.34,
+        "name": "K Kamaraj Ward",
+        "name_source": "place",
+        "slug": "k-kamaraj-ward-7"
+      },
+      {
+        "area_m2": 2745.138,
+        "name": "K Kamaraj Ward",
+        "name_source": "place",
+        "slug": "k-kamaraj-ward-8"
+      },
+      {
+        "area_m2": 3157.46,
+        "name": "K Kamaraj Ward",
+        "name_source": "place",
+        "slug": "k-kamaraj-ward-9"
+      },
+      {
+        "area_m2": 0.003,
+        "name": "K.R Market",
+        "name_source": "place",
+        "slug": "k-r-market"
+      },
+      {
+        "area_m2": 0.958,
+        "name": "K.R Market",
+        "name_source": "place",
+        "slug": "k-r-market-2"
+      },
+      {
+        "area_m2": 1.436,
+        "name": "K.R Market",
+        "name_source": "place",
+        "slug": "k-r-market-3"
+      },
+      {
+        "area_m2": 19.773,
+        "name": "K.R Market",
+        "name_source": "place",
+        "slug": "k-r-market-4"
+      },
+      {
+        "area_m2": 22.248,
+        "name": "K.R Market",
+        "name_source": "place",
+        "slug": "k-r-market-5"
+      },
+      {
+        "area_m2": 4802.044,
+        "name": "K.R Market",
+        "name_source": "place",
+        "slug": "k-r-market-6"
+      },
+      {
+        "area_m2": 0.502,
+        "name": "K.S. Nissar Ahmed Ward",
+        "name_source": "place",
+        "slug": "k-s-nissar-ahmed-ward"
+      },
+      {
+        "area_m2": 1.469,
+        "name": "K.S. Nissar Ahmed Ward",
+        "name_source": "place",
+        "slug": "k-s-nissar-ahmed-ward-2"
+      },
+      {
+        "area_m2": 290751.828,
+        "name": "Kachamaranahalli",
+        "name_source": "place",
+        "slug": "kachamaranahalli-11"
+      },
+      {
+        "area_m2": 399787.226,
+        "name": "Kachamaranahalli",
+        "name_source": "place",
+        "slug": "kachamaranahalli-12"
+      },
+      {
+        "area_m2": 1204382.03,
+        "name": "Kachamaranahalli",
+        "name_source": "place",
+        "slug": "kachamaranahalli-13"
+      },
+      {
+        "area_m2": 0.706,
+        "name": "Kadugodi",
+        "name_source": "place",
+        "slug": "kadugodi"
+      },
+      {
+        "area_m2": 1.06,
+        "name": "Kadugodi",
+        "name_source": "place",
+        "slug": "kadugodi-2"
+      },
+      {
+        "area_m2": 1.71,
+        "name": "Kadugodi",
+        "name_source": "place",
+        "slug": "kadugodi-3"
+      },
+      {
+        "area_m2": 290159.941,
+        "name": "Kadugodi",
+        "name_source": "place",
+        "slug": "kadugodi-39"
+      },
+      {
+        "area_m2": 2.248,
+        "name": "Kadugodi",
+        "name_source": "place",
+        "slug": "kadugodi-4"
+      },
+      {
+        "area_m2": 314258.823,
+        "name": "Kadugodi",
+        "name_source": "place",
+        "slug": "kadugodi-40"
+      },
+      {
+        "area_m2": 471097.525,
+        "name": "Kadugodi",
+        "name_source": "place",
+        "slug": "kadugodi-41"
+      },
+      {
+        "area_m2": 2.504,
+        "name": "Kadugodi",
+        "name_source": "place",
+        "slug": "kadugodi-5"
+      },
+      {
+        "area_m2": 3.24,
+        "name": "Kadugodi",
+        "name_source": "place",
+        "slug": "kadugodi-6"
+      },
+      {
+        "area_m2": 8.264,
+        "name": "Kadugodi",
+        "name_source": "place",
+        "slug": "kadugodi-7"
+      },
+      {
+        "area_m2": 1224.525,
+        "name": "Kadugodi",
+        "name_source": "place",
+        "slug": "kadugodi-8"
+      },
+      {
+        "area_m2": 0.305,
+        "name": "Kaggadasapura",
+        "name_source": "place",
+        "slug": "kaggadasapura"
+      },
+      {
+        "area_m2": 2.718,
+        "name": "Kaggadasapura",
+        "name_source": "place",
+        "slug": "kaggadasapura-2"
+      },
+      {
+        "area_m2": 2.779,
+        "name": "Kaggadasapura",
+        "name_source": "place",
+        "slug": "kaggadasapura-3"
+      },
+      {
+        "area_m2": 416226.146,
+        "name": "Kanakanapalya",
+        "name_source": "place",
+        "slug": "kanakanapalya-21"
+      },
+      {
+        "area_m2": 0.182,
+        "name": "Kane Muneshwara Ward",
+        "name_source": "place",
+        "slug": "kane-muneshwara-ward"
+      },
+      {
+        "area_m2": 0.56,
+        "name": "Kane Muneshwara Ward",
+        "name_source": "place",
+        "slug": "kane-muneshwara-ward-2"
+      },
+      {
+        "area_m2": 1.455,
+        "name": "Kane Muneshwara Ward",
+        "name_source": "place",
+        "slug": "kane-muneshwara-ward-3"
+      },
+      {
+        "area_m2": 2.093,
+        "name": "Kane Muneshwara Ward",
+        "name_source": "place",
+        "slug": "kane-muneshwara-ward-4"
+      },
+      {
+        "area_m2": 0.207,
+        "name": "Kasavanahalli",
+        "name_source": "place",
+        "slug": "kasavanahalli"
+      },
+      {
+        "area_m2": 281795.698,
+        "name": "Kasavanahalli",
+        "name_source": "place",
+        "slug": "kasavanahalli-136"
+      },
+      {
+        "area_m2": 395837.546,
+        "name": "Kasavanahalli",
+        "name_source": "place",
+        "slug": "kasavanahalli-137"
+      },
+      {
+        "area_m2": 439204.778,
+        "name": "Kasavanahalli",
+        "name_source": "place",
+        "slug": "kasavanahalli-138"
+      },
+      {
+        "area_m2": 1291304.606,
+        "name": "Kasavanahalli",
+        "name_source": "place",
+        "slug": "kasavanahalli-139"
+      },
+      {
+        "area_m2": 0.884,
+        "name": "Kasavanahalli",
+        "name_source": "place",
+        "slug": "kasavanahalli-2"
+      },
+      {
+        "area_m2": 2.162,
+        "name": "Kasavanahalli",
+        "name_source": "place",
+        "slug": "kasavanahalli-3"
+      },
+      {
+        "area_m2": 338.02,
+        "name": "Kasavanahalli",
+        "name_source": "place",
+        "slug": "kasavanahalli-4"
+      },
+      {
+        "area_m2": 1705.598,
+        "name": "Kasavanahalli",
+        "name_source": "place",
+        "slug": "kasavanahalli-5"
+      },
+      {
+        "area_m2": 2494.558,
+        "name": "Kasavanahalli",
+        "name_source": "place",
+        "slug": "kasavanahalli-6"
+      },
+      {
+        "area_m2": 275955.775,
+        "name": "Kasturi Nagar",
+        "name_source": "place",
+        "slug": "kasturi-nagar"
+      },
+      {
+        "area_m2": 0.077,
+        "name": "Kattariguppe",
+        "name_source": "place",
+        "slug": "kattariguppe"
+      },
+      {
+        "area_m2": 265993.972,
+        "name": "Kattariguppe",
+        "name_source": "place",
+        "slug": "kattariguppe-10"
+      },
+      {
+        "area_m2": 298623.515,
+        "name": "Kattariguppe",
+        "name_source": "place",
+        "slug": "kattariguppe-11"
+      },
+      {
+        "area_m2": 312971.699,
+        "name": "Kattariguppe",
+        "name_source": "place",
+        "slug": "kattariguppe-12"
+      },
+      {
+        "area_m2": 707816.927,
+        "name": "Kattariguppe",
+        "name_source": "place",
+        "slug": "kattariguppe-13"
+      },
+      {
+        "area_m2": 259280.804,
+        "name": "Kattariguppe",
+        "name_source": "place",
+        "slug": "kattariguppe-9"
+      },
+      {
+        "area_m2": 0.381,
+        "name": "Kaveri Nagara",
+        "name_source": "place",
+        "slug": "kaveri-nagara"
+      },
+      {
+        "area_m2": 0.526,
+        "name": "Kaveri Nagara",
+        "name_source": "place",
+        "slug": "kaveri-nagara-2"
+      },
+      {
+        "area_m2": 0.528,
+        "name": "Kaveri Nagara",
+        "name_source": "place",
+        "slug": "kaveri-nagara-3"
+      },
+      {
+        "area_m2": 391585.555,
+        "name": "Kaveri Nagara",
+        "name_source": "place",
+        "slug": "kaveri-nagara-30"
+      },
+      {
+        "area_m2": 747902.037,
+        "name": "Kaveri Nagara",
+        "name_source": "place",
+        "slug": "kaveri-nagara-31"
+      },
+      {
+        "area_m2": 1160296.796,
+        "name": "Kaveri Nagara",
+        "name_source": "place",
+        "slug": "kaveri-nagara-32"
+      },
+      {
+        "area_m2": 0.728,
+        "name": "Kaveri Nagara",
+        "name_source": "place",
+        "slug": "kaveri-nagara-4"
+      },
+      {
+        "area_m2": 1.033,
+        "name": "Kodathi",
+        "name_source": "place",
+        "slug": "kodathi"
+      },
+      {
+        "area_m2": 1.584,
+        "name": "Kodathi",
+        "name_source": "place",
+        "slug": "kodathi-2"
+      },
+      {
+        "area_m2": 1.841,
+        "name": "Kodathi",
+        "name_source": "place",
+        "slug": "kodathi-3"
+      },
+      {
+        "area_m2": 307178.223,
+        "name": "Kodathi",
+        "name_source": "place",
+        "slug": "kodathi-36"
+      },
+      {
+        "area_m2": 517102.716,
+        "name": "Kodathi",
+        "name_source": "place",
+        "slug": "kodathi-37"
+      },
+      {
+        "area_m2": 2.509,
+        "name": "Kodathi",
+        "name_source": "place",
+        "slug": "kodathi-4"
+      },
+      {
+        "area_m2": 2.901,
+        "name": "Kodathi",
+        "name_source": "place",
+        "slug": "kodathi-5"
+      },
+      {
+        "area_m2": 3253.464,
+        "name": "Kodathi",
+        "name_source": "place",
+        "slug": "kodathi-6"
+      },
+      {
+        "area_m2": 0.003,
+        "name": "Kodi Chikkanahalli",
+        "name_source": "place",
+        "slug": "kodi-chikkanahalli"
+      },
+      {
+        "area_m2": 1.586,
+        "name": "Kodi Chikkanahalli",
+        "name_source": "place",
+        "slug": "kodi-chikkanahalli-2"
+      },
+      {
+        "area_m2": 2.915,
+        "name": "Kodi Chikkanahalli",
+        "name_source": "place",
+        "slug": "kodi-chikkanahalli-3"
+      },
+      {
+        "area_m2": 0.001,
+        "name": "Kodihalli",
+        "name_source": "place",
+        "slug": "kodihalli"
+      },
+      {
+        "area_m2": 4.622,
+        "name": "Kodihalli",
+        "name_source": "place",
+        "slug": "kodihalli-10"
+      },
+      {
+        "area_m2": 19.973,
+        "name": "Kodihalli",
+        "name_source": "place",
+        "slug": "kodihalli-11"
+      },
+      {
+        "area_m2": 918.266,
+        "name": "Kodihalli",
+        "name_source": "place",
+        "slug": "kodihalli-12"
+      },
+      {
+        "area_m2": 4556.284,
+        "name": "Kodihalli",
+        "name_source": "place",
+        "slug": "kodihalli-13"
+      },
+      {
+        "area_m2": 0.711,
+        "name": "Kodihalli",
+        "name_source": "place",
+        "slug": "kodihalli-2"
+      },
+      {
+        "area_m2": 0.842,
+        "name": "Kodihalli",
+        "name_source": "place",
+        "slug": "kodihalli-3"
+      },
+      {
+        "area_m2": 1.069,
+        "name": "Kodihalli",
+        "name_source": "place",
+        "slug": "kodihalli-4"
+      },
+      {
+        "area_m2": 1.101,
+        "name": "Kodihalli",
+        "name_source": "place",
+        "slug": "kodihalli-5"
+      },
+      {
+        "area_m2": 1.118,
+        "name": "Kodihalli",
+        "name_source": "place",
+        "slug": "kodihalli-6"
+      },
+      {
+        "area_m2": 1.314,
+        "name": "Kodihalli",
+        "name_source": "place",
+        "slug": "kodihalli-7"
+      },
+      {
+        "area_m2": 1.354,
+        "name": "Kodihalli",
+        "name_source": "place",
+        "slug": "kodihalli-8"
+      },
+      {
+        "area_m2": 3.213,
+        "name": "Kodihalli",
+        "name_source": "place",
+        "slug": "kodihalli-9"
+      },
+      {
+        "area_m2": 0.087,
+        "name": "Konena Agrahara",
+        "name_source": "place",
+        "slug": "konena-agrahara"
+      },
+      {
+        "area_m2": 7.162,
+        "name": "Konena Agrahara",
+        "name_source": "place",
+        "slug": "konena-agrahara-10"
+      },
+      {
+        "area_m2": 3375.81,
+        "name": "Konena Agrahara",
+        "name_source": "place",
+        "slug": "konena-agrahara-11"
+      },
+      {
+        "area_m2": 0.299,
+        "name": "Konena Agrahara",
+        "name_source": "place",
+        "slug": "konena-agrahara-2"
+      },
+      {
+        "area_m2": 0.324,
+        "name": "Konena Agrahara",
+        "name_source": "place",
+        "slug": "konena-agrahara-3"
+      },
+      {
+        "area_m2": 0.729,
+        "name": "Konena Agrahara",
+        "name_source": "place",
+        "slug": "konena-agrahara-4"
+      },
+      {
+        "area_m2": 1.252,
+        "name": "Konena Agrahara",
+        "name_source": "place",
+        "slug": "konena-agrahara-5"
+      },
+      {
+        "area_m2": 1.509,
+        "name": "Konena Agrahara",
+        "name_source": "place",
+        "slug": "konena-agrahara-6"
+      },
+      {
+        "area_m2": 580838.119,
+        "name": "Konena Agrahara",
+        "name_source": "place",
+        "slug": "konena-agrahara-60"
+      },
+      {
+        "area_m2": 1.69,
+        "name": "Konena Agrahara",
+        "name_source": "place",
+        "slug": "konena-agrahara-7"
+      },
+      {
+        "area_m2": 1.937,
+        "name": "Konena Agrahara",
+        "name_source": "place",
+        "slug": "konena-agrahara-8"
+      },
+      {
+        "area_m2": 2.434,
+        "name": "Konena Agrahara",
+        "name_source": "place",
+        "slug": "konena-agrahara-9"
+      },
+      {
+        "area_m2": 3455.43,
+        "name": "Koramangala 1st Block",
+        "name_source": "place",
+        "slug": "koramangala-1st-block"
+      },
+      {
+        "area_m2": 1681.487,
+        "name": "Koramangala 3rd Block",
+        "name_source": "place",
+        "slug": "koramangala-3rd-block"
+      },
+      {
+        "area_m2": 2628.347,
+        "name": "Koramangala 3rd Block",
+        "name_source": "place",
+        "slug": "koramangala-3rd-block-2"
+      },
+      {
+        "area_m2": 3312.298,
+        "name": "Koramangala 3rd Block",
+        "name_source": "place",
+        "slug": "koramangala-3rd-block-3"
+      },
+      {
+        "area_m2": 3744.817,
+        "name": "Koramangala 4th Block",
+        "name_source": "place",
+        "slug": "koramangala-4th-block"
+      },
+      {
+        "area_m2": 4747.414,
+        "name": "Koramangala 4th Block",
+        "name_source": "place",
+        "slug": "koramangala-4th-block-2"
+      },
+      {
+        "area_m2": 0.113,
+        "name": "Koramangala 7th Block",
+        "name_source": "place",
+        "slug": "koramangala-7th-block"
+      },
+      {
+        "area_m2": 0.135,
+        "name": "Koramangala 7th Block",
+        "name_source": "place",
+        "slug": "koramangala-7th-block-2"
+      },
+      {
+        "area_m2": 0.135,
+        "name": "Koramangala 7th Block",
+        "name_source": "place",
+        "slug": "koramangala-7th-block-3"
+      },
+      {
+        "area_m2": 0.62,
+        "name": "Koramangala 7th Block",
+        "name_source": "place",
+        "slug": "koramangala-7th-block-4"
+      },
+      {
+        "area_m2": 1.21,
+        "name": "Koramangala 7th Block",
+        "name_source": "place",
+        "slug": "koramangala-7th-block-5"
+      },
+      {
+        "area_m2": 1.383,
+        "name": "Koramangala 7th Block",
+        "name_source": "place",
+        "slug": "koramangala-7th-block-6"
+      },
+      {
+        "area_m2": 1.585,
+        "name": "Koramangala 7th Block",
+        "name_source": "place",
+        "slug": "koramangala-7th-block-7"
+      },
+      {
+        "area_m2": 1.147,
+        "name": "Koramangala 8th Block",
+        "name_source": "place",
+        "slug": "koramangala-8th-block"
+      },
+      {
+        "area_m2": 5.215,
+        "name": "Koramangala 8th Block",
+        "name_source": "place",
+        "slug": "koramangala-8th-block-2"
+      },
+      {
+        "area_m2": 2903.648,
+        "name": "Koramangala 8th Block",
+        "name_source": "place",
+        "slug": "koramangala-8th-block-3"
+      },
+      {
+        "area_m2": 4421.726,
+        "name": "Koramangala 8th Block",
+        "name_source": "place",
+        "slug": "koramangala-8th-block-4"
+      },
+      {
+        "area_m2": 0.294,
+        "name": "Kormangala East",
+        "name_source": "place",
+        "slug": "kormangala-east"
+      },
+      {
+        "area_m2": 0.567,
+        "name": "Kormangala East",
+        "name_source": "place",
+        "slug": "kormangala-east-2"
+      },
+      {
+        "area_m2": 3.368,
+        "name": "Kormangala East",
+        "name_source": "place",
+        "slug": "kormangala-east-3"
+      },
+      {
+        "area_m2": 174.77,
+        "name": "Kormangala East",
+        "name_source": "place",
+        "slug": "kormangala-east-4"
+      },
+      {
+        "area_m2": 3643.734,
+        "name": "Kormangala East",
+        "name_source": "place",
+        "slug": "kormangala-east-5"
+      },
+      {
+        "area_m2": 3722.371,
+        "name": "Kormangala East",
+        "name_source": "place",
+        "slug": "kormangala-east-6"
+      },
+      {
+        "area_m2": 0.095,
+        "name": "Kormangala West",
+        "name_source": "place",
+        "slug": "kormangala-west"
+      },
+      {
+        "area_m2": 20.675,
+        "name": "Kormangala West",
+        "name_source": "place",
+        "slug": "kormangala-west-10"
+      },
+      {
+        "area_m2": 3257.643,
+        "name": "Kormangala West",
+        "name_source": "place",
+        "slug": "kormangala-west-11"
+      },
+      {
+        "area_m2": 0.208,
+        "name": "Kormangala West",
+        "name_source": "place",
+        "slug": "kormangala-west-2"
+      },
+      {
+        "area_m2": 0.625,
+        "name": "Kormangala West",
+        "name_source": "place",
+        "slug": "kormangala-west-3"
+      },
+      {
+        "area_m2": 0.865,
+        "name": "Kormangala West",
+        "name_source": "place",
+        "slug": "kormangala-west-4"
+      },
+      {
+        "area_m2": 0.965,
+        "name": "Kormangala West",
+        "name_source": "place",
+        "slug": "kormangala-west-5"
+      },
+      {
+        "area_m2": 1.947,
+        "name": "Kormangala West",
+        "name_source": "place",
+        "slug": "kormangala-west-6"
+      },
+      {
+        "area_m2": 645715.186,
+        "name": "Kormangala West",
+        "name_source": "place",
+        "slug": "kormangala-west-65"
+      },
+      {
+        "area_m2": 2.44,
+        "name": "Kormangala West",
+        "name_source": "place",
+        "slug": "kormangala-west-7"
+      },
+      {
+        "area_m2": 3.196,
+        "name": "Kormangala West",
+        "name_source": "place",
+        "slug": "kormangala-west-8"
+      },
+      {
+        "area_m2": 10.548,
+        "name": "Kormangala West",
+        "name_source": "place",
+        "slug": "kormangala-west-9"
+      },
+      {
+        "area_m2": 0.318,
+        "name": "Krishnaiahnapalya",
+        "name_source": "place",
+        "slug": "krishnaiahnapalya"
+      },
+      {
+        "area_m2": 0.506,
+        "name": "Krishnaiahnapalya",
+        "name_source": "place",
+        "slug": "krishnaiahnapalya-2"
+      },
+      {
+        "area_m2": 315093.166,
+        "name": "Krishnaiahnapalya",
+        "name_source": "place",
+        "slug": "krishnaiahnapalya-26"
+      },
+      {
+        "area_m2": 2.219,
+        "name": "Krishnaiahnapalya",
+        "name_source": "place",
+        "slug": "krishnaiahnapalya-3"
+      },
+      {
+        "area_m2": 303688.056,
+        "name": "Kudlu",
+        "name_source": "place",
+        "slug": "kudlu-22"
+      },
+      {
+        "area_m2": 0.005,
+        "name": "Kundalahalli",
+        "name_source": "place",
+        "slug": "kundalahalli"
+      },
+      {
+        "area_m2": 0.761,
+        "name": "Kundalahalli",
+        "name_source": "place",
+        "slug": "kundalahalli-10"
+      },
+      {
+        "area_m2": 1.116,
+        "name": "Kundalahalli",
+        "name_source": "place",
+        "slug": "kundalahalli-11"
+      },
+      {
+        "area_m2": 1.23,
+        "name": "Kundalahalli",
+        "name_source": "place",
+        "slug": "kundalahalli-12"
+      },
+      {
+        "area_m2": 1.337,
+        "name": "Kundalahalli",
+        "name_source": "place",
+        "slug": "kundalahalli-13"
+      },
+      {
+        "area_m2": 1.364,
+        "name": "Kundalahalli",
+        "name_source": "place",
+        "slug": "kundalahalli-14"
+      },
+      {
+        "area_m2": 1.617,
+        "name": "Kundalahalli",
+        "name_source": "place",
+        "slug": "kundalahalli-15"
+      },
+      {
+        "area_m2": 1.717,
+        "name": "Kundalahalli",
+        "name_source": "place",
+        "slug": "kundalahalli-16"
+      },
+      {
+        "area_m2": 1.743,
+        "name": "Kundalahalli",
+        "name_source": "place",
+        "slug": "kundalahalli-17"
+      },
+      {
+        "area_m2": 2.076,
+        "name": "Kundalahalli",
+        "name_source": "place",
+        "slug": "kundalahalli-18"
+      },
+      {
+        "area_m2": 2.134,
+        "name": "Kundalahalli",
+        "name_source": "place",
+        "slug": "kundalahalli-19"
+      },
+      {
+        "area_m2": 0.008,
+        "name": "Kundalahalli",
+        "name_source": "place",
+        "slug": "kundalahalli-2"
+      },
+      {
+        "area_m2": 2.29,
+        "name": "Kundalahalli",
+        "name_source": "place",
+        "slug": "kundalahalli-20"
+      },
+      {
+        "area_m2": 2.585,
+        "name": "Kundalahalli",
+        "name_source": "place",
+        "slug": "kundalahalli-21"
+      },
+      {
+        "area_m2": 3.029,
+        "name": "Kundalahalli",
+        "name_source": "place",
+        "slug": "kundalahalli-22"
+      },
+      {
+        "area_m2": 4.857,
+        "name": "Kundalahalli",
+        "name_source": "place",
+        "slug": "kundalahalli-23"
+      },
+      {
+        "area_m2": 7.263,
+        "name": "Kundalahalli",
+        "name_source": "place",
+        "slug": "kundalahalli-24"
+      },
+      {
+        "area_m2": 10.085,
+        "name": "Kundalahalli",
+        "name_source": "place",
+        "slug": "kundalahalli-25"
+      },
+      {
+        "area_m2": 15.55,
+        "name": "Kundalahalli",
+        "name_source": "place",
+        "slug": "kundalahalli-26"
+      },
+      {
+        "area_m2": 2999.734,
+        "name": "Kundalahalli",
+        "name_source": "place",
+        "slug": "kundalahalli-27"
+      },
+      {
+        "area_m2": 0.096,
+        "name": "Kundalahalli",
+        "name_source": "place",
+        "slug": "kundalahalli-3"
+      },
+      {
+        "area_m2": 0.099,
+        "name": "Kundalahalli",
+        "name_source": "place",
+        "slug": "kundalahalli-4"
+      },
+      {
+        "area_m2": 0.167,
+        "name": "Kundalahalli",
+        "name_source": "place",
+        "slug": "kundalahalli-5"
+      },
+      {
+        "area_m2": 0.189,
+        "name": "Kundalahalli",
+        "name_source": "place",
+        "slug": "kundalahalli-6"
+      },
+      {
+        "area_m2": 0.301,
+        "name": "Kundalahalli",
+        "name_source": "place",
+        "slug": "kundalahalli-7"
+      },
+      {
+        "area_m2": 0.676,
+        "name": "Kundalahalli",
+        "name_source": "place",
+        "slug": "kundalahalli-8"
+      },
+      {
+        "area_m2": 267349.41,
+        "name": "Kundalahalli",
+        "name_source": "place",
+        "slug": "kundalahalli-80"
+      },
+      {
+        "area_m2": 293852.013,
+        "name": "Kundalahalli",
+        "name_source": "place",
+        "slug": "kundalahalli-81"
+      },
+      {
+        "area_m2": 1280852.248,
+        "name": "Kundalahalli",
+        "name_source": "place",
+        "slug": "kundalahalli-82"
+      },
+      {
+        "area_m2": 1712603.315,
+        "name": "Kundalahalli",
+        "name_source": "place",
+        "slug": "kundalahalli-83"
+      },
+      {
+        "area_m2": 0.724,
+        "name": "Kundalahalli",
+        "name_source": "place",
+        "slug": "kundalahalli-9"
+      },
+      {
+        "area_m2": 0.556,
+        "name": "Kundalahalli Colony",
+        "name_source": "place",
+        "slug": "kundalahalli-colony"
+      },
+      {
+        "area_m2": 4.157,
+        "name": "L.B Shastri Nagar",
+        "name_source": "place",
+        "slug": "l-b-shastri-nagar"
+      },
+      {
+        "area_m2": 15.268,
+        "name": "Lakkasandra",
+        "name_source": "place",
+        "slug": "lakkasandra"
+      },
+      {
+        "area_m2": 488846.73,
+        "name": "Lakkasandra",
+        "name_source": "place",
+        "slug": "lakkasandra-24"
+      },
+      {
+        "area_m2": 1.01,
+        "name": "Madiwala",
+        "name_source": "place",
+        "slug": "madiwala"
+      },
+      {
+        "area_m2": 1.621,
+        "name": "Madiwala",
+        "name_source": "place",
+        "slug": "madiwala-2"
+      },
+      {
+        "area_m2": 1.82,
+        "name": "Madiwala",
+        "name_source": "place",
+        "slug": "madiwala-3"
+      },
+      {
+        "area_m2": 2.666,
+        "name": "Madiwala",
+        "name_source": "place",
+        "slug": "madiwala-4"
+      },
+      {
+        "area_m2": 965.167,
+        "name": "Madiwala",
+        "name_source": "place",
+        "slug": "madiwala-5"
+      },
+      {
+        "area_m2": 2004.803,
+        "name": "Madiwala",
+        "name_source": "place",
+        "slug": "madiwala-6"
+      },
+      {
+        "area_m2": 0.573,
+        "name": "Mahadevapura",
+        "name_source": "place",
+        "slug": "mahadevapura"
+      },
+      {
+        "area_m2": 1.916,
+        "name": "Mahadevapura",
+        "name_source": "place",
+        "slug": "mahadevapura-10"
+      },
+      {
+        "area_m2": 2.86,
+        "name": "Mahadevapura",
+        "name_source": "place",
+        "slug": "mahadevapura-11"
+      },
+      {
+        "area_m2": 2.969,
+        "name": "Mahadevapura",
+        "name_source": "place",
+        "slug": "mahadevapura-12"
+      },
+      {
+        "area_m2": 4.278,
+        "name": "Mahadevapura",
+        "name_source": "place",
+        "slug": "mahadevapura-13"
+      },
+      {
+        "area_m2": 5.357,
+        "name": "Mahadevapura",
+        "name_source": "place",
+        "slug": "mahadevapura-14"
+      },
+      {
+        "area_m2": 5.466,
+        "name": "Mahadevapura",
+        "name_source": "place",
+        "slug": "mahadevapura-15"
+      },
+      {
+        "area_m2": 7.721,
+        "name": "Mahadevapura",
+        "name_source": "place",
+        "slug": "mahadevapura-16"
+      },
+      {
+        "area_m2": 104.383,
+        "name": "Mahadevapura",
+        "name_source": "place",
+        "slug": "mahadevapura-17"
+      },
+      {
+        "area_m2": 1541.586,
+        "name": "Mahadevapura",
+        "name_source": "place",
+        "slug": "mahadevapura-18"
+      },
+      {
+        "area_m2": 1634.296,
+        "name": "Mahadevapura",
+        "name_source": "place",
+        "slug": "mahadevapura-19"
+      },
+      {
+        "area_m2": 0.612,
+        "name": "Mahadevapura",
+        "name_source": "place",
+        "slug": "mahadevapura-2"
+      },
+      {
+        "area_m2": 0.812,
+        "name": "Mahadevapura",
+        "name_source": "place",
+        "slug": "mahadevapura-3"
+      },
+      {
+        "area_m2": 0.88,
+        "name": "Mahadevapura",
+        "name_source": "place",
+        "slug": "mahadevapura-4"
+      },
+      {
+        "area_m2": 0.955,
+        "name": "Mahadevapura",
+        "name_source": "place",
+        "slug": "mahadevapura-5"
+      },
+      {
+        "area_m2": 1.007,
+        "name": "Mahadevapura",
+        "name_source": "place",
+        "slug": "mahadevapura-6"
+      },
+      {
+        "area_m2": 1.543,
+        "name": "Mahadevapura",
+        "name_source": "place",
+        "slug": "mahadevapura-7"
+      },
+      {
+        "area_m2": 1.562,
+        "name": "Mahadevapura",
+        "name_source": "place",
+        "slug": "mahadevapura-8"
+      },
+      {
+        "area_m2": 1.744,
+        "name": "Mahadevapura",
+        "name_source": "place",
+        "slug": "mahadevapura-9"
+      },
+      {
+        "area_m2": 860594.932,
+        "name": "Mahadevapura",
+        "name_source": "place",
+        "slug": "mahadevapura-92"
+      },
+      {
+        "area_m2": 3.309,
+        "name": "Marathahalli",
+        "name_source": "place",
+        "slug": "marathahalli"
+      },
+      {
+        "area_m2": 3045.5,
+        "name": "Marathahalli",
+        "name_source": "place",
+        "slug": "marathahalli-2"
+      },
+      {
+        "area_m2": 251189.409,
+        "name": "Marathahalli",
+        "name_source": "place",
+        "slug": "marathahalli-35"
+      },
+      {
+        "area_m2": 3.467,
+        "name": "Marenahalli South",
+        "name_source": "place",
+        "slug": "marenahalli-south"
+      },
+      {
+        "area_m2": 12.194,
+        "name": "Marenahalli South",
+        "name_source": "place",
+        "slug": "marenahalli-south-2"
+      },
+      {
+        "area_m2": 12.647,
+        "name": "Marenahalli South",
+        "name_source": "place",
+        "slug": "marenahalli-south-3"
+      },
+      {
+        "area_m2": 0.037,
+        "name": "Mulluru",
+        "name_source": "place",
+        "slug": "mulluru"
+      },
+      {
+        "area_m2": 0.169,
+        "name": "Mulluru",
+        "name_source": "place",
+        "slug": "mulluru-2"
+      },
+      {
+        "area_m2": 344116.771,
+        "name": "Mulluru",
+        "name_source": "place",
+        "slug": "mulluru-26"
+      },
+      {
+        "area_m2": 613272.892,
+        "name": "Mulluru",
+        "name_source": "place",
+        "slug": "mulluru-27"
+      },
+      {
+        "area_m2": 899300.802,
+        "name": "Mulluru",
+        "name_source": "place",
+        "slug": "mulluru-28"
+      },
+      {
+        "area_m2": 0.982,
+        "name": "Mulluru",
+        "name_source": "place",
+        "slug": "mulluru-3"
+      },
+      {
+        "area_m2": 1.298,
+        "name": "Mulluru",
+        "name_source": "place",
+        "slug": "mulluru-4"
+      },
+      {
+        "area_m2": 2.296,
+        "name": "Mulluru",
+        "name_source": "place",
+        "slug": "mulluru-5"
+      },
+      {
+        "area_m2": 2.771,
+        "name": "Mulluru",
+        "name_source": "place",
+        "slug": "mulluru-6"
+      },
+      {
+        "area_m2": 326004.707,
+        "name": "Munnenkolalu",
+        "name_source": "place",
+        "slug": "munnenkolalu-73"
+      },
+      {
+        "area_m2": 1220.51,
+        "name": "N.R Colony",
+        "name_source": "place",
+        "slug": "n-r-colony"
+      },
+      {
+        "area_m2": 1862.965,
+        "name": "N.R Colony",
+        "name_source": "place",
+        "slug": "n-r-colony-2"
+      },
+      {
+        "area_m2": 0.056,
+        "name": "N.S Palya",
+        "name_source": "place",
+        "slug": "n-s-palya"
+      },
+      {
+        "area_m2": 0.136,
+        "name": "N.S Palya",
+        "name_source": "place",
+        "slug": "n-s-palya-2"
+      },
+      {
+        "area_m2": 3.514,
+        "name": "Nagavarapalya",
+        "name_source": "place",
+        "slug": "nagavarapalya"
+      },
+      {
+        "area_m2": 3.904,
+        "name": "Nagavarapalya",
+        "name_source": "place",
+        "slug": "nagavarapalya-2"
+      },
+      {
+        "area_m2": 566420.923,
+        "name": "Nagavarapalya",
+        "name_source": "place",
+        "slug": "nagavarapalya-25"
+      },
+      {
+        "area_m2": 691347.13,
+        "name": "Nagavarapalya",
+        "name_source": "place",
+        "slug": "nagavarapalya-26"
+      },
+      {
+        "area_m2": 4.33,
+        "name": "Nagavarapalya",
+        "name_source": "place",
+        "slug": "nagavarapalya-3"
+      },
+      {
+        "area_m2": 1.639,
+        "name": "Nehru Nagar",
+        "name_source": "place",
+        "slug": "nehru-nagar"
+      },
+      {
+        "area_m2": 2.397,
+        "name": "Nehru Nagar",
+        "name_source": "place",
+        "slug": "nehru-nagar-2"
+      },
+      {
+        "area_m2": 2.716,
+        "name": "Nehru Nagar",
+        "name_source": "place",
+        "slug": "nehru-nagar-3"
+      },
+      {
+        "area_m2": 3.846,
+        "name": "Nehru Nagar",
+        "name_source": "place",
+        "slug": "nehru-nagar-4"
+      },
+      {
+        "area_m2": 726.033,
+        "name": "Nehru Nagar",
+        "name_source": "place",
+        "slug": "nehru-nagar-5"
+      },
+      {
+        "area_m2": 4327.013,
+        "name": "Nehru Nagar",
+        "name_source": "place",
+        "slug": "nehru-nagar-6"
+      },
+      {
+        "area_m2": 4489.107,
+        "name": "Nehru Nagar",
+        "name_source": "place",
+        "slug": "nehru-nagar-7"
+      },
+      {
+        "area_m2": 0.289,
+        "name": "Nekkondi Dommasandra",
+        "name_source": "place",
+        "slug": "nekkondi-dommasandra"
+      },
+      {
+        "area_m2": 0.562,
+        "name": "Nekkondi Dommasandra",
+        "name_source": "place",
+        "slug": "nekkondi-dommasandra-2"
+      },
+      {
+        "area_m2": 2.851,
+        "name": "Nekkondi Dommasandra",
+        "name_source": "place",
+        "slug": "nekkondi-dommasandra-3"
+      },
+      {
+        "area_m2": 338202.015,
+        "name": "Nekkondi Dommasandra",
+        "name_source": "place",
+        "slug": "nekkondi-dommasandra-8"
+      },
+      {
+        "area_m2": 862977.129,
+        "name": "Nekkondi Dommasandra",
+        "name_source": "place",
+        "slug": "nekkondi-dommasandra-9"
+      },
+      {
+        "area_m2": 320935.117,
+        "name": "Nerige",
+        "name_source": "place",
+        "slug": "nerige-16"
+      },
+      {
+        "area_m2": 440033.727,
+        "name": "Nerige",
+        "name_source": "place",
+        "slug": "nerige-17"
+      },
+      {
+        "area_m2": 575055.964,
+        "name": "Nerige",
+        "name_source": "place",
+        "slug": "nerige-18"
+      },
+      {
+        "area_m2": 1094551.491,
+        "name": "Nerige",
+        "name_source": "place",
+        "slug": "nerige-19"
+      },
+      {
+        "area_m2": 0.033,
+        "name": "New Thippasandra",
+        "name_source": "place",
+        "slug": "new-thippasandra"
+      },
+      {
+        "area_m2": 1.041,
+        "name": "New Thippasandra",
+        "name_source": "place",
+        "slug": "new-thippasandra-2"
+      },
+      {
+        "area_m2": 3.823,
+        "name": "New Thippasandra",
+        "name_source": "place",
+        "slug": "new-thippasandra-3"
+      },
+      {
+        "area_m2": 3942.282,
+        "name": "New Thippasandra",
+        "name_source": "place",
+        "slug": "new-thippasandra-4"
+      },
+      {
+        "area_m2": 1090314.791,
+        "name": "New Thippasandra",
+        "name_source": "place",
+        "slug": "new-thippasandra-57"
+      },
+      {
+        "area_m2": 1.058,
+        "name": "Old Baiyappanahalli",
+        "name_source": "place",
+        "slug": "old-baiyappanahalli"
+      },
+      {
+        "area_m2": 0.143,
+        "name": "Panathur",
+        "name_source": "place",
+        "slug": "panathur"
+      },
+      {
+        "area_m2": 267.755,
+        "name": "Panathur",
+        "name_source": "place",
+        "slug": "panathur-10"
+      },
+      {
+        "area_m2": 731.132,
+        "name": "Panathur",
+        "name_source": "place",
+        "slug": "panathur-11"
+      },
+      {
+        "area_m2": 252916.027,
+        "name": "Panathur",
+        "name_source": "place",
+        "slug": "panathur-110"
+      },
+      {
+        "area_m2": 255359.046,
+        "name": "Panathur",
+        "name_source": "place",
+        "slug": "panathur-111"
+      },
+      {
+        "area_m2": 364855.077,
+        "name": "Panathur",
+        "name_source": "place",
+        "slug": "panathur-112"
+      },
+      {
+        "area_m2": 376152.767,
+        "name": "Panathur",
+        "name_source": "place",
+        "slug": "panathur-113"
+      },
+      {
+        "area_m2": 380217.077,
+        "name": "Panathur",
+        "name_source": "place",
+        "slug": "panathur-114"
+      },
+      {
+        "area_m2": 384817.51,
+        "name": "Panathur",
+        "name_source": "place",
+        "slug": "panathur-115"
+      },
+      {
+        "area_m2": 459541.469,
+        "name": "Panathur",
+        "name_source": "place",
+        "slug": "panathur-116"
+      },
+      {
+        "area_m2": 459783.337,
+        "name": "Panathur",
+        "name_source": "place",
+        "slug": "panathur-117"
+      },
+      {
+        "area_m2": 503165.715,
+        "name": "Panathur",
+        "name_source": "place",
+        "slug": "panathur-118"
+      },
+      {
+        "area_m2": 926672.358,
+        "name": "Panathur",
+        "name_source": "place",
+        "slug": "panathur-119"
+      },
+      {
+        "area_m2": 1423960.701,
+        "name": "Panathur",
+        "name_source": "place",
+        "slug": "panathur-120"
+      },
+      {
+        "area_m2": 0.18,
+        "name": "Panathur",
+        "name_source": "place",
+        "slug": "panathur-2"
+      },
+      {
+        "area_m2": 0.214,
+        "name": "Panathur",
+        "name_source": "place",
+        "slug": "panathur-3"
+      },
+      {
+        "area_m2": 0.276,
+        "name": "Panathur",
+        "name_source": "place",
+        "slug": "panathur-4"
+      },
+      {
+        "area_m2": 1.612,
+        "name": "Panathur",
+        "name_source": "place",
+        "slug": "panathur-5"
+      },
+      {
+        "area_m2": 2.146,
+        "name": "Panathur",
+        "name_source": "place",
+        "slug": "panathur-6"
+      },
+      {
+        "area_m2": 2.388,
+        "name": "Panathur",
+        "name_source": "place",
+        "slug": "panathur-7"
+      },
+      {
+        "area_m2": 6.725,
+        "name": "Panathur",
+        "name_source": "place",
+        "slug": "panathur-8"
+      },
+      {
+        "area_m2": 173.531,
+        "name": "Panathur",
+        "name_source": "place",
+        "slug": "panathur-9"
+      },
+      {
+        "area_m2": 0.761,
+        "name": "Pattabhirama Nagara",
+        "name_source": "place",
+        "slug": "pattabhirama-nagara"
+      },
+      {
+        "area_m2": 0.995,
+        "name": "Pattabhirama Nagara",
+        "name_source": "place",
+        "slug": "pattabhirama-nagara-2"
+      },
+      {
+        "area_m2": 1.345,
+        "name": "Pattabhirama Nagara",
+        "name_source": "place",
+        "slug": "pattabhirama-nagara-3"
+      },
+      {
+        "area_m2": 1.375,
+        "name": "Pattabhirama Nagara",
+        "name_source": "place",
+        "slug": "pattabhirama-nagara-4"
+      },
+      {
+        "area_m2": 2.325,
+        "name": "Pattabhirama Nagara",
+        "name_source": "place",
+        "slug": "pattabhirama-nagara-5"
+      },
+      {
+        "area_m2": 2.404,
+        "name": "Pattabhirama Nagara",
+        "name_source": "place",
+        "slug": "pattabhirama-nagara-6"
+      },
+      {
+        "area_m2": 2.749,
+        "name": "Pattabhirama Nagara",
+        "name_source": "place",
+        "slug": "pattabhirama-nagara-7"
+      },
+      {
+        "area_m2": 4.857,
+        "name": "Pattabhirama Nagara",
+        "name_source": "place",
+        "slug": "pattabhirama-nagara-8"
+      },
+      {
+        "area_m2": 6.259,
+        "name": "Pattabhirama Nagara",
+        "name_source": "place",
+        "slug": "pattabhirama-nagara-9"
+      },
+      {
+        "area_m2": 0.341,
+        "name": "Prestige Shantiniketan",
+        "name_source": "place",
+        "slug": "prestige-shantiniketan"
+      },
+      {
+        "area_m2": 1.31,
+        "name": "Prestige Shantiniketan",
+        "name_source": "place",
+        "slug": "prestige-shantiniketan-10"
+      },
+      {
+        "area_m2": 1.57,
+        "name": "Prestige Shantiniketan",
+        "name_source": "place",
+        "slug": "prestige-shantiniketan-11"
+      },
+      {
+        "area_m2": 1.779,
+        "name": "Prestige Shantiniketan",
+        "name_source": "place",
+        "slug": "prestige-shantiniketan-12"
+      },
+      {
+        "area_m2": 264.316,
+        "name": "Prestige Shantiniketan",
+        "name_source": "place",
+        "slug": "prestige-shantiniketan-13"
+      },
+      {
+        "area_m2": 1222.535,
+        "name": "Prestige Shantiniketan",
+        "name_source": "place",
+        "slug": "prestige-shantiniketan-14"
+      },
+      {
+        "area_m2": 1361.466,
+        "name": "Prestige Shantiniketan",
+        "name_source": "place",
+        "slug": "prestige-shantiniketan-15"
+      },
+      {
+        "area_m2": 4163.95,
+        "name": "Prestige Shantiniketan",
+        "name_source": "place",
+        "slug": "prestige-shantiniketan-16"
+      },
+      {
+        "area_m2": 0.514,
+        "name": "Prestige Shantiniketan",
+        "name_source": "place",
+        "slug": "prestige-shantiniketan-2"
+      },
+      {
+        "area_m2": 0.584,
+        "name": "Prestige Shantiniketan",
+        "name_source": "place",
+        "slug": "prestige-shantiniketan-3"
+      },
+      {
+        "area_m2": 0.613,
+        "name": "Prestige Shantiniketan",
+        "name_source": "place",
+        "slug": "prestige-shantiniketan-4"
+      },
+      {
+        "area_m2": 0.664,
+        "name": "Prestige Shantiniketan",
+        "name_source": "place",
+        "slug": "prestige-shantiniketan-5"
+      },
+      {
+        "area_m2": 0.714,
+        "name": "Prestige Shantiniketan",
+        "name_source": "place",
+        "slug": "prestige-shantiniketan-6"
+      },
+      {
+        "area_m2": 0.827,
+        "name": "Prestige Shantiniketan",
+        "name_source": "place",
+        "slug": "prestige-shantiniketan-7"
+      },
+      {
+        "area_m2": 0.994,
+        "name": "Prestige Shantiniketan",
+        "name_source": "place",
+        "slug": "prestige-shantiniketan-8"
+      },
+      {
+        "area_m2": 1.234,
+        "name": "Prestige Shantiniketan",
+        "name_source": "place",
+        "slug": "prestige-shantiniketan-9"
+      },
+      {
+        "area_m2": 0.008,
+        "name": "Priyadarshini Ward",
+        "name_source": "place",
+        "slug": "priyadarshini-ward"
+      },
+      {
+        "area_m2": 0.09,
+        "name": "Priyadarshini Ward",
+        "name_source": "place",
+        "slug": "priyadarshini-ward-2"
+      },
+      {
+        "area_m2": 0.86,
+        "name": "Priyadarshini Ward",
+        "name_source": "place",
+        "slug": "priyadarshini-ward-3"
+      },
+      {
+        "area_m2": 1.545,
+        "name": "Priyadarshini Ward",
+        "name_source": "place",
+        "slug": "priyadarshini-ward-4"
+      },
+      {
+        "area_m2": 1.602,
+        "name": "Priyadarshini Ward",
+        "name_source": "place",
+        "slug": "priyadarshini-ward-5"
+      },
+      {
+        "area_m2": 2.884,
+        "name": "Priyadarshini Ward",
+        "name_source": "place",
+        "slug": "priyadarshini-ward-6"
+      },
+      {
+        "area_m2": 256517.419,
+        "name": "Priyadarshini Ward",
+        "name_source": "place",
+        "slug": "priyadarshini-ward-66"
+      },
+      {
+        "area_m2": 3146.662,
+        "name": "Priyadarshini Ward",
+        "name_source": "place",
+        "slug": "priyadarshini-ward-7"
+      },
+      {
+        "area_m2": 1977.224,
+        "name": "Pulakeshi Nagar",
+        "name_source": "place",
+        "slug": "pulakeshi-nagar"
+      },
+      {
+        "area_m2": 0.432,
+        "name": "Ramanayakanahalli",
+        "name_source": "place",
+        "slug": "ramanayakanahalli"
+      },
+      {
+        "area_m2": 1482600.325,
+        "name": "Ramanayakanahalli",
+        "name_source": "place",
+        "slug": "ramanayakanahalli-8"
+      },
+      {
+        "area_m2": 0.269,
+        "name": "RBI Layout",
+        "name_source": "place",
+        "slug": "rbi-layout"
+      },
+      {
+        "area_m2": 1754.345,
+        "name": "RBI Layout",
+        "name_source": "place",
+        "slug": "rbi-layout-2"
+      },
+      {
+        "area_m2": 1973.598,
+        "name": "RBI Layout",
+        "name_source": "place",
+        "slug": "rbi-layout-3"
+      },
+      {
+        "area_m2": 1.211,
+        "name": "S.G Palya",
+        "name_source": "place",
+        "slug": "s-g-palya"
+      },
+      {
+        "area_m2": 3578.687,
+        "name": "S.G Palya",
+        "name_source": "place",
+        "slug": "s-g-palya-2"
+      },
+      {
+        "area_m2": 2.091,
+        "name": "S.K Garden",
+        "name_source": "place",
+        "slug": "s-k-garden"
+      },
+      {
+        "area_m2": 0.016,
+        "name": "S.M Krishna Ward",
+        "name_source": "place",
+        "slug": "s-m-krishna-ward"
+      },
+      {
+        "area_m2": 1.518,
+        "name": "S.M Krishna Ward",
+        "name_source": "place",
+        "slug": "s-m-krishna-ward-10"
+      },
+      {
+        "area_m2": 524985.829,
+        "name": "S.M Krishna Ward",
+        "name_source": "place",
+        "slug": "s-m-krishna-ward-104"
+      },
+      {
+        "area_m2": 717665.825,
+        "name": "S.M Krishna Ward",
+        "name_source": "place",
+        "slug": "s-m-krishna-ward-105"
+      },
+      {
+        "area_m2": 856085.541,
+        "name": "S.M Krishna Ward",
+        "name_source": "place",
+        "slug": "s-m-krishna-ward-106"
+      },
+      {
+        "area_m2": 1.667,
+        "name": "S.M Krishna Ward",
+        "name_source": "place",
+        "slug": "s-m-krishna-ward-11"
+      },
+      {
+        "area_m2": 2.296,
+        "name": "S.M Krishna Ward",
+        "name_source": "place",
+        "slug": "s-m-krishna-ward-12"
+      },
+      {
+        "area_m2": 2.374,
+        "name": "S.M Krishna Ward",
+        "name_source": "place",
+        "slug": "s-m-krishna-ward-13"
+      },
+      {
+        "area_m2": 3.243,
+        "name": "S.M Krishna Ward",
+        "name_source": "place",
+        "slug": "s-m-krishna-ward-14"
+      },
+      {
+        "area_m2": 3.296,
+        "name": "S.M Krishna Ward",
+        "name_source": "place",
+        "slug": "s-m-krishna-ward-15"
+      },
+      {
+        "area_m2": 3.319,
+        "name": "S.M Krishna Ward",
+        "name_source": "place",
+        "slug": "s-m-krishna-ward-16"
+      },
+      {
+        "area_m2": 3.503,
+        "name": "S.M Krishna Ward",
+        "name_source": "place",
+        "slug": "s-m-krishna-ward-17"
+      },
+      {
+        "area_m2": 3.746,
+        "name": "S.M Krishna Ward",
+        "name_source": "place",
+        "slug": "s-m-krishna-ward-18"
+      },
+      {
+        "area_m2": 4.414,
+        "name": "S.M Krishna Ward",
+        "name_source": "place",
+        "slug": "s-m-krishna-ward-19"
+      },
+      {
+        "area_m2": 0.191,
+        "name": "S.M Krishna Ward",
+        "name_source": "place",
+        "slug": "s-m-krishna-ward-2"
+      },
+      {
+        "area_m2": 4702.238,
+        "name": "S.M Krishna Ward",
+        "name_source": "place",
+        "slug": "s-m-krishna-ward-20"
+      },
+      {
+        "area_m2": 4978.149,
+        "name": "S.M Krishna Ward",
+        "name_source": "place",
+        "slug": "s-m-krishna-ward-21"
+      },
+      {
+        "area_m2": 0.313,
+        "name": "S.M Krishna Ward",
+        "name_source": "place",
+        "slug": "s-m-krishna-ward-3"
+      },
+      {
+        "area_m2": 0.315,
+        "name": "S.M Krishna Ward",
+        "name_source": "place",
+        "slug": "s-m-krishna-ward-4"
+      },
+      {
+        "area_m2": 0.434,
+        "name": "S.M Krishna Ward",
+        "name_source": "place",
+        "slug": "s-m-krishna-ward-5"
+      },
+      {
+        "area_m2": 1.078,
+        "name": "S.M Krishna Ward",
+        "name_source": "place",
+        "slug": "s-m-krishna-ward-6"
+      },
+      {
+        "area_m2": 1.145,
+        "name": "S.M Krishna Ward",
+        "name_source": "place",
+        "slug": "s-m-krishna-ward-7"
+      },
+      {
+        "area_m2": 1.426,
+        "name": "S.M Krishna Ward",
+        "name_source": "place",
+        "slug": "s-m-krishna-ward-8"
+      },
+      {
+        "area_m2": 1.465,
+        "name": "S.M Krishna Ward",
+        "name_source": "place",
+        "slug": "s-m-krishna-ward-9"
+      },
+      {
+        "area_m2": 0.63,
+        "name": "Sampangirama Nagar",
+        "name_source": "place",
+        "slug": "sampangirama-nagar"
+      },
+      {
+        "area_m2": 1842.165,
+        "name": "Sampangirama Nagar",
+        "name_source": "place",
+        "slug": "sampangirama-nagar-10"
+      },
+      {
+        "area_m2": 350558.024,
+        "name": "Sampangirama Nagar",
+        "name_source": "place",
+        "slug": "sampangirama-nagar-106"
+      },
+      {
+        "area_m2": 414147.788,
+        "name": "Sampangirama Nagar",
+        "name_source": "place",
+        "slug": "sampangirama-nagar-107"
+      },
+      {
+        "area_m2": 1954.663,
+        "name": "Sampangirama Nagar",
+        "name_source": "place",
+        "slug": "sampangirama-nagar-11"
+      },
+      {
+        "area_m2": 3508.457,
+        "name": "Sampangirama Nagar",
+        "name_source": "place",
+        "slug": "sampangirama-nagar-12"
+      },
+      {
+        "area_m2": 3578.498,
+        "name": "Sampangirama Nagar",
+        "name_source": "place",
+        "slug": "sampangirama-nagar-13"
+      },
+      {
+        "area_m2": 0.661,
+        "name": "Sampangirama Nagar",
+        "name_source": "place",
+        "slug": "sampangirama-nagar-2"
+      },
+      {
+        "area_m2": 2.014,
+        "name": "Sampangirama Nagar",
+        "name_source": "place",
+        "slug": "sampangirama-nagar-3"
+      },
+      {
+        "area_m2": 2.223,
+        "name": "Sampangirama Nagar",
+        "name_source": "place",
+        "slug": "sampangirama-nagar-4"
+      },
+      {
+        "area_m2": 2.646,
+        "name": "Sampangirama Nagar",
+        "name_source": "place",
+        "slug": "sampangirama-nagar-5"
+      },
+      {
+        "area_m2": 2.656,
+        "name": "Sampangirama Nagar",
+        "name_source": "place",
+        "slug": "sampangirama-nagar-6"
+      },
+      {
+        "area_m2": 2.867,
+        "name": "Sampangirama Nagar",
+        "name_source": "place",
+        "slug": "sampangirama-nagar-7"
+      },
+      {
+        "area_m2": 7.194,
+        "name": "Sampangirama Nagar",
+        "name_source": "place",
+        "slug": "sampangirama-nagar-8"
+      },
+      {
+        "area_m2": 777.76,
+        "name": "Sampangirama Nagar",
+        "name_source": "place",
+        "slug": "sampangirama-nagar-9"
+      },
+      {
+        "area_m2": 0.566,
+        "name": "Sangama Ward",
+        "name_source": "place",
+        "slug": "sangama-ward"
+      },
+      {
+        "area_m2": 2.538,
+        "name": "Sangama Ward",
+        "name_source": "place",
+        "slug": "sangama-ward-10"
+      },
+      {
+        "area_m2": 3.121,
+        "name": "Sangama Ward",
+        "name_source": "place",
+        "slug": "sangama-ward-11"
+      },
+      {
+        "area_m2": 2916.872,
+        "name": "Sangama Ward",
+        "name_source": "place",
+        "slug": "sangama-ward-12"
+      },
+      {
+        "area_m2": 0.811,
+        "name": "Sangama Ward",
+        "name_source": "place",
+        "slug": "sangama-ward-2"
+      },
+      {
+        "area_m2": 0.974,
+        "name": "Sangama Ward",
+        "name_source": "place",
+        "slug": "sangama-ward-3"
+      },
+      {
+        "area_m2": 1.043,
+        "name": "Sangama Ward",
+        "name_source": "place",
+        "slug": "sangama-ward-4"
+      },
+      {
+        "area_m2": 1.182,
+        "name": "Sangama Ward",
+        "name_source": "place",
+        "slug": "sangama-ward-5"
+      },
+      {
+        "area_m2": 1.651,
+        "name": "Sangama Ward",
+        "name_source": "place",
+        "slug": "sangama-ward-6"
+      },
+      {
+        "area_m2": 1.696,
+        "name": "Sangama Ward",
+        "name_source": "place",
+        "slug": "sangama-ward-7"
+      },
+      {
+        "area_m2": 1.783,
+        "name": "Sangama Ward",
+        "name_source": "place",
+        "slug": "sangama-ward-8"
+      },
+      {
+        "area_m2": 512148.476,
+        "name": "Sangama Ward",
+        "name_source": "place",
+        "slug": "sangama-ward-86"
+      },
+      {
+        "area_m2": 2.22,
+        "name": "Sangama Ward",
+        "name_source": "place",
+        "slug": "sangama-ward-9"
+      },
+      {
+        "area_m2": 0.196,
+        "name": "Sector 1",
+        "name_source": "place",
+        "slug": "sector-1"
+      },
+      {
+        "area_m2": 2992383.977,
+        "name": "Sector 1",
+        "name_source": "place",
+        "slug": "sector-1-59"
+      },
+      {
+        "area_m2": 5.008,
+        "name": "Sector 2",
+        "name_source": "place",
+        "slug": "sector-2"
+      },
+      {
+        "area_m2": 3285.047,
+        "name": "Sector 3",
+        "name_source": "place",
+        "slug": "sector-3"
+      },
+      {
+        "area_m2": 4286.775,
+        "name": "Sector 3",
+        "name_source": "place",
+        "slug": "sector-3-2"
+      },
+      {
+        "area_m2": 0.478,
+        "name": "Sector 4",
+        "name_source": "place",
+        "slug": "sector-4"
+      },
+      {
+        "area_m2": 0.922,
+        "name": "Sector 4",
+        "name_source": "place",
+        "slug": "sector-4-2"
+      },
+      {
+        "area_m2": 1.663,
+        "name": "Sector 4",
+        "name_source": "place",
+        "slug": "sector-4-3"
+      },
+      {
+        "area_m2": 5.181,
+        "name": "Sector 4",
+        "name_source": "place",
+        "slug": "sector-4-4"
+      },
+      {
+        "area_m2": 16.725,
+        "name": "Sector 4",
+        "name_source": "place",
+        "slug": "sector-4-5"
+      },
+      {
+        "area_m2": 1460.353,
+        "name": "Sector 4",
+        "name_source": "place",
+        "slug": "sector-4-6"
+      },
+      {
+        "area_m2": 0.364,
+        "name": "Sector 5",
+        "name_source": "place",
+        "slug": "sector-5"
+      },
+      {
+        "area_m2": 3.535,
+        "name": "Sector 5",
+        "name_source": "place",
+        "slug": "sector-5-2"
+      },
+      {
+        "area_m2": 4.051,
+        "name": "Sector 5",
+        "name_source": "place",
+        "slug": "sector-5-3"
+      },
+      {
+        "area_m2": 12.206,
+        "name": "Sector 5",
+        "name_source": "place",
+        "slug": "sector-5-4"
+      },
+      {
+        "area_m2": 14.557,
+        "name": "Sector 5",
+        "name_source": "place",
+        "slug": "sector-5-5"
+      },
+      {
+        "area_m2": 20.846,
+        "name": "Sector 5",
+        "name_source": "place",
+        "slug": "sector-5-6"
+      },
+      {
+        "area_m2": 0.002,
+        "name": "Sector 6",
+        "name_source": "place",
+        "slug": "sector-6"
+      },
+      {
+        "area_m2": 0.61,
+        "name": "Sector 6",
+        "name_source": "place",
+        "slug": "sector-6-10"
+      },
+      {
+        "area_m2": 2.553,
+        "name": "Sector 6",
+        "name_source": "place",
+        "slug": "sector-6-11"
+      },
+      {
+        "area_m2": 0.002,
+        "name": "Sector 6",
+        "name_source": "place",
+        "slug": "sector-6-2"
+      },
+      {
+        "area_m2": 0.009,
+        "name": "Sector 6",
+        "name_source": "place",
+        "slug": "sector-6-3"
+      },
+      {
+        "area_m2": 0.015,
+        "name": "Sector 6",
+        "name_source": "place",
+        "slug": "sector-6-4"
+      },
+      {
+        "area_m2": 0.018,
+        "name": "Sector 6",
+        "name_source": "place",
+        "slug": "sector-6-5"
+      },
+      {
+        "area_m2": 0.021,
+        "name": "Sector 6",
+        "name_source": "place",
+        "slug": "sector-6-6"
+      },
+      {
+        "area_m2": 0.022,
+        "name": "Sector 6",
+        "name_source": "place",
+        "slug": "sector-6-7"
+      },
+      {
+        "area_m2": 0.08,
+        "name": "Sector 6",
+        "name_source": "place",
+        "slug": "sector-6-8"
+      },
+      {
+        "area_m2": 0.433,
+        "name": "Sector 6",
+        "name_source": "place",
+        "slug": "sector-6-9"
+      },
+      {
+        "area_m2": 0.969,
+        "name": "Sector 7",
+        "name_source": "place",
+        "slug": "sector-7"
+      },
+      {
+        "area_m2": 1.247,
+        "name": "Shakambarinagara",
+        "name_source": "place",
+        "slug": "shakambarinagara"
+      },
+      {
+        "area_m2": 0.015,
+        "name": "Shivajinagar",
+        "name_source": "place",
+        "slug": "shivajinagar"
+      },
+      {
+        "area_m2": 0.162,
+        "name": "Shivajinagar",
+        "name_source": "place",
+        "slug": "shivajinagar-2"
+      },
+      {
+        "area_m2": 0.225,
+        "name": "Shivajinagar",
+        "name_source": "place",
+        "slug": "shivajinagar-3"
+      },
+      {
+        "area_m2": 0.263,
+        "name": "Shivajinagar",
+        "name_source": "place",
+        "slug": "shivajinagar-4"
+      },
+      {
+        "area_m2": 3.234,
+        "name": "Shivajinagar",
+        "name_source": "place",
+        "slug": "shivajinagar-5"
+      },
+      {
+        "area_m2": 3.7,
+        "name": "Shivajinagar",
+        "name_source": "place",
+        "slug": "shivajinagar-6"
+      },
+      {
+        "area_m2": 13.551,
+        "name": "Shivajinagar",
+        "name_source": "place",
+        "slug": "shivajinagar-7"
+      },
+      {
+        "area_m2": 1271.436,
+        "name": "Shivajinagar",
+        "name_source": "place",
+        "slug": "shivajinagar-8"
+      },
+      {
+        "area_m2": 4625.332,
+        "name": "Shivajinagar",
+        "name_source": "place",
+        "slug": "shivajinagar-9"
+      },
+      {
+        "area_m2": 0.001,
+        "name": "Shivanasamudra Ward",
+        "name_source": "place",
+        "slug": "shivanasamudra-ward"
+      },
+      {
+        "area_m2": 2.815,
+        "name": "Shivanasamudra Ward",
+        "name_source": "place",
+        "slug": "shivanasamudra-ward-10"
+      },
+      {
+        "area_m2": 3.345,
+        "name": "Shivanasamudra Ward",
+        "name_source": "place",
+        "slug": "shivanasamudra-ward-11"
+      },
+      {
+        "area_m2": 3.539,
+        "name": "Shivanasamudra Ward",
+        "name_source": "place",
+        "slug": "shivanasamudra-ward-12"
+      },
+      {
+        "area_m2": 3.693,
+        "name": "Shivanasamudra Ward",
+        "name_source": "place",
+        "slug": "shivanasamudra-ward-13"
+      },
+      {
+        "area_m2": 5.261,
+        "name": "Shivanasamudra Ward",
+        "name_source": "place",
+        "slug": "shivanasamudra-ward-14"
+      },
+      {
+        "area_m2": 7.056,
+        "name": "Shivanasamudra Ward",
+        "name_source": "place",
+        "slug": "shivanasamudra-ward-15"
+      },
+      {
+        "area_m2": 1586.623,
+        "name": "Shivanasamudra Ward",
+        "name_source": "place",
+        "slug": "shivanasamudra-ward-16"
+      },
+      {
+        "area_m2": 1590.211,
+        "name": "Shivanasamudra Ward",
+        "name_source": "place",
+        "slug": "shivanasamudra-ward-17"
+      },
+      {
+        "area_m2": 0.298,
+        "name": "Shivanasamudra Ward",
+        "name_source": "place",
+        "slug": "shivanasamudra-ward-2"
+      },
+      {
+        "area_m2": 0.571,
+        "name": "Shivanasamudra Ward",
+        "name_source": "place",
+        "slug": "shivanasamudra-ward-3"
+      },
+      {
+        "area_m2": 0.904,
+        "name": "Shivanasamudra Ward",
+        "name_source": "place",
+        "slug": "shivanasamudra-ward-4"
+      },
+      {
+        "area_m2": 1.189,
+        "name": "Shivanasamudra Ward",
+        "name_source": "place",
+        "slug": "shivanasamudra-ward-5"
+      },
+      {
+        "area_m2": 1.776,
+        "name": "Shivanasamudra Ward",
+        "name_source": "place",
+        "slug": "shivanasamudra-ward-6"
+      },
+      {
+        "area_m2": 252181.016,
+        "name": "Shivanasamudra Ward",
+        "name_source": "place",
+        "slug": "shivanasamudra-ward-65"
+      },
+      {
+        "area_m2": 422358.243,
+        "name": "Shivanasamudra Ward",
+        "name_source": "place",
+        "slug": "shivanasamudra-ward-66"
+      },
+      {
+        "area_m2": 566372.264,
+        "name": "Shivanasamudra Ward",
+        "name_source": "place",
+        "slug": "shivanasamudra-ward-67"
+      },
+      {
+        "area_m2": 2.299,
+        "name": "Shivanasamudra Ward",
+        "name_source": "place",
+        "slug": "shivanasamudra-ward-7"
+      },
+      {
+        "area_m2": 2.361,
+        "name": "Shivanasamudra Ward",
+        "name_source": "place",
+        "slug": "shivanasamudra-ward-8"
+      },
+      {
+        "area_m2": 2.732,
+        "name": "Shivanasamudra Ward",
+        "name_source": "place",
+        "slug": "shivanasamudra-ward-9"
+      },
+      {
+        "area_m2": 0.345,
+        "name": "SilverJubilee Park Ward",
+        "name_source": "place",
+        "slug": "silverjubilee-park-ward"
+      },
+      {
+        "area_m2": 1.601,
+        "name": "SilverJubilee Park Ward",
+        "name_source": "place",
+        "slug": "silverjubilee-park-ward-2"
+      },
+      {
+        "area_m2": 4.02,
+        "name": "SilverJubilee Park Ward",
+        "name_source": "place",
+        "slug": "silverjubilee-park-ward-3"
+      },
+      {
+        "area_m2": 2665.797,
+        "name": "SilverJubilee Park Ward",
+        "name_source": "place",
+        "slug": "silverjubilee-park-ward-4"
+      },
+      {
+        "area_m2": 0.648,
+        "name": "Someshwara Nagara",
+        "name_source": "place",
+        "slug": "someshwara-nagara"
+      },
+      {
+        "area_m2": 3.319,
+        "name": "Someshwara Nagara",
+        "name_source": "place",
+        "slug": "someshwara-nagara-2"
+      },
+      {
+        "area_m2": 1475.603,
+        "name": "Someshwara Nagara",
+        "name_source": "place",
+        "slug": "someshwara-nagara-3"
+      },
+      {
+        "area_m2": 1.251,
+        "name": "Sri Lakshmi Devi Ward",
+        "name_source": "place",
+        "slug": "sri-lakshmi-devi-ward"
+      },
+      {
+        "area_m2": 1.37,
+        "name": "Sri Lakshmi Devi Ward",
+        "name_source": "place",
+        "slug": "sri-lakshmi-devi-ward-2"
+      },
+      {
+        "area_m2": 1.371,
+        "name": "Sulakunte",
+        "name_source": "place",
+        "slug": "sulakunte"
+      },
+      {
+        "area_m2": 368158.805,
+        "name": "Sulakunte",
+        "name_source": "place",
+        "slug": "sulakunte-14"
+      },
+      {
+        "area_m2": 805343.058,
+        "name": "Sulakunte",
+        "name_source": "place",
+        "slug": "sulakunte-15"
+      },
+      {
+        "area_m2": 1.401,
+        "name": "Sulakunte",
+        "name_source": "place",
+        "slug": "sulakunte-2"
+      },
+      {
+        "area_m2": 1.485,
+        "name": "Sulakunte",
+        "name_source": "place",
+        "slug": "sulakunte-3"
+      },
+      {
+        "area_m2": 734445.772,
+        "name": "Thigalachowdadenahalli",
+        "name_source": "place",
+        "slug": "thigalachowdadenahalli-9"
+      },
+      {
+        "area_m2": 0.673,
+        "name": "Tilak Nagara",
+        "name_source": "place",
+        "slug": "tilak-nagara"
+      },
+      {
+        "area_m2": 0.836,
+        "name": "Tilak Nagara",
+        "name_source": "place",
+        "slug": "tilak-nagara-2"
+      },
+      {
+        "area_m2": 2.637,
+        "name": "Uday Nagar",
+        "name_source": "place",
+        "slug": "uday-nagar"
+      },
+      {
+        "area_m2": 3.955,
+        "name": "Uday Nagar",
+        "name_source": "place",
+        "slug": "uday-nagar-2"
+      },
+      {
+        "area_m2": 369375.73,
+        "name": "Uday Nagar",
+        "name_source": "place",
+        "slug": "uday-nagar-35"
+      },
+      {
+        "area_m2": 1.646,
+        "name": "V.V Puram",
+        "name_source": "place",
+        "slug": "v-v-puram"
+      },
+      {
+        "area_m2": 2747.212,
+        "name": "V.V Puram",
+        "name_source": "place",
+        "slug": "v-v-puram-2"
+      },
+      {
+        "area_m2": 2777.361,
+        "name": "V.V Puram",
+        "name_source": "place",
+        "slug": "v-v-puram-3"
+      },
+      {
+        "area_m2": 3.908,
+        "name": "Valagere Kallahalli",
+        "name_source": "place",
+        "slug": "valagere-kallahalli"
+      },
+      {
+        "area_m2": 0.594,
+        "name": "Vannarpet",
+        "name_source": "place",
+        "slug": "vannarpet"
+      },
+      {
+        "area_m2": 1.196,
+        "name": "Vannarpet",
+        "name_source": "place",
+        "slug": "vannarpet-2"
+      },
+      {
+        "area_m2": 1.796,
+        "name": "Vannarpet",
+        "name_source": "place",
+        "slug": "vannarpet-3"
+      },
+      {
+        "area_m2": 4.273,
+        "name": "Vannarpet",
+        "name_source": "place",
+        "slug": "vannarpet-4"
+      },
+      {
+        "area_m2": 7.27,
+        "name": "Vannarpet",
+        "name_source": "place",
+        "slug": "vannarpet-5"
+      },
+      {
+        "area_m2": 0.006,
+        "name": "Varthur",
+        "name_source": "place",
+        "slug": "varthur"
+      },
+      {
+        "area_m2": 0.38,
+        "name": "Varthur",
+        "name_source": "place",
+        "slug": "varthur-10"
+      },
+      {
+        "area_m2": 0.439,
+        "name": "Varthur",
+        "name_source": "place",
+        "slug": "varthur-11"
+      },
+      {
+        "area_m2": 0.531,
+        "name": "Varthur",
+        "name_source": "place",
+        "slug": "varthur-12"
+      },
+      {
+        "area_m2": 0.59,
+        "name": "Varthur",
+        "name_source": "place",
+        "slug": "varthur-13"
+      },
+      {
+        "area_m2": 258584.931,
+        "name": "Varthur",
+        "name_source": "place",
+        "slug": "varthur-135"
+      },
+      {
+        "area_m2": 277155.895,
+        "name": "Varthur",
+        "name_source": "place",
+        "slug": "varthur-136"
+      },
+      {
+        "area_m2": 286408.947,
+        "name": "Varthur",
+        "name_source": "place",
+        "slug": "varthur-137"
+      },
+      {
+        "area_m2": 432344.951,
+        "name": "Varthur",
+        "name_source": "place",
+        "slug": "varthur-138"
+      },
+      {
+        "area_m2": 485236.584,
+        "name": "Varthur",
+        "name_source": "place",
+        "slug": "varthur-139"
+      },
+      {
+        "area_m2": 0.602,
+        "name": "Varthur",
+        "name_source": "place",
+        "slug": "varthur-14"
+      },
+      {
+        "area_m2": 591524.097,
+        "name": "Varthur",
+        "name_source": "place",
+        "slug": "varthur-140"
+      },
+      {
+        "area_m2": 694207.548,
+        "name": "Varthur",
+        "name_source": "place",
+        "slug": "varthur-141"
+      },
+      {
+        "area_m2": 696488.317,
+        "name": "Varthur",
+        "name_source": "place",
+        "slug": "varthur-142"
+      },
+      {
+        "area_m2": 807166.968,
+        "name": "Varthur",
+        "name_source": "place",
+        "slug": "varthur-143"
+      },
+      {
+        "area_m2": 0.72,
+        "name": "Varthur",
+        "name_source": "place",
+        "slug": "varthur-15"
+      },
+      {
+        "area_m2": 0.811,
+        "name": "Varthur",
+        "name_source": "place",
+        "slug": "varthur-16"
+      },
+      {
+        "area_m2": 0.948,
+        "name": "Varthur",
+        "name_source": "place",
+        "slug": "varthur-17"
+      },
+      {
+        "area_m2": 0.992,
+        "name": "Varthur",
+        "name_source": "place",
+        "slug": "varthur-18"
+      },
+      {
+        "area_m2": 1.359,
+        "name": "Varthur",
+        "name_source": "place",
+        "slug": "varthur-19"
+      },
+      {
+        "area_m2": 0.05,
+        "name": "Varthur",
+        "name_source": "place",
+        "slug": "varthur-2"
+      },
+      {
+        "area_m2": 1.366,
+        "name": "Varthur",
+        "name_source": "place",
+        "slug": "varthur-20"
+      },
+      {
+        "area_m2": 1.379,
+        "name": "Varthur",
+        "name_source": "place",
+        "slug": "varthur-21"
+      },
+      {
+        "area_m2": 1.451,
+        "name": "Varthur",
+        "name_source": "place",
+        "slug": "varthur-22"
+      },
+      {
+        "area_m2": 1.936,
+        "name": "Varthur",
+        "name_source": "place",
+        "slug": "varthur-23"
+      },
+      {
+        "area_m2": 2.146,
+        "name": "Varthur",
+        "name_source": "place",
+        "slug": "varthur-24"
+      },
+      {
+        "area_m2": 2.396,
+        "name": "Varthur",
+        "name_source": "place",
+        "slug": "varthur-25"
+      },
+      {
+        "area_m2": 2.416,
+        "name": "Varthur",
+        "name_source": "place",
+        "slug": "varthur-26"
+      },
+      {
+        "area_m2": 2.52,
+        "name": "Varthur",
+        "name_source": "place",
+        "slug": "varthur-27"
+      },
+      {
+        "area_m2": 2.737,
+        "name": "Varthur",
+        "name_source": "place",
+        "slug": "varthur-28"
+      },
+      {
+        "area_m2": 2.991,
+        "name": "Varthur",
+        "name_source": "place",
+        "slug": "varthur-29"
+      },
+      {
+        "area_m2": 0.064,
+        "name": "Varthur",
+        "name_source": "place",
+        "slug": "varthur-3"
+      },
+      {
+        "area_m2": 3.22,
+        "name": "Varthur",
+        "name_source": "place",
+        "slug": "varthur-30"
+      },
+      {
+        "area_m2": 3.397,
+        "name": "Varthur",
+        "name_source": "place",
+        "slug": "varthur-31"
+      },
+      {
+        "area_m2": 3.77,
+        "name": "Varthur",
+        "name_source": "place",
+        "slug": "varthur-32"
+      },
+      {
+        "area_m2": 4.114,
+        "name": "Varthur",
+        "name_source": "place",
+        "slug": "varthur-33"
+      },
+      {
+        "area_m2": 4.183,
+        "name": "Varthur",
+        "name_source": "place",
+        "slug": "varthur-34"
+      },
+      {
+        "area_m2": 4.307,
+        "name": "Varthur",
+        "name_source": "place",
+        "slug": "varthur-35"
+      },
+      {
+        "area_m2": 4.475,
+        "name": "Varthur",
+        "name_source": "place",
+        "slug": "varthur-36"
+      },
+      {
+        "area_m2": 5.119,
+        "name": "Varthur",
+        "name_source": "place",
+        "slug": "varthur-37"
+      },
+      {
+        "area_m2": 5.981,
+        "name": "Varthur",
+        "name_source": "place",
+        "slug": "varthur-38"
+      },
+      {
+        "area_m2": 0.08,
+        "name": "Varthur",
+        "name_source": "place",
+        "slug": "varthur-4"
+      },
+      {
+        "area_m2": 0.102,
+        "name": "Varthur",
+        "name_source": "place",
+        "slug": "varthur-5"
+      },
+      {
+        "area_m2": 0.127,
+        "name": "Varthur",
+        "name_source": "place",
+        "slug": "varthur-6"
+      },
+      {
+        "area_m2": 0.178,
+        "name": "Varthur",
+        "name_source": "place",
+        "slug": "varthur-7"
+      },
+      {
+        "area_m2": 0.234,
+        "name": "Varthur",
+        "name_source": "place",
+        "slug": "varthur-8"
+      },
+      {
+        "area_m2": 0.289,
+        "name": "Varthur",
+        "name_source": "place",
+        "slug": "varthur-9"
+      },
+      {
+        "area_m2": 0.669,
+        "name": "Vasanth Nagar",
+        "name_source": "place",
+        "slug": "vasanth-nagar"
+      },
+      {
+        "area_m2": 1418.677,
+        "name": "Vasanth Nagar",
+        "name_source": "place",
+        "slug": "vasanth-nagar-2"
+      },
+      {
+        "area_m2": 2297.373,
+        "name": "Vasanth Nagar",
+        "name_source": "place",
+        "slug": "vasanth-nagar-3"
+      },
+      {
+        "area_m2": 2370.45,
+        "name": "Vasanth Nagar",
+        "name_source": "place",
+        "slug": "vasanth-nagar-4"
+      },
+      {
+        "area_m2": 0.395,
+        "name": "Venkat Reddy Nagara",
+        "name_source": "place",
+        "slug": "venkat-reddy-nagara"
+      },
+      {
+        "area_m2": 1.992,
+        "name": "Venkat Reddy Nagara",
+        "name_source": "place",
+        "slug": "venkat-reddy-nagara-2"
+      },
+      {
+        "area_m2": 819774.869,
+        "name": "Vibhootipura",
+        "name_source": "place",
+        "slug": "vibhootipura-30"
+      },
+      {
+        "area_m2": 3259242.872,
+        "name": "Vibhootipura",
+        "name_source": "place",
+        "slug": "vibhootipura-31"
+      },
+      {
+        "area_m2": 1.053,
+        "name": "Vignananagara",
+        "name_source": "place",
+        "slug": "vignananagara"
+      },
+      {
+        "area_m2": 2.112,
+        "name": "Vignananagara",
+        "name_source": "place",
+        "slug": "vignananagara-2"
+      },
+      {
+        "area_m2": 2.431,
+        "name": "Vignananagara",
+        "name_source": "place",
+        "slug": "vignananagara-3"
+      },
+      {
+        "area_m2": 462333.494,
+        "name": "Vignananagara",
+        "name_source": "place",
+        "slug": "vignananagara-37"
+      },
+      {
+        "area_m2": 2707.959,
+        "name": "Vignananagara",
+        "name_source": "place",
+        "slug": "vignananagara-4"
+      },
+      {
+        "area_m2": 1.944,
+        "name": "Vijaya Bank Layout",
+        "name_source": "place",
+        "slug": "vijaya-bank-layout"
+      },
+      {
+        "area_m2": 2.693,
+        "name": "Vinayakanagar",
+        "name_source": "place",
+        "slug": "vinayakanagar"
+      },
+      {
+        "area_m2": 927843.811,
+        "name": "Vinayakanagar",
+        "name_source": "place",
+        "slug": "vinayakanagar-30"
+      },
+      {
+        "area_m2": 0.061,
+        "name": "Viswamanava Kuvempu Ward",
+        "name_source": "place",
+        "slug": "viswamanava-kuvempu-ward"
+      },
+      {
+        "area_m2": 0.161,
+        "name": "Viswamanava Kuvempu Ward",
+        "name_source": "place",
+        "slug": "viswamanava-kuvempu-ward-2"
+      },
+      {
+        "area_m2": 0.258,
+        "name": "Viswamanava Kuvempu Ward",
+        "name_source": "place",
+        "slug": "viswamanava-kuvempu-ward-3"
+      },
+      {
+        "area_m2": 0.279,
+        "name": "Viswamanava Kuvempu Ward",
+        "name_source": "place",
+        "slug": "viswamanava-kuvempu-ward-4"
+      },
+      {
+        "area_m2": 3.686,
+        "name": "Viswamanava Kuvempu Ward",
+        "name_source": "place",
+        "slug": "viswamanava-kuvempu-ward-5"
+      },
+      {
+        "area_m2": 5.058,
+        "name": "Viswamanava Kuvempu Ward",
+        "name_source": "place",
+        "slug": "viswamanava-kuvempu-ward-6"
+      },
+      {
+        "area_m2": 13.283,
+        "name": "Viswamanava Kuvempu Ward",
+        "name_source": "place",
+        "slug": "viswamanava-kuvempu-ward-7"
+      },
+      {
+        "area_m2": 2536.056,
+        "name": "Viswamanava Kuvempu Ward",
+        "name_source": "place",
+        "slug": "viswamanava-kuvempu-ward-8"
+      },
+      {
+        "area_m2": 3168.487,
+        "name": "Viswamanava Kuvempu Ward",
+        "name_source": "place",
+        "slug": "viswamanava-kuvempu-ward-9"
+      },
+      {
+        "area_m2": 0.001,
+        "name": "Whitefield",
+        "name_source": "place",
+        "slug": "whitefield"
+      },
+      {
+        "area_m2": 0.002,
+        "name": "Whitefield",
+        "name_source": "place",
+        "slug": "whitefield-2"
+      },
+      {
+        "area_m2": 0.694,
+        "name": "Whitefield",
+        "name_source": "place",
+        "slug": "whitefield-3"
+      },
+      {
+        "area_m2": 0.729,
+        "name": "Whitefield",
+        "name_source": "place",
+        "slug": "whitefield-4"
+      },
+      {
+        "area_m2": 2.1,
+        "name": "Whitefield",
+        "name_source": "place",
+        "slug": "whitefield-5"
+      },
+      {
+        "area_m2": 880.661,
+        "name": "Whitefield",
+        "name_source": "place",
+        "slug": "whitefield-6"
+      },
+      {
+        "area_m2": 285256.07,
+        "name": "Whitefield",
+        "name_source": "place",
+        "slug": "whitefield-71"
+      },
+      {
+        "area_m2": 286942.432,
+        "name": "Whitefield",
+        "name_source": "place",
+        "slug": "whitefield-72"
+      },
+      {
+        "area_m2": 381932.389,
+        "name": "Whitefield",
+        "name_source": "place",
+        "slug": "whitefield-73"
+      },
+      {
+        "area_m2": 385970.298,
+        "name": "Whitefield",
+        "name_source": "place",
+        "slug": "whitefield-74"
+      },
+      {
+        "area_m2": 436395.807,
+        "name": "Whitefield",
+        "name_source": "place",
+        "slug": "whitefield-75"
+      },
+      {
+        "area_m2": 615694.974,
+        "name": "Whitefield",
+        "name_source": "place",
+        "slug": "whitefield-76"
+      },
+      {
+        "area_m2": 704284.04,
+        "name": "Whitefield",
+        "name_source": "place",
+        "slug": "whitefield-77"
+      },
+      {
+        "area_m2": 0.433,
+        "name": "Yamalur",
+        "name_source": "place",
+        "slug": "yamalur"
+      },
+      {
+        "area_m2": 1.0,
+        "name": "Yamalur",
+        "name_source": "place",
+        "slug": "yamalur-2"
+      },
+      {
+        "area_m2": 1.904,
+        "name": "Yamalur",
+        "name_source": "place",
+        "slug": "yamalur-3"
+      },
+      {
+        "area_m2": 2.04,
+        "name": "Yamalur",
+        "name_source": "place",
+        "slug": "yamalur-4"
+      },
+      {
+        "area_m2": 2.54,
+        "name": "Yamalur",
+        "name_source": "place",
+        "slug": "yamalur-5"
+      },
+      {
+        "area_m2": 2.591,
+        "name": "Yamalur",
+        "name_source": "place",
+        "slug": "yamalur-6"
+      },
+      {
+        "area_m2": 264668.385,
+        "name": "Yamalur",
+        "name_source": "place",
+        "slug": "yamalur-66"
+      },
+      {
+        "area_m2": 557843.835,
+        "name": "Yamalur",
+        "name_source": "place",
+        "slug": "yamalur-67"
+      },
+      {
+        "area_m2": 774078.079,
+        "name": "Yamalur",
+        "name_source": "place",
+        "slug": "yamalur-68"
+      },
+      {
+        "area_m2": 0.005,
+        "name": "Yediyuru",
+        "name_source": "place",
+        "slug": "yediyuru"
+      },
+      {
+        "area_m2": 0.339,
+        "name": "Yediyuru",
+        "name_source": "place",
+        "slug": "yediyuru-10"
+      },
+      {
+        "area_m2": 0.415,
+        "name": "Yediyuru",
+        "name_source": "place",
+        "slug": "yediyuru-11"
+      },
+      {
+        "area_m2": 0.463,
+        "name": "Yediyuru",
+        "name_source": "place",
+        "slug": "yediyuru-12"
+      },
+      {
+        "area_m2": 0.495,
+        "name": "Yediyuru",
+        "name_source": "place",
+        "slug": "yediyuru-13"
+      },
+      {
+        "area_m2": 0.562,
+        "name": "Yediyuru",
+        "name_source": "place",
+        "slug": "yediyuru-14"
+      },
+      {
+        "area_m2": 0.563,
+        "name": "Yediyuru",
+        "name_source": "place",
+        "slug": "yediyuru-15"
+      },
+      {
+        "area_m2": 0.578,
+        "name": "Yediyuru",
+        "name_source": "place",
+        "slug": "yediyuru-16"
+      },
+      {
+        "area_m2": 0.64,
+        "name": "Yediyuru",
+        "name_source": "place",
+        "slug": "yediyuru-17"
+      },
+      {
+        "area_m2": 0.676,
+        "name": "Yediyuru",
+        "name_source": "place",
+        "slug": "yediyuru-18"
+      },
+      {
+        "area_m2": 0.781,
+        "name": "Yediyuru",
+        "name_source": "place",
+        "slug": "yediyuru-19"
+      },
+      {
+        "area_m2": 0.051,
+        "name": "Yediyuru",
+        "name_source": "place",
+        "slug": "yediyuru-2"
+      },
+      {
+        "area_m2": 0.853,
+        "name": "Yediyuru",
+        "name_source": "place",
+        "slug": "yediyuru-20"
+      },
+      {
+        "area_m2": 0.857,
+        "name": "Yediyuru",
+        "name_source": "place",
+        "slug": "yediyuru-21"
+      },
+      {
+        "area_m2": 1.689,
+        "name": "Yediyuru",
+        "name_source": "place",
+        "slug": "yediyuru-22"
+      },
+      {
+        "area_m2": 1.76,
+        "name": "Yediyuru",
+        "name_source": "place",
+        "slug": "yediyuru-23"
+      },
+      {
+        "area_m2": 3.131,
+        "name": "Yediyuru",
+        "name_source": "place",
+        "slug": "yediyuru-24"
+      },
+      {
+        "area_m2": 3.766,
+        "name": "Yediyuru",
+        "name_source": "place",
+        "slug": "yediyuru-25"
+      },
+      {
+        "area_m2": 1393.585,
+        "name": "Yediyuru",
+        "name_source": "place",
+        "slug": "yediyuru-26"
+      },
+      {
+        "area_m2": 0.082,
+        "name": "Yediyuru",
+        "name_source": "place",
+        "slug": "yediyuru-3"
+      },
+      {
+        "area_m2": 0.099,
+        "name": "Yediyuru",
+        "name_source": "place",
+        "slug": "yediyuru-4"
+      },
+      {
+        "area_m2": 0.113,
+        "name": "Yediyuru",
+        "name_source": "place",
+        "slug": "yediyuru-5"
+      },
+      {
+        "area_m2": 0.211,
+        "name": "Yediyuru",
+        "name_source": "place",
+        "slug": "yediyuru-6"
+      },
+      {
+        "area_m2": 0.248,
+        "name": "Yediyuru",
+        "name_source": "place",
+        "slug": "yediyuru-7"
+      },
+      {
+        "area_m2": 0.295,
+        "name": "Yediyuru",
+        "name_source": "place",
+        "slug": "yediyuru-8"
+      },
+      {
+        "area_m2": 0.323,
+        "name": "Yediyuru",
+        "name_source": "place",
+        "slug": "yediyuru-9"
+      }
+    ],
+    "needs_review_count": 907,
+    "size_bands": {
+      "fabric_above_review_max": 154,
+      "fabric_above_soft_max": 505,
+      "fabric_below_soft_min": 6685,
+      "fabric_in_soft_band": 1282
+    },
+    "unexpected_kinds": []
+  },
+  "stage": "validate",
+  "status": "pass"
+}

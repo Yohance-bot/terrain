@@ -1,0 +1,469 @@
+{
+  "critic": "heuristic",
+  "region": "bengaluru_mvp",
+  "suggestion_count": 30,
+  "suggestions": [
+    {
+      "confidence": 0.95,
+      "donor_territory_id": "e27c6ee1-34d2-5bee-8dba-c8d04e4ce0f1",
+      "id": "sug-0001",
+      "metrics_refs": [
+        "aspect_ratio",
+        "member_territory_ids"
+      ],
+      "op": "transfer_member_parcel",
+      "parcel_id": "001b9727-24fb-5941-be47-90432965e369",
+      "reason": "strip aspect 4.80; transfer boundary parcel toward neighbour to rebalance proportions",
+      "receiver_territory_id": "03d731b6-2b05-5aa7-b28f-a783c62cf295",
+      "territory_ids": [
+        "03d731b6-2b05-5aa7-b28f-a783c62cf295",
+        "e27c6ee1-34d2-5bee-8dba-c8d04e4ce0f1"
+      ]
+    },
+    {
+      "confidence": 0.95,
+      "donor_territory_id": "b62dbbf0-b346-5479-929d-06fd5e7a0dfb",
+      "id": "sug-0002",
+      "metrics_refs": [
+        "aspect_ratio",
+        "member_territory_ids"
+      ],
+      "op": "transfer_member_parcel",
+      "parcel_id": "1b8a5b10-ea18-568c-8472-f35e8d70ade0",
+      "reason": "strip aspect 4.39; transfer boundary parcel toward neighbour to rebalance proportions",
+      "receiver_territory_id": "0afd83a5-91f6-599e-9696-c4b987dbca82",
+      "territory_ids": [
+        "0afd83a5-91f6-599e-9696-c4b987dbca82",
+        "b62dbbf0-b346-5479-929d-06fd5e7a0dfb"
+      ]
+    },
+    {
+      "confidence": 0.95,
+      "donor_territory_id": "cb96070c-e4f3-53ba-970b-8dbb12227282",
+      "id": "sug-0003",
+      "metrics_refs": [
+        "aspect_ratio",
+        "member_territory_ids"
+      ],
+      "op": "transfer_member_parcel",
+      "parcel_id": "011c8fb3-0b13-5a08-a0db-f707deeee247",
+      "reason": "strip aspect 3.60; transfer boundary parcel toward neighbour to rebalance proportions",
+      "receiver_territory_id": "20b634c2-2e5b-5d70-a3b5-01abc31e0b78",
+      "territory_ids": [
+        "20b634c2-2e5b-5d70-a3b5-01abc31e0b78",
+        "cb96070c-e4f3-53ba-970b-8dbb12227282"
+      ]
+    },
+    {
+      "confidence": 0.95,
+      "donor_territory_id": "48fce251-f6b1-5ee6-9fdb-8a1697edc282",
+      "id": "sug-0004",
+      "metrics_refs": [
+        "aspect_ratio",
+        "member_territory_ids"
+      ],
+      "op": "transfer_member_parcel",
+      "parcel_id": "070feee3-06a5-5809-8a8a-eec533225f20",
+      "reason": "strip aspect 3.60; transfer boundary parcel toward neighbour to rebalance proportions",
+      "receiver_territory_id": "22fb963f-0708-5921-9238-96bfac9f2733",
+      "territory_ids": [
+        "22fb963f-0708-5921-9238-96bfac9f2733",
+        "48fce251-f6b1-5ee6-9fdb-8a1697edc282"
+      ]
+    },
+    {
+      "confidence": 0.95,
+      "donor_territory_id": "36e41b87-cfac-5a7f-8472-93040b1deb87",
+      "id": "sug-0005",
+      "metrics_refs": [
+        "aspect_ratio",
+        "member_territory_ids"
+      ],
+      "op": "transfer_member_parcel",
+      "parcel_id": "0342bb87-c162-57b6-b227-6d3f12168c40",
+      "reason": "strip aspect 3.24; transfer boundary parcel toward neighbour to rebalance proportions",
+      "receiver_territory_id": "382fb923-4191-594d-939d-202497bd2512",
+      "territory_ids": [
+        "36e41b87-cfac-5a7f-8472-93040b1deb87",
+        "382fb923-4191-594d-939d-202497bd2512"
+      ]
+    },
+    {
+      "confidence": 0.95,
+      "donor_territory_id": "61858736-f967-56f3-97c1-e6f02d6aceb4",
+      "id": "sug-0006",
+      "metrics_refs": [
+        "aspect_ratio",
+        "member_territory_ids"
+      ],
+      "op": "transfer_member_parcel",
+      "parcel_id": "00b6b070-a74c-5055-907b-fca68fbbf077",
+      "reason": "strip aspect 4.10; transfer boundary parcel toward neighbour to rebalance proportions",
+      "receiver_territory_id": "397aa747-cd88-5274-b995-ba2937db2a3a",
+      "territory_ids": [
+        "397aa747-cd88-5274-b995-ba2937db2a3a",
+        "61858736-f967-56f3-97c1-e6f02d6aceb4"
+      ]
+    },
+    {
+      "confidence": 0.95,
+      "donor_territory_id": "6ba83360-44f6-5216-8b76-acb6f0c70e88",
+      "id": "sug-0007",
+      "metrics_refs": [
+        "aspect_ratio",
+        "member_territory_ids"
+      ],
+      "op": "transfer_member_parcel",
+      "parcel_id": "21eee03a-dbf0-5ef9-bee7-24d986818ece",
+      "reason": "strip aspect 10.17; transfer boundary parcel toward neighbour to rebalance proportions",
+      "receiver_territory_id": "3ad79f01-828c-5ca8-992a-521e89bfa549",
+      "territory_ids": [
+        "3ad79f01-828c-5ca8-992a-521e89bfa549",
+        "6ba83360-44f6-5216-8b76-acb6f0c70e88"
+      ]
+    },
+    {
+      "confidence": 0.95,
+      "donor_territory_id": "9f16e0e0-54d8-51e8-9055-ef57de3173f9",
+      "id": "sug-0008",
+      "metrics_refs": [
+        "aspect_ratio",
+        "member_territory_ids"
+      ],
+      "op": "transfer_member_parcel",
+      "parcel_id": "007682e3-3895-5752-ab92-927b15f21339",
+      "reason": "strip aspect 5.98; transfer boundary parcel toward neighbour to rebalance proportions",
+      "receiver_territory_id": "41753a52-5094-5e83-b481-46801af982a8",
+      "territory_ids": [
+        "41753a52-5094-5e83-b481-46801af982a8",
+        "9f16e0e0-54d8-51e8-9055-ef57de3173f9"
+      ]
+    },
+    {
+      "confidence": 0.95,
+      "donor_territory_id": "46bee0af-1a8f-5fa5-9d76-2d3cc11e5e60",
+      "id": "sug-0009",
+      "metrics_refs": [
+        "aspect_ratio",
+        "member_territory_ids"
+      ],
+      "op": "transfer_member_parcel",
+      "parcel_id": "15a134f6-3ca2-5b71-9a31-492d88ce8493",
+      "reason": "strip aspect 4.27; transfer boundary parcel toward neighbour to rebalance proportions",
+      "receiver_territory_id": "89f6d27c-6b52-5f20-ad2d-2b0c221d4a1d",
+      "territory_ids": [
+        "46bee0af-1a8f-5fa5-9d76-2d3cc11e5e60",
+        "89f6d27c-6b52-5f20-ad2d-2b0c221d4a1d"
+      ]
+    },
+    {
+      "confidence": 0.95,
+      "donor_territory_id": "69a109d4-ab82-5178-8126-6a3b6afcff18",
+      "id": "sug-0010",
+      "metrics_refs": [
+        "aspect_ratio",
+        "member_territory_ids"
+      ],
+      "op": "transfer_member_parcel",
+      "parcel_id": "014b5528-c7a9-5632-ad76-bd560c988cd1",
+      "reason": "strip aspect 3.10; transfer boundary parcel toward neighbour to rebalance proportions",
+      "receiver_territory_id": "7846fbe0-c995-509f-8f9b-e59844b55e00",
+      "territory_ids": [
+        "69a109d4-ab82-5178-8126-6a3b6afcff18",
+        "7846fbe0-c995-509f-8f9b-e59844b55e00"
+      ]
+    },
+    {
+      "confidence": 0.95,
+      "donor_territory_id": "8c8f1051-e6a0-5238-bb8b-cdee8d472592",
+      "id": "sug-0011",
+      "metrics_refs": [
+        "aspect_ratio",
+        "member_territory_ids"
+      ],
+      "op": "transfer_member_parcel",
+      "parcel_id": "91a47d3b-8fe6-5380-8201-bb1ad18aded8",
+      "reason": "strip aspect 4.41; transfer boundary parcel toward neighbour to rebalance proportions",
+      "receiver_territory_id": "b8b9c9d4-7787-5d72-bbae-ac7757795ec9",
+      "territory_ids": [
+        "8c8f1051-e6a0-5238-bb8b-cdee8d472592",
+        "b8b9c9d4-7787-5d72-bbae-ac7757795ec9"
+      ]
+    },
+    {
+      "confidence": 0.95,
+      "donor_territory_id": "c2f4c2de-3c20-57a1-a604-a773a57e606b",
+      "id": "sug-0012",
+      "metrics_refs": [
+        "aspect_ratio",
+        "member_territory_ids"
+      ],
+      "op": "transfer_member_parcel",
+      "parcel_id": "01f925a2-ce1e-5f3d-aa3b-97f57e47af89",
+      "reason": "strip aspect 3.36; transfer boundary parcel toward neighbour to rebalance proportions",
+      "receiver_territory_id": "8e1d1b88-c6e3-5e12-9864-09cb930f0534",
+      "territory_ids": [
+        "8e1d1b88-c6e3-5e12-9864-09cb930f0534",
+        "c2f4c2de-3c20-57a1-a604-a773a57e606b"
+      ]
+    },
+    {
+      "confidence": 0.95,
+      "donor_territory_id": "9545efb8-33f7-5f34-86a4-9504de949ab2",
+      "id": "sug-0013",
+      "metrics_refs": [
+        "aspect_ratio",
+        "member_territory_ids"
+      ],
+      "op": "transfer_member_parcel",
+      "parcel_id": "0bb1f334-6c0d-5276-95ad-e36958d8cf4c",
+      "reason": "strip aspect 5.09; transfer boundary parcel toward neighbour to rebalance proportions",
+      "receiver_territory_id": "a84a7913-8b9b-5c86-bfdf-b0a34770d7a9",
+      "territory_ids": [
+        "9545efb8-33f7-5f34-86a4-9504de949ab2",
+        "a84a7913-8b9b-5c86-bfdf-b0a34770d7a9"
+      ]
+    },
+    {
+      "confidence": 0.95,
+      "donor_territory_id": "bea77be5-1b06-5224-9444-e5089dd3b326",
+      "id": "sug-0014",
+      "metrics_refs": [
+        "aspect_ratio",
+        "member_territory_ids"
+      ],
+      "op": "transfer_member_parcel",
+      "parcel_id": "07790532-4205-5672-915c-249564ef915a",
+      "reason": "strip aspect 6.80; transfer boundary parcel toward neighbour to rebalance proportions",
+      "receiver_territory_id": "ad67a7a0-50a8-5cc2-a217-5eebcf74bd77",
+      "territory_ids": [
+        "ad67a7a0-50a8-5cc2-a217-5eebcf74bd77",
+        "bea77be5-1b06-5224-9444-e5089dd3b326"
+      ]
+    },
+    {
+      "confidence": 0.95,
+      "donor_territory_id": "b2b2e831-c7dd-5667-808f-ba372ad7a44b",
+      "id": "sug-0015",
+      "metrics_refs": [
+        "aspect_ratio",
+        "member_territory_ids"
+      ],
+      "op": "transfer_member_parcel",
+      "parcel_id": "469c456d-7ea3-5d8f-beaf-63807505a0f8",
+      "reason": "strip aspect 3.09; transfer boundary parcel toward neighbour to rebalance proportions",
+      "receiver_territory_id": "ed9ed57b-6432-5835-9350-544a96f112af",
+      "territory_ids": [
+        "b2b2e831-c7dd-5667-808f-ba372ad7a44b",
+        "ed9ed57b-6432-5835-9350-544a96f112af"
+      ]
+    },
+    {
+      "confidence": 0.95,
+      "donor_territory_id": "b7004220-0b50-5801-93a6-31be2ac45708",
+      "id": "sug-0016",
+      "metrics_refs": [
+        "aspect_ratio",
+        "member_territory_ids"
+      ],
+      "op": "transfer_member_parcel",
+      "parcel_id": "03d5bd11-32e3-5871-936b-cc9a06e233eb",
+      "reason": "strip aspect 5.12; transfer boundary parcel toward neighbour to rebalance proportions",
+      "receiver_territory_id": "c372f33a-4cd7-5038-9c59-655515e8279f",
+      "territory_ids": [
+        "b7004220-0b50-5801-93a6-31be2ac45708",
+        "c372f33a-4cd7-5038-9c59-655515e8279f"
+      ]
+    },
+    {
+      "confidence": 0.95,
+      "donor_territory_id": "e70622dd-ed76-5c52-ad79-a61fbd75f570",
+      "id": "sug-0017",
+      "metrics_refs": [
+        "aspect_ratio",
+        "member_territory_ids"
+      ],
+      "op": "transfer_member_parcel",
+      "parcel_id": "0162ffaa-9a23-56c2-ba52-2a5ff9c989cb",
+      "reason": "strip aspect 5.12; transfer boundary parcel toward neighbour to rebalance proportions",
+      "receiver_territory_id": "dfe332ce-e07e-5951-b1bb-341d0510ea92",
+      "territory_ids": [
+        "dfe332ce-e07e-5951-b1bb-341d0510ea92",
+        "e70622dd-ed76-5c52-ad79-a61fbd75f570"
+      ]
+    },
+    {
+      "confidence": 0.95,
+      "donor_territory_id": "f2400ab8-29c0-588f-810d-867f99bcec53",
+      "id": "sug-0018",
+      "metrics_refs": [
+        "aspect_ratio",
+        "member_territory_ids"
+      ],
+      "op": "transfer_member_parcel",
+      "parcel_id": "029f7388-0bbf-5753-a38e-e4c37448aa59",
+      "reason": "strip aspect 3.17; transfer boundary parcel toward neighbour to rebalance proportions",
+      "receiver_territory_id": "e53903bf-218a-5d00-adf0-ef4271678f8a",
+      "territory_ids": [
+        "e53903bf-218a-5d00-adf0-ef4271678f8a",
+        "f2400ab8-29c0-588f-810d-867f99bcec53"
+      ]
+    },
+    {
+      "confidence": 1.0,
+      "id": "sug-0019",
+      "metrics_refs": [
+        "protected",
+        "kind"
+      ],
+      "op": "keep_standalone",
+      "reason": "protected landmark stays a prize territory",
+      "territory_ids": [
+        "2ad9db80-5133-573e-a210-8f82ea06ddca"
+      ]
+    },
+    {
+      "confidence": 1.0,
+      "id": "sug-0020",
+      "metrics_refs": [
+        "protected",
+        "kind"
+      ],
+      "op": "keep_standalone",
+      "reason": "protected landmark stays a prize territory",
+      "territory_ids": [
+        "313a3064-19d0-5059-84dc-30a78c1a039b"
+      ]
+    },
+    {
+      "confidence": 1.0,
+      "id": "sug-0021",
+      "metrics_refs": [
+        "protected",
+        "kind"
+      ],
+      "op": "keep_standalone",
+      "reason": "protected landmark stays a prize territory",
+      "territory_ids": [
+        "7831cf1d-2412-5f11-a5c6-ab5392713619"
+      ]
+    },
+    {
+      "confidence": 1.0,
+      "id": "sug-0022",
+      "metrics_refs": [
+        "protected",
+        "kind"
+      ],
+      "op": "keep_standalone",
+      "reason": "protected landmark stays a prize territory",
+      "territory_ids": [
+        "7c2ec353-8616-58c0-bb30-df21c2b4c1d8"
+      ]
+    },
+    {
+      "confidence": 1.0,
+      "id": "sug-0023",
+      "metrics_refs": [
+        "protected",
+        "kind"
+      ],
+      "op": "keep_standalone",
+      "reason": "protected landmark stays a prize territory",
+      "territory_ids": [
+        "7fca3ef4-d981-5ce2-9d7d-e17d1dc93317"
+      ]
+    },
+    {
+      "confidence": 1.0,
+      "id": "sug-0024",
+      "metrics_refs": [
+        "protected",
+        "kind"
+      ],
+      "op": "keep_standalone",
+      "reason": "protected landmark stays a prize territory",
+      "territory_ids": [
+        "91552156-c0a0-53d6-94d5-aebdb100b3cf"
+      ]
+    },
+    {
+      "confidence": 1.0,
+      "id": "sug-0025",
+      "metrics_refs": [
+        "protected",
+        "kind"
+      ],
+      "op": "keep_standalone",
+      "reason": "protected landmark stays a prize territory",
+      "territory_ids": [
+        "94166b7a-a691-575a-9ab3-ef7bde8c0c6c"
+      ]
+    },
+    {
+      "confidence": 1.0,
+      "id": "sug-0026",
+      "metrics_refs": [
+        "protected",
+        "kind"
+      ],
+      "op": "keep_standalone",
+      "reason": "protected landmark stays a prize territory",
+      "territory_ids": [
+        "a232e751-6488-5328-a7e2-ba37eea546ff"
+      ]
+    },
+    {
+      "confidence": 1.0,
+      "id": "sug-0027",
+      "metrics_refs": [
+        "protected",
+        "kind"
+      ],
+      "op": "keep_standalone",
+      "reason": "protected landmark stays a prize territory",
+      "territory_ids": [
+        "a73afb47-7095-53b4-84ac-12c54fa80085"
+      ]
+    },
+    {
+      "confidence": 1.0,
+      "id": "sug-0028",
+      "metrics_refs": [
+        "protected",
+        "kind"
+      ],
+      "op": "keep_standalone",
+      "reason": "protected landmark stays a prize territory",
+      "territory_ids": [
+        "b20d2131-006f-551b-ae77-20b0b52b68dd"
+      ]
+    },
+    {
+      "confidence": 1.0,
+      "id": "sug-0029",
+      "metrics_refs": [
+        "protected",
+        "kind"
+      ],
+      "op": "keep_standalone",
+      "reason": "protected landmark stays a prize territory",
+      "territory_ids": [
+        "b5934228-72a7-54a5-90b2-d45ebda9374c"
+      ]
+    },
+    {
+      "confidence": 1.0,
+      "id": "sug-0030",
+      "metrics_refs": [
+        "protected",
+        "kind"
+      ],
+      "op": "keep_standalone",
+      "reason": "protected landmark stays a prize territory",
+      "territory_ids": [
+        "fef52078-98a2-580c-8eed-1dd98643fafc"
+      ]
+    }
+  ]
+}

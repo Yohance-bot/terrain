@@ -1,0 +1,40 @@
+[project]
+name = "run-territory-pipeline"
+version = "0.1.0"
+description = "Milestone 2: deterministic, build-time territory generation from Overture and OSM."
+requires-python = ">=3.11"
+dependencies = [
+    # Phase A (exoskeleton) uses these.
+    "pyyaml>=6.0",
+    "shapely>=2.0",
+    "pyproj>=3.6",
+    # Phase B (stage bodies) will use these. Declared now so the environment a
+    # stage author gets is the environment the contracts assume.
+    "geopandas>=1.0",
+    "psycopg[binary]>=3.2",
+    "requests>=2.32",
+    "overturemaps>=1.0.1",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "ruff>=0.8",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.ruff.lint.per-file-ignores]
+# Stage modules are named 01_*.py .. 09_*.py so the pipeline order is obvious on
+# disk. That is not an importable module name, so they are loaded by path via
+# lib/registry.py. Ruff's invalid-module-name rule does not apply here.
+"stages/*.py" = ["N999"]

@@ -1,0 +1,43 @@
+{
+  "area": "jayanagar_lalbagh",
+  "artifacts": {
+    "boundary_graph": {
+      "path": "data/pipeline/bengaluru/jayanagar_lalbagh/intermediate/04_boundary_graph.geojson",
+      "present": true,
+      "sha256": "e637b8c2f543209924127b810d0f52f6a3dd7a5fc34875f6524b70319db9cfd0"
+    },
+    "faces": {
+      "path": "data/pipeline/bengaluru/jayanagar_lalbagh/intermediate/05_faces.geojson",
+      "present": true,
+      "sha256": "0884bc3957c1b4b888f6c59937ab135482994d36f792e7b483823a7990dae6d0"
+    },
+    "landmarks": {
+      "path": "data/pipeline/bengaluru/jayanagar_lalbagh/intermediate/03_landmarks.geojson",
+      "present": true,
+      "sha256": "6cb00a10b8e52b20ad89740f5a7cf307248f8e5f0e4a54e10d97762084fb8d6e"
+    },
+    "named": {
+      "path": "data/pipeline/bengaluru/jayanagar_lalbagh/intermediate/07_named.geojson",
+      "present": true,
+      "sha256": "d856ce5988826eabaaa42f39ae9180f38d0a3c32b2f846cf01dcb8a6a1fe60be"
+    },
+    "normalized": {
+      "path": "data/pipeline/bengaluru/jayanagar_lalbagh/intermediate/06_normalized.geojson",
+      "present": true,
+      "sha256": "606becedd41b41dd219a7eb221c3944e50148274b13e7d4e6af4cda9b0e39fa3"
+    },
+    "raw_manifest": {
+      "path": "data/pipeline/bengaluru/jayanagar_lalbagh/raw/download_manifest.json",
+      "present": true,
+      "sha256": "602363eafb61e5d07b8627c4855fae1390edbbe807c29cb0aa8fcb530064932d"
+    },
+    "separators": {
+      "path": "data/pipeline/bengaluru/jayanagar_lalbagh/intermediate/02_separators.geojson",
+      "present": true,
+      "sha256": "c66e65238a6e4bb2947be66968b86c41955016b80178ffc18028eeaed4078f5e"
+    }
+  },
+  "city": "bengaluru",
+  "pipeline_stages": "01-07",
+  "region": "bengaluru_jayanagar_lalbagh"
+}

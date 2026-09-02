@@ -1,0 +1,74 @@
+# MVP region: Bengaluru playable expansion beyond the Jayanagar-Lalbagh
+# prototype corridor.
+#
+# This file is the ONLY place the pipeline learns what geography it is working
+# on. Processing a different area later -- another district, or eventually all of
+# Bengaluru -- is a new file in this directory, not a code change. That is the
+# whole point of `03_MAP_AND_TERRITORY_PIPELINE` calling for a pipeline that
+# scales from one district to a city without redesign.
+
+city: bengaluru
+
+# The pipeline area key. Deliberately NOT "jayanagar_lalbagh", so this MVP
+# expansion publishes alongside the existing prototype data rather than on top
+# of it. Rolling back is then a config change plus a re-seed.
+area: mvp
+
+# [south, west, north, east] in EPSG:4326.
+#
+# PROVISIONAL. Extends the Jayanagar-Lalbagh prototype corridor east and north
+# to bring Koramangala, HSR Layout, Indiranagar and Whitefield into the same
+# playable footprint. Stage 01 prints the extract footprint; check it against
+# satellite imagery and tighten this before trusting any generated territory.
+#
+# Landmarks covered:
+#   Jayanagar    ~12.925 N, 77.583 E
+#   Lalbagh      ~12.950 N, 77.585 E
+#   Koramangala  ~12.935 N, 77.625 E
+#   HSR Layout   ~12.910 N, 77.645 E
+#   Indiranagar  ~12.971 N, 77.640 E
+#   Whitefield   ~12.969 N, 77.750 E
+bbox: [12.890, 77.565, 12.995, 77.780]
+
+# Planar work happens in UTM zone 43N. Every length, area and buffer in this
+# pipeline is computed in metres, never in EPSG:4326 degrees -- `03` is explicit
+# that degree-based area calculations are wrong and must not appear.
+crs_work: EPSG:32643
+
+# What lands in PostGIS, matching the Milestone 1 `territories.geom` column.
+crs_store: EPSG:4326
+
+sources:
+  # Overture is the primary source per `03`. Base carries land use, parks and
+  # water; divisions carries neighbourhood boundaries; transportation carries
+  # the road and rail network used to cut territory borders.
+  overture:
+    # Pinned. Overture only keeps ~60 days of public releases; bump this
+    # deliberately when regenerating, never silently float to "latest".
+    # Catalogue: https://docs.overturemaps.org/release-calendar/
+    release: "2026-07-22.0"
+    themes:
+      - base
+      - divisions
+      - transportation
+
+  # Geofabrik OSM is the documented fallback for anything Overture covers
+  # poorly in Bengaluru. Southern Zone contains Karnataka. Pinned to a dated
+  # extract (not *-latest) so a re-run tomorrow cannot silently change the map.
+  geofabrik:
+    extract_url: https://download.geofabrik.de/asia/india/southern-zone-260804.osm.pbf
+
+# Where published output lands. Consumed by stage 09 and by the backend seed
+# script, which already reads data/territories/{city}/{area}/v{n}/.
+publish:
+  territory_data_root: data/territories
+  version: 1
+
+# Explicit, scoped MVP exception toggle. The reviewed slug list in
+# config/regions/bengaluru_mvp.exceptions.json is consulted only for this
+# region. It primarily captures Stage 08 "names" exclusions and may include
+# narrowly reviewed Stage 10 hard-max overrides for specific slugs. This does
+# not alter thresholds or global validation rules; each exception remains
+# explicitly auditable in generated reports.
+# Every other region defaults to False and is unaffected.
+allow_validation_exceptions: true

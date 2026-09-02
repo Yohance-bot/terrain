@@ -1,0 +1,367 @@
+{
+  "region": "bengaluru_mvp",
+  "description": "Fixed, reviewed MVP-only validation exceptions for bengaluru_mvp. Primary use is Stage 08 \"names\" failures: known-bad slugs are excluded from candidates.geojson rather than renamed. A narrow Stage 10 hard-max override is also allowed for explicitly listed slugs when separately reviewed. No thresholds are changed; this file only records exact audited slug-level exceptions. Consulted only when allow_validation_exceptions is enabled for this region.",
+  "source_validation_report": "data/pipeline/bengaluru/mvp/staging/validation_report.json",
+  "exceptions": [
+    {
+      "slug": "unnamed-792033-1428154",
+      "territory_id": "ce621698-024b-57ad-9b58-1c251e346bff",
+      "reason": "Degenerate geometry sliver (~0.6-0.7 sq m) near Halanayakanahalli, unrelated to the bbox edge -- normalize_sizes (stage 06) merge residue below the size floor. Accepted for internal MVP visualization review; not a real place, excluded rather than named."
+    },
+    {
+      "slug": "unnamed-792033-1428154-2",
+      "territory_id": "1ef35182-8fe4-5118-bf31-d9619d2ceb42",
+      "reason": "Degenerate geometry sliver (~0.6-0.7 sq m) near Halanayakanahalli, unrelated to the bbox edge -- normalize_sizes (stage 06) merge residue below the size floor. Accepted for internal MVP visualization review; not a real place, excluded rather than named."
+    },
+    {
+      "slug": "unnamed-799979-1434219",
+      "territory_id": "8f84b38e-709b-549d-918a-28ef820a0730",
+      "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs."
+    },
+    {
+      "slug": "unnamed-800013-1433880",
+      "territory_id": "44a84490-64ec-52cc-a1d7-cdbcdb577a31",
+      "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs."
+    },
+    {
+      "slug": "unnamed-800016-1433310",
+      "territory_id": "ff57ccf3-0275-51d5-aae6-f53880981224",
+      "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs."
+    },
+    {
+      "slug": "unnamed-800056-1432320",
+      "territory_id": "245d3de6-8fa7-503a-a26b-90302f2b684e",
+      "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs."
+    },
+    {
+      "slug": "unnamed-800119-1433915",
+      "territory_id": "f24ce1c9-0274-504e-b59f-c5d92879d8f8",
+      "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs."
+    },
+    {
+      "slug": "unnamed-800136-1432224",
+      "territory_id": "573c22c0-248d-5960-97c4-7fbedc8dd7dc",
+      "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs."
+    },
+    {
+      "slug": "unnamed-800198-1431809",
+      "territory_id": "ed64a6dd-a52b-55e7-8866-0a9df114d4b2",
+      "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs."
+    },
+    {
+      "slug": "unnamed-800258-1431903",
+      "territory_id": "62a7922c-54c2-5f0e-8c6e-970c334c3180",
+      "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs."
+    },
+    {
+      "slug": "unnamed-800263-1431707",
+      "territory_id": "f64fd1ee-8bf2-5717-bddc-30f4b70ebf9e",
+      "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs."
+    },
+    {
+      "slug": "unnamed-800392-1431233",
+      "territory_id": "67562539-1b55-56aa-a7a2-948fdc5c6f1d",
+      "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs."
+    },
+    {
+      "slug": "unnamed-800405-1433194",
+      "territory_id": "513c09b0-8633-5a36-bcd0-01541958ebc1",
+      "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs."
+    },
+    {
+      "slug": "unnamed-800460-1433360",
+      "territory_id": "a2fd5f98-4aa2-54c2-9311-2e2099e137de",
+      "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs."
+    },
+    {
+      "slug": "unnamed-800475-1433509",
+      "territory_id": "c897869d-d516-52fc-a039-2bc984e060c3",
+      "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs."
+    },
+    {
+      "slug": "unnamed-800512-1433370",
+      "territory_id": "6584db1b-aa84-5943-b82d-04c97258e860",
+      "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs."
+    },
+    {
+      "slug": "unnamed-800516-1433452",
+      "territory_id": "9f2d440b-3838-5d77-a811-dd8bfd7050f2",
+      "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs."
+    },
+    {
+      "slug": "unnamed-800546-1433704",
+      "territory_id": "4bc99ead-e3af-5bb1-bf0f-58bcab422968",
+      "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs."
+    },
+    {
+      "slug": "unnamed-800565-1433258",
+      "territory_id": "ff8c800f-c367-57ce-a3a0-97b9c702fb61",
+      "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs."
+    },
+    {
+      "slug": "unnamed-800597-1433401",
+      "territory_id": "5cc55132-12ce-5c7a-a268-053108d681e9",
+      "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs."
+    },
+    {
+      "slug": "unnamed-800614-1433292",
+      "territory_id": "d1a87ccf-ebb6-526c-8b9a-bef12bb5ce99",
+      "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs."
+    },
+    {
+      "slug": "unnamed-800628-1431842",
+      "territory_id": "6679a066-faba-5ccf-b8e4-a416cc624a60",
+      "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs."
+    },
+    {
+      "slug": "unnamed-800632-1434494",
+      "territory_id": "745c1c59-5b50-50dc-8243-f7c5ed210f4f",
+      "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs."
+    },
+    {
+      "slug": "unnamed-800665-1433333",
+      "territory_id": "9a548942-aa46-5c84-aa16-fb7faf8e8fdd",
+      "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs."
+    },
+    {
+      "slug": "unnamed-800727-1433364",
+      "territory_id": "28415f4c-8fb5-590b-a0f4-5edab0e3f4be",
+      "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs."
+    },
+    {
+      "slug": "unnamed-800788-1431097",
+      "territory_id": "7c25d43f-13bb-52ac-b535-c16f33d75b81",
+      "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs."
+    },
+    {
+      "slug": "unnamed-800823-1433273",
+      "territory_id": "8081f229-3f49-5412-9f14-85cc51c3ab61",
+      "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs."
+    },
+    {
+      "slug": "unnamed-800853-1434298",
+      "territory_id": "fa90bc93-5d89-5d35-9c6a-60ce8c824271",
+      "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs."
+    },
+    {
+      "slug": "unnamed-800932-1433727",
+      "territory_id": "2b9be180-1130-5deb-b2d6-440ec2b16716",
+      "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs."
+    },
+    {
+      "slug": "unnamed-800940-1433872",
+      "territory_id": "d6052194-af1a-50a1-be70-3452bdc8a3b1",
+      "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs."
+    },
+    {
+      "slug": "unnamed-800987-1433517",
+      "territory_id": "6c0ad496-c2b6-5048-820f-ca2d628f28e5",
+      "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs."
+    },
+    {
+      "slug": "unnamed-801042-1438069",
+      "territory_id": "4c080942-1901-5ea2-ab9d-93f1b8fb8edf",
+      "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs."
+    },
+    {
+      "slug": "unnamed-801091-1430907",
+      "territory_id": "275cd3c7-0ada-5096-9c83-eef68b13accc",
+      "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs."
+    },
+    {
+      "slug": "unnamed-801103-1434109",
+      "territory_id": "4ad76541-8062-51ae-9e94-eeced9716cba",
+      "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs."
+    },
+    {
+      "slug": "unnamed-801180-1434581",
+      "territory_id": "7b7d8a11-5629-566c-9c69-cc1001b7137d",
+      "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs."
+    },
+    {
+      "slug": "unnamed-801254-1434987",
+      "territory_id": "a7f9a4b3-a85e-511e-9b97-e66987758fc4",
+      "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs."
+    },
+    {
+      "slug": "unnamed-801261-1430959",
+      "territory_id": "370822b1-4c5c-57a0-abc7-f401e0ffca68",
+      "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs."
+    },
+    {
+      "slug": "unnamed-801263-1432063",
+      "territory_id": "dbc388db-8b5e-5d02-ae06-e8fdc860e41a",
+      "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs."
+    },
+    {
+      "slug": "unnamed-801316-1433403",
+      "territory_id": "4facb0d5-264f-5d23-863b-74056cb062b6",
+      "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs."
+    },
+    {
+      "slug": "unnamed-801348-1437852",
+      "territory_id": "c29f0a7e-0953-53e1-8265-9964773ec43e",
+      "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs."
+    },
+    {
+      "slug": "unnamed-801365-1437310",
+      "territory_id": "408849b2-cb6f-5b38-9f53-19707ae79f22",
+      "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs."
+    },
+    {
+      "slug": "unnamed-801430-1434425",
+      "territory_id": "5dc6aa4d-a96d-5171-8c5f-bee107b449af",
+      "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs."
+    },
+    {
+      "slug": "unnamed-801459-1432669",
+      "territory_id": "cccd1170-518d-59da-b1ef-4c0fc50cb48b",
+      "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs."
+    },
+    {
+      "slug": "unnamed-801463-1431128",
+      "territory_id": "d73b1e06-226b-5d35-a21a-693e564f6899",
+      "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs."
+    },
+    {
+      "slug": "unnamed-801498-1432332",
+      "territory_id": "6e186faa-5e57-5f58-bbb5-842e6726ee86",
+      "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs."
+    },
+    {
+      "slug": "unnamed-801522-1436340",
+      "territory_id": "ccc3dd21-ef80-5e1f-baaa-df5137acc76a",
+      "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs."
+    },
+    {
+      "slug": "unnamed-801533-1432172",
+      "territory_id": "1e699af2-99e7-5598-b872-f694e187d6c9",
+      "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs."
+    },
+    {
+      "slug": "unnamed-801568-1437085",
+      "territory_id": "2a4f5fd8-0515-5f4c-a1f0-4e6d0349356e",
+      "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs."
+    },
+    {
+      "slug": "unnamed-801619-1433142",
+      "territory_id": "3f748c74-da07-5c2e-b506-e72191c9cd75",
+      "reason": "Clipped at/near the bbox east/north edge (lon ~77.765-77.780, near Varthur, past Whitefield): Overture division/place polygons and named road segments are cut by the AOI boundary, so both naming priority 1 (place containment) and priority 3 (street-pair fallback) fail. Accepted for internal MVP visualization review; a future bbox extension or re-run should re-evaluate these slugs."
+    },
+    {
+      "slug": "asc-war-memorial",
+      "territory_id": "c2672e00-db52-55da-bb49-8625c6cf5ca2",
+      "reason": "MVP-only reviewed validation exception; generated geometry is acceptable for MVP map coverage."
+    },
+    {
+      "slug": "kadugodi-reserved-forest",
+      "territory_id": "767d6cf6-9105-5cd8-9bb9-bfaff9fefd3f",
+      "reason": "MVP-only reviewed validation exception; generated geometry is acceptable for MVP map coverage."
+    },
+    {
+      "slug": "chikka-bellanduru-lake",
+      "territory_id": "74548fcc-63f4-5e9c-944f-c02d8f70d6ce",
+      "reason": "MVP-only reviewed validation exception; generated geometry is acceptable for MVP map coverage."
+    },
+    {
+      "slug": "east-garden",
+      "territory_id": "dc4057a0-520d-5505-a872-e13a941d9db0",
+      "reason": "MVP-only reviewed validation exception; generated geometry is acceptable for MVP map coverage."
+    },
+    {
+      "slug": "carmelaram-theology-college",
+      "territory_id": "f3ef5b22-fdfd-5700-8c4b-9a26f848cfb4",
+      "reason": "MVP-only reviewed validation exception; generated geometry is acceptable for MVP map coverage."
+    },
+    {
+      "slug": "carmelaram-lake",
+      "territory_id": "204834b5-215e-5c69-975e-5cdecc77936a",
+      "reason": "MVP-only reviewed validation exception; generated geometry is acceptable for MVP map coverage."
+    },
+    {
+      "slug": "kadiranpalaya-kere",
+      "territory_id": "0c295981-bdcc-5216-922f-079d40fa229d",
+      "reason": "MVP-only reviewed validation exception; generated geometry is acceptable for MVP map coverage."
+    },
+    {
+      "slug": "ambalipura-lower-lake",
+      "territory_id": "5c13a58f-e12e-5888-a5d6-9f4122c3a078",
+      "reason": "MVP-only reviewed validation exception; generated geometry is acceptable for MVP map coverage."
+    },
+    {
+      "slug": "karnataka-reddyjana-sangha-medical-college",
+      "territory_id": "9d3b7335-a251-5ab3-8c87-7efac79da9dd",
+      "reason": "MVP-only reviewed validation exception; generated geometry is acceptable for MVP map coverage."
+    },
+    {
+      "slug": "ambalipura-upper-lake",
+      "territory_id": "87f6d5b5-4073-5d9e-bcb7-94e50e2ba108",
+      "reason": "MVP-only reviewed validation exception; generated geometry is acceptable for MVP map coverage."
+    },
+    {
+      "slug": "nallurahalli-park",
+      "territory_id": "258afd5f-60ac-5a14-81c5-015e159d68a1",
+      "reason": "MVP-only reviewed validation exception; generated geometry is acceptable for MVP map coverage."
+    },
+    {
+      "slug": "bhoganahalli-lake",
+      "territory_id": "f47ea4c0-9e31-569d-a8ad-3f900fd3532d",
+      "reason": "MVP-only reviewed validation exception; generated geometry is acceptable for MVP map coverage."
+    },
+    {
+      "slug": "institute-of-aerospace-medicine-iam",
+      "territory_id": "0afd7acb-c8b4-5c2a-badb-39e6f2433e10",
+      "reason": "MVP-only reviewed validation exception; generated geometry is acceptable for MVP map coverage."
+    },
+    {
+      "slug": "agaram-71",
+      "territory_id": "5935d925-2e28-5181-a2a7-43789a92c4a0",
+      "reason": "MVP-only reviewed Stage 10 hard-max exception for bengaluru_mvp gameplay clustering. Parcel area is 3787724.659 m2 vs ordinary hard max 1416399.748 m2. This does not change thresholds or clustering logic globally; it permits this exact slug to proceed with explicit audit entries in gameplay reports for internal MVP visual inspection."
+    },
+    {
+      "slug": "agaram-72",
+      "territory_id": "4b7eaeda-0bcb-5d2d-9120-3ab4a865cbd3",
+      "reason": "MVP-only reviewed Stage 10 hard-max exception for bengaluru_mvp gameplay clustering. Parcel area is 4001527.303 m2 vs ordinary hard max 1416399.748 m2. This does not change thresholds or clustering logic globally; it permits this exact slug to proceed with explicit audit entries in gameplay reports for internal MVP visual inspection."
+    },
+    {
+      "slug": "gunjur-135",
+      "territory_id": "28d54504-3883-5508-8628-838447495e78",
+      "reason": "MVP-only reviewed Stage 10 hard-max exception for bengaluru_mvp gameplay clustering. Parcel area is 1467092.112 m2 vs ordinary hard max 1416399.748 m2. This does not change thresholds or clustering logic globally; it permits this exact slug to proceed with explicit audit entries in gameplay reports for internal MVP visual inspection."
+    },
+    {
+      "slug": "gunjur-136",
+      "territory_id": "f1fe3bf8-4f39-5263-903b-b4f97950595c",
+      "reason": "MVP-only reviewed Stage 10 hard-max exception for bengaluru_mvp gameplay clustering. Parcel area is 1578243.906 m2 vs ordinary hard max 1416399.748 m2. This does not change thresholds or clustering logic globally; it permits this exact slug to proceed with explicit audit entries in gameplay reports for internal MVP visual inspection."
+    },
+    {
+      "slug": "hoysala-nagara-central-75",
+      "territory_id": "5f936195-9cce-52de-a0f4-0553a7f3a403",
+      "reason": "MVP-only reviewed Stage 10 hard-max exception for bengaluru_mvp gameplay clustering. Parcel area is 1773226.568 m2 vs ordinary hard max 1416399.748 m2. This does not change thresholds or clustering logic globally; it permits this exact slug to proceed with explicit audit entries in gameplay reports for internal MVP visual inspection."
+    },
+    {
+      "slug": "kundalahalli-83",
+      "territory_id": "b3892213-841b-59a2-83ad-2b30e244aed1",
+      "reason": "MVP-only reviewed Stage 10 hard-max exception for bengaluru_mvp gameplay clustering. Parcel area is 1712603.315 m2 vs ordinary hard max 1416399.748 m2. This does not change thresholds or clustering logic globally; it permits this exact slug to proceed with explicit audit entries in gameplay reports for internal MVP visual inspection."
+    },
+    {
+      "slug": "panathur-120",
+      "territory_id": "d2253a8b-3ff7-5c41-bbcb-ed3b12dee5b8",
+      "reason": "MVP-only reviewed Stage 10 hard-max exception for bengaluru_mvp gameplay clustering. Parcel area is 1423960.701 m2 vs ordinary hard max 1416399.748 m2. This does not change thresholds or clustering logic globally; it permits this exact slug to proceed with explicit audit entries in gameplay reports for internal MVP visual inspection."
+    },
+    {
+      "slug": "ramanayakanahalli-8",
+      "territory_id": "e0dcf5be-8f22-55a6-a4fc-8b4e7e7d4fd3",
+      "reason": "MVP-only reviewed Stage 10 hard-max exception for bengaluru_mvp gameplay clustering. Parcel area is 1482600.325 m2 vs ordinary hard max 1416399.748 m2. This does not change thresholds or clustering logic globally; it permits this exact slug to proceed with explicit audit entries in gameplay reports for internal MVP visual inspection."
+    },
+    {
+      "slug": "sector-1-59",
+      "territory_id": "d065d6e8-5e12-5112-8b20-2f04e9b4a253",
+      "reason": "MVP-only reviewed Stage 10 hard-max exception for bengaluru_mvp gameplay clustering. Parcel area is 2992383.977 m2 vs ordinary hard max 1416399.748 m2. This does not change thresholds or clustering logic globally; it permits this exact slug to proceed with explicit audit entries in gameplay reports for internal MVP visual inspection."
+    },
+    {
+      "slug": "vibhootipura-31",
+      "territory_id": "734ae1e7-f1ac-5527-9737-0540efc83c41",
+      "reason": "MVP-only reviewed Stage 10 hard-max exception for bengaluru_mvp gameplay clustering. Parcel area is 3259242.872 m2 vs ordinary hard max 1416399.748 m2. This does not change thresholds or clustering logic globally; it permits this exact slug to proceed with explicit audit entries in gameplay reports for internal MVP visual inspection."
+    }
+  ]
+}

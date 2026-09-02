@@ -1,0 +1,87 @@
+{
+  "city": "bengaluru",
+  "area": "jayanagar",
+  "version": 1,
+  "_bbox_note": "south, west, north, east. Covers Jayanagar and its immediate surroundings, including Lalbagh to the north and the J.P. Nagar lakes to the south.",
+  "bbox": [
+    12.87,
+    77.54,
+    12.97,
+    77.62
+  ],
+  "_note": "Candidates, not decisions. Every entry must be verified against OSM and satellite imagery before the resulting GeoJSON is used. Delete anything whose geometry is missing, wrong, or not physically runnable.",
+  "picks": [
+    {
+      "slug": "lalbagh",
+      "name": "Lalbagh Botanical Garden",
+      "kind": "park",
+      "osm": [
+        "way[\"name\"~\"Lal ?[Bb]agh\"][\"leisure\"=\"park\"]",
+        "relation[\"name\"~\"Lal ?[Bb]agh\"][\"leisure\"=\"park\"]"
+      ]
+    },
+    {
+      "slug": "jayanagar-4th-block",
+      "name": "Jayanagar 4th Block",
+      "kind": "block",
+      "osm": [
+        "relation[\"name\"=\"Jayanagar 4th Block\"]",
+        "way[\"name\"=\"Jayanagar 4th Block\"]"
+      ]
+    },
+    {
+      "slug": "jayanagar-9th-block",
+      "name": "Jayanagar 9th Block",
+      "kind": "block",
+      "osm": [
+        "relation[\"name\"=\"Jayanagar 9th Block\"]",
+        "way[\"name\"=\"Jayanagar 9th Block\"]"
+      ]
+    },
+    {
+      "slug": "madhavan-park",
+      "name": "Madhavan Park",
+      "kind": "park",
+      "osm": [
+        "way[\"name\"=\"Madhavan Park\"]",
+        "relation[\"name\"=\"Madhavan Park\"]"
+      ]
+    },
+    {
+      "slug": "krishna-rao-park",
+      "name": "Krishna Rao Park",
+      "kind": "park",
+      "osm": [
+        "way[\"name\"~\"Krishna ?Rao\"]",
+        "relation[\"name\"~\"Krishna ?Rao\"]"
+      ]
+    },
+    {
+      "slug": "ragigudda",
+      "name": "Ragigudda",
+      "kind": "landmark",
+      "osm": [
+        "way[\"name\"~\"Ragigudda\"]",
+        "relation[\"name\"~\"Ragigudda\"]"
+      ]
+    },
+    {
+      "slug": "sarakki-lake",
+      "name": "Sarakki Lake",
+      "kind": "lake",
+      "osm": [
+        "way[\"name\"~\"Sarakki\"][\"natural\"=\"water\"]",
+        "relation[\"name\"~\"Sarakki\"][\"natural\"=\"water\"]"
+      ]
+    },
+    {
+      "slug": "puttenahalli-lake",
+      "name": "Puttenahalli Lake",
+      "kind": "lake",
+      "osm": [
+        "way[\"name\"~\"Puttenahalli\"][\"natural\"=\"water\"]",
+        "relation[\"name\"~\"Puttenahalli\"][\"natural\"=\"water\"]"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,1058 @@
+{
+  "adjacency_edges": 5830,
+  "area_rules": {
+    "above_hard_max": 0,
+    "hard_max_acres": 350.0,
+    "hard_max_m2": 1416399.74784,
+    "max_aspect_ratio": 3.0,
+    "target_max_acres": 300.0,
+    "target_max_m2": 1214056.92672
+  },
+  "atomic_absorptions": [
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 67690.175,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "Sarakki Kere",
+      "landmark_slug": "sarakki-kere",
+      "landmark_territory_id": "029c45e3-57ba-5522-99e2-c927f1dec98b",
+      "result_id": "cluster:410d236282df9e49"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 24948.806,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "Hockey Stadium",
+      "landmark_slug": "hockey-stadium",
+      "landmark_territory_id": "04f51e31-adab-5bcd-a98e-59e772a08cd0",
+      "result_id": "cluster:caa826b0667b4636"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 20806.011,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "Yediyur Lake Park",
+      "landmark_slug": "yediyur-lake-park",
+      "landmark_territory_id": "0637b49c-94e0-584d-ad6d-aacf29ac4c24",
+      "result_id": "cluster:43265c4785f47af5"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 50680.421,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "BBMP Thavarkere Park",
+      "landmark_slug": "bbmp-thavarkere-park",
+      "landmark_territory_id": "07741695-563a-5c43-bd3f-b818bf5b7dca",
+      "result_id": "cluster:684de611ba7c507f"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 20903.811,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "Carmel Convent PU College",
+      "landmark_slug": "carmel-convent-pu-college",
+      "landmark_territory_id": "0b73c440-b6fd-5bac-8bec-d709f755b82a",
+      "result_id": "cluster:5b50d056791f75b0"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 33079.962,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "Mini Forest",
+      "landmark_slug": "mini-forest",
+      "landmark_territory_id": "0c76b70f-f483-5f98-a5c9-3a702262a4f1",
+      "result_id": "cluster:7dbc2b5e58ae20c0"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 3832.81,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "City College, Bangalore",
+      "landmark_slug": "city-college-bangalore",
+      "landmark_territory_id": "0dd13b4c-91d9-5234-b244-bbb614559ee8",
+      "result_id": "cluster:cb13427715eb0ba2"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 2536.056,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "SFHS Layout Park",
+      "landmark_slug": "sfhs-layout-park",
+      "landmark_territory_id": "0eb2a0c8-5c25-5ce6-96c9-7d3c0b488883",
+      "result_id": "cluster:f1cbb8c513e028a0"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 28596.435,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "Vasavi Education Trust",
+      "landmark_slug": "vasavi-education-trust",
+      "landmark_territory_id": "0fa4c113-c8b3-59f9-845c-dccf83b3614f",
+      "result_id": "cluster:7dbc2b5e58ae20c0"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 13155.318,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "Putha Narasimhachar Park",
+      "landmark_slug": "putha-narasimhachar-park",
+      "landmark_territory_id": "135fa90f-f206-55d7-9388-f6c3f7f645b4",
+      "result_id": "cluster:6918f6468a7896fb"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 9738.843,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "Madhavan Park",
+      "landmark_slug": "madhavan-park",
+      "landmark_territory_id": "1889d57e-42c3-50e6-a9ef-1276b4ee9fdc",
+      "result_id": "cluster:5b50d056791f75b0"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 207157.861,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "Christ University",
+      "landmark_slug": "christ-university",
+      "landmark_territory_id": "1d4d1760-38cd-5ba8-9431-174db095c804",
+      "result_id": "cluster:684de611ba7c507f"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 39059.858,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "St. Joseph's University",
+      "landmark_slug": "st-joseph-s-university",
+      "landmark_territory_id": "1edfc407-6800-5bca-b071-39d2abec801c",
+      "result_id": "cluster:caa826b0667b4636"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 8064.012,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "Vishnuvardhan Park",
+      "landmark_slug": "vishnuvardhan-park",
+      "landmark_territory_id": "1f0b2f01-9ac4-5b1e-bb60-aadf1f6add8a",
+      "result_id": "cluster:a557dd912103f7cb"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 51595.952,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "Dharmaram Vidya Kshetra",
+      "landmark_slug": "dharmaram-vidya-kshetra",
+      "landmark_territory_id": "21663be6-8741-54d4-ba62-f510bf1c68fb",
+      "result_id": "cluster:684de611ba7c507f"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 107697.148,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "Dayanand Sagar Institutions",
+      "landmark_slug": "dayanand-sagar-institutions",
+      "landmark_territory_id": "230b7ba6-770c-5b1b-abac-207589d871c3",
+      "result_id": "cluster:02c1bf705be15dd3"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 3578.687,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "IBC Evacuation area park",
+      "landmark_slug": "ibc-evacuation-area-park",
+      "landmark_territory_id": "23bdfa70-07d9-51fc-b313-b5eee4397099",
+      "result_id": "cluster:684de611ba7c507f"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 16834.085,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "National College Jayanagar",
+      "landmark_slug": "national-college-jayanagar",
+      "landmark_territory_id": "24062f2d-4c54-5ad4-9d6c-8caa72242d72",
+      "result_id": "cluster:cb13427715eb0ba2"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 1862.965,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "Shamanna Park",
+      "landmark_slug": "shamanna-park",
+      "landmark_territory_id": "2473658d-8119-5294-84b9-3fe6dd9fba15",
+      "result_id": "cluster:4ece1c4b08468f84"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 23175.594,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "Sarakki Lake Park",
+      "landmark_slug": "sarakki-lake-park",
+      "landmark_territory_id": "2504ed62-b89d-5faa-b737-3c3c023b52b7",
+      "result_id": "cluster:410d236282df9e49"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 13124.065,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "Bishop Cotton's Women's Christian College",
+      "landmark_slug": "bishop-cotton-s-women-s-christian-college",
+      "landmark_territory_id": "29ff37a6-9dbd-59ce-8239-a3e282c65b1b",
+      "result_id": "cluster:ed1ad0268a894b5f"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 81313.519,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "MN Krishna Rao Park",
+      "landmark_slug": "mn-krishna-rao-park",
+      "landmark_territory_id": "2c299890-7aa9-5d62-bdb9-d1c8f5190542",
+      "result_id": "cluster:0bb6f976751cb4f6"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 10792.72,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "Richmond Town Park",
+      "landmark_slug": "richmond-town-park",
+      "landmark_territory_id": "2da398c4-85e2-56cd-9edf-2866a94b9cde",
+      "result_id": "cluster:caa826b0667b4636"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 44101.696,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "BMS College of Engineering",
+      "landmark_slug": "bms-college-of-engineering",
+      "landmark_territory_id": "2e0ae565-78ba-59ce-8161-2196b1c055d3",
+      "result_id": "cluster:0bb6f976751cb4f6"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 5066.529,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "Jayanti Garden",
+      "landmark_slug": "jayanti-garden",
+      "landmark_territory_id": "2f3570d9-2d31-5dca-aa01-d3a7ccb8d425",
+      "result_id": "cluster:0bb6f976751cb4f6"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 5329.386,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "Makkala Koota Playground & Children Park",
+      "landmark_slug": "makkala-koota-playground-children-park",
+      "landmark_territory_id": "3294cde3-3609-5f58-88e7-c9542c856ac0",
+      "result_id": "cluster:999c70b78ce7ed92"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 678.95,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "Freedom Park",
+      "landmark_slug": "freedom-park",
+      "landmark_territory_id": "38885b8c-d71a-53fd-9121-e1e50efaf6f1",
+      "result_id": "cluster:3b98a92b14b4ac98"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 127521.108,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "Fire Service Campus",
+      "landmark_slug": "fire-service-campus",
+      "landmark_territory_id": "3a240426-b3d7-5685-b1d5-6cf53199ea50",
+      "result_id": "cluster:e679086d5d33a9bd"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 96554.029,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "National Dairy Research Institute Adugodi",
+      "landmark_slug": "national-dairy-research-institute-adugodi",
+      "landmark_territory_id": "45516c11-0449-5753-a668-b7c5fafb021a",
+      "result_id": "cluster:3dc97bff0ae056e1"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 8095.639,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "Jaraganahalli Park",
+      "landmark_slug": "jaraganahalli-park",
+      "landmark_territory_id": "4a4e4430-5edb-5f5d-a165-cd5efab8f3b2",
+      "result_id": "cluster:410d236282df9e49"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 2665.797,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "Jain Centre for Management Studies",
+      "landmark_slug": "jain-centre-for-management-studies",
+      "landmark_territory_id": "4a75298c-e7e6-56df-8659-232aa826dbe8",
+      "result_id": "cluster:ed1ad0268a894b5f"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 3168.487,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "BTM Water Tank Park",
+      "landmark_slug": "btm-water-tank-park",
+      "landmark_territory_id": "4d85d3a9-8ec5-530b-b1d0-1354581eebb7",
+      "result_id": "cluster:f1cbb8c513e028a0"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 11647.531,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "ME & WA College",
+      "landmark_slug": "me-wa-college",
+      "landmark_territory_id": "5224e6a0-72d4-5ffa-a275-e35bd0c9384d",
+      "result_id": "cluster:a557dd912103f7cb"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 2747.212,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "Journalist Colony Garden",
+      "landmark_slug": "journalist-colony-garden",
+      "landmark_territory_id": "5236c007-93f2-551d-b365-163f2e4d0401",
+      "result_id": "cluster:bf473dfcc9058192"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 4619.707,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "DV Gundappa Park",
+      "landmark_slug": "dv-gundappa-park",
+      "landmark_territory_id": "52ebb6d6-55f1-51bf-a6cc-8c6492b3f014",
+      "result_id": "cluster:d38a89b5a195b242"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 3906.507,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "Yelachenahalli Kere Park",
+      "landmark_slug": "yelachenahalli-kere-park",
+      "landmark_territory_id": "5739b2ea-2eb1-5f98-aa52-df72395be41e",
+      "result_id": "cluster:34931c75a8b0717d"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 7822.322,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "Dollars Colony Park",
+      "landmark_slug": "dollars-colony-park",
+      "landmark_territory_id": "576f4d64-9847-5c01-ae67-4908d465911f",
+      "result_id": "cluster:3b98a92b14b4ac98"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 1179.352,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "RV Dental College",
+      "landmark_slug": "rv-dental-college",
+      "landmark_territory_id": "5d024f84-f49b-582e-ace3-77112ed9664e",
+      "result_id": "cluster:7aacf093afc36050"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 47292.606,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "Bugle Rock Park",
+      "landmark_slug": "bugle-rock-park",
+      "landmark_territory_id": "6961f8c6-a7f1-5ce4-b579-940bc602284e",
+      "result_id": "cluster:4ece1c4b08468f84"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 3398.303,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "Bangalore International Academy",
+      "landmark_slug": "bangalore-international-academy",
+      "landmark_territory_id": "6ab9df30-e916-57f5-b8df-3b6ead121350",
+      "result_id": "cluster:cb13427715eb0ba2"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 16792.859,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "Government Pharmacy College",
+      "landmark_slug": "government-pharmacy-college",
+      "landmark_territory_id": "6e0a4cf7-7268-572a-8dd6-3d48add007c9",
+      "result_id": "cluster:ed1ad0268a894b5f"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 4802.044,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "Government College of Nursing",
+      "landmark_slug": "government-college-of-nursing",
+      "landmark_territory_id": "72acc432-8800-522c-a6a1-84d7b5d8a14d",
+      "result_id": "cluster:74d99afef560bb7e"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 5321.092,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "Senior Citizen Park",
+      "landmark_slug": "senior-citizen-park",
+      "landmark_territory_id": "7d8945dd-838b-58b4-bbac-e5d232d78e6d",
+      "result_id": "cluster:6918f6468a7896fb"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 27952.435,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "Vijaya College",
+      "landmark_slug": "vijaya-college",
+      "landmark_territory_id": "81290955-d0e7-5386-a671-777e4b5f91f0",
+      "result_id": "cluster:32b31aa9a2514b50"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 10587.925,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "Sri SK Nataraj Park",
+      "landmark_slug": "sri-sk-nataraj-park",
+      "landmark_territory_id": "877388d8-28c9-574b-96c5-bf0c78444402",
+      "result_id": "cluster:21f2b6981e05a14c"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 20099.832,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "BES Educational Institutions",
+      "landmark_slug": "bes-educational-institutions",
+      "landmark_territory_id": "8b0c9a65-64ed-5a9a-86ce-2bc0120eb040",
+      "result_id": "cluster:5b50d056791f75b0"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 11856.644,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "Kitturu Rani Chennamma Park",
+      "landmark_slug": "kitturu-rani-chennamma-park",
+      "landmark_territory_id": "8f92b61e-f1b2-5c63-ba8f-3adc5c7d326f",
+      "result_id": "cluster:e1d4fe862df96533"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 67676.601,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "Government Technical Industrial Institute",
+      "landmark_slug": "government-technical-industrial-institute",
+      "landmark_territory_id": "95c95d8e-74b6-531e-ad03-89f3c151a86d",
+      "result_id": "cluster:e679086d5d33a9bd"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 26159.389,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "Byrasandra Lake",
+      "landmark_slug": "byrasandra-lake",
+      "landmark_territory_id": "9749e38c-634c-593c-938f-1014f1fac959",
+      "result_id": "cluster:e679086d5d33a9bd"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 2860.069,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "Maruthi Layout Park",
+      "landmark_slug": "maruthi-layout-park",
+      "landmark_territory_id": "9767bff7-6a20-5c1b-9ba5-c5572f2a4191",
+      "result_id": "cluster:72cacb7278e11dd7"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 18837.518,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "Government Dental College and Research Institute",
+      "landmark_slug": "government-dental-college-and-research-institute",
+      "landmark_territory_id": "99b1eb4c-2b6f-5f4d-94ab-50b39dc00e31",
+      "result_id": "cluster:74d99afef560bb7e"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 6964.709,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "Theosophical Society",
+      "landmark_slug": "theosophical-society",
+      "landmark_territory_id": "9a88fd32-29ea-5bc0-ad81-2925a94e6532",
+      "result_id": "cluster:164c7a487098badc"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 3118.369,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "Uma Maheshwara park",
+      "landmark_slug": "uma-maheshwara-park",
+      "landmark_territory_id": "9bc24ef7-6d9a-58fe-97bd-a598c67d995b",
+      "result_id": "cluster:cb13427715eb0ba2"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 24123.333,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "NMKRV College",
+      "landmark_slug": "nmkrv-college",
+      "landmark_territory_id": "a02106cd-f20a-5605-8152-d4be2e3d219e",
+      "result_id": "cluster:7aacf093afc36050"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 3183.043,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "Yelachenahalli Kere",
+      "landmark_slug": "yelachenahalli-kere",
+      "landmark_territory_id": "a235493e-660c-5ed4-b4dc-781e762f860c",
+      "result_id": "cluster:34931c75a8b0717d"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 49340.953,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "National Power Training Institute",
+      "landmark_slug": "national-power-training-institute",
+      "landmark_territory_id": "a34c16de-8da4-5284-9d26-90a2a9fe32a8",
+      "result_id": "cluster:02c1bf705be15dd3"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 5352.714,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "Madhava Rao Park",
+      "landmark_slug": "madhava-rao-park",
+      "landmark_territory_id": "a58b7d47-de0a-597d-b1fb-700de6aead03",
+      "result_id": "cluster:0bb6f976751cb4f6"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 6633.502,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "BTM",
+      "landmark_slug": "btm",
+      "landmark_territory_id": "b5b8996a-5fc6-59a7-b83f-deeff90c17fc",
+      "result_id": "cluster:f1cbb8c513e028a0"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 11682.73,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "National College",
+      "landmark_slug": "national-college",
+      "landmark_territory_id": "b7e132e1-0a2a-57b7-b5f3-6030bc90a72e",
+      "result_id": "cluster:cb13427715eb0ba2"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 1758.726,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "Nandanvan Childrens play Park",
+      "landmark_slug": "nandanvan-childrens-play-park",
+      "landmark_territory_id": "b9a3827e-4509-5835-b45a-268499f4e8b1",
+      "result_id": "cluster:a557dd912103f7cb"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 2045.647,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "LIC Colony Park",
+      "landmark_slug": "lic-colony-park",
+      "landmark_territory_id": "bb187a29-90fe-52f5-a43b-a469106f18a2",
+      "result_id": "cluster:5b50d056791f75b0"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 13108.498,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "United Mission PUC and Degree College",
+      "landmark_slug": "united-mission-puc-and-degree-college",
+      "landmark_territory_id": "bb3117f4-eecd-5771-9e69-bfa707d0c915",
+      "result_id": "cluster:ed1ad0268a894b5f"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 10382.892,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "RV Institute of Management",
+      "landmark_slug": "rv-institute-of-management",
+      "landmark_territory_id": "bcc93a64-1ac5-5578-a103-d1aa27eab7f2",
+      "result_id": "cluster:a557dd912103f7cb"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 1393.585,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "Surana College",
+      "landmark_slug": "surana-college",
+      "landmark_territory_id": "be4aa5ea-1a2b-5070-9db0-9bcb219b2312",
+      "result_id": "cluster:43265c4785f47af5"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 1595.05,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "Ambedkar Park",
+      "landmark_slug": "ambedkar-park",
+      "landmark_territory_id": "bebee8eb-f14f-574c-91ab-14021426699f",
+      "result_id": "cluster:cb13427715eb0ba2"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 2906.767,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "Baldwin Women's Methodist College",
+      "landmark_slug": "baldwin-women-s-methodist-college",
+      "landmark_territory_id": "c11ee51d-a691-5e9f-96a2-10cc93cd6ba5",
+      "result_id": "cluster:caa826b0667b4636"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 13376.552,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "Kuvempu Park",
+      "landmark_slug": "kuvempu-park",
+      "landmark_territory_id": "c2995819-d99e-5fb7-bebe-4fab8131416a",
+      "result_id": "cluster:f1cbb8c513e028a0"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 4918.338,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "Canara Bank Park",
+      "landmark_slug": "canara-bank-park",
+      "landmark_territory_id": "c69c5e95-5e27-5826-a0fa-fe97b1c99923",
+      "result_id": "cluster:ed1ad0268a894b5f"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 6874.219,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "Sajjan Rao Park",
+      "landmark_slug": "sajjan-rao-park",
+      "landmark_territory_id": "c83b3b8c-7eff-5a70-b82f-3339a5f37ceb",
+      "result_id": "cluster:bf473dfcc9058192"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 1475.603,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "Doctor Mujahid Pasha Park",
+      "landmark_slug": "doctor-mujahid-pasha-park",
+      "landmark_territory_id": "cc07ee5c-34c9-5cf4-bf13-7ce1b6a29941",
+      "result_id": "cluster:54a4bef6e55c8970"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 8066.498,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "Al Ameen Pre and Degree College",
+      "landmark_slug": "al-ameen-pre-and-degree-college",
+      "landmark_territory_id": "cf1c5470-a17e-5f1d-9e17-365b26719d82",
+      "result_id": "cluster:e1d4fe862df96533"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 6587.72,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "Rainwater Harvesting Theme Park",
+      "landmark_slug": "rainwater-harvesting-theme-park",
+      "landmark_territory_id": "d356f924-9eb8-501b-be9f-5ae0584600f5",
+      "result_id": "cluster:6918f6468a7896fb"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 1202.183,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "Nanjudeshwara Layout Public Park",
+      "landmark_slug": "nanjudeshwara-layout-public-park",
+      "landmark_territory_id": "d3b15372-ff01-5568-bc2d-3b8e940b5051",
+      "result_id": "cluster:21f2b6981e05a14c"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 6770.002,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "Indira Gandhi National Open University",
+      "landmark_slug": "indira-gandhi-national-open-university",
+      "landmark_territory_id": "d46e6636-18bf-5838-bc94-3e158fd09b6c",
+      "result_id": "cluster:caa826b0667b4636"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 27765.691,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "Silver Jubilee Park",
+      "landmark_slug": "silver-jubilee-park",
+      "landmark_territory_id": "d4c6ba30-5442-53b9-be41-d8879cfdb237",
+      "result_id": "cluster:ed1ad0268a894b5f"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 10810.895,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "Brindavana Park",
+      "landmark_slug": "brindavana-park",
+      "landmark_territory_id": "d652b5d0-3af0-5329-a54b-500f9f22a568",
+      "result_id": "cluster:7aacf093afc36050"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 3164.28,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "BTM Park",
+      "landmark_slug": "btm-park",
+      "landmark_territory_id": "d6b96ac5-d734-5152-b0f6-47dbdff3ea39",
+      "result_id": "cluster:14b29d3b04941bba"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 2237.154,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "Bhuvaneshwari Park",
+      "landmark_slug": "bhuvaneshwari-park",
+      "landmark_territory_id": "d7a01a4f-d420-5111-99f3-986e8a09b486",
+      "result_id": "cluster:e1d4fe862df96533"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 8314.805,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "R V Teachers College",
+      "landmark_slug": "r-v-teachers-college",
+      "landmark_territory_id": "d8fbb141-724a-58d1-9589-8227302874e3",
+      "result_id": "cluster:32b31aa9a2514b50"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 9849.151,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "Ghousia Polytechnic",
+      "landmark_slug": "ghousia-polytechnic",
+      "landmark_territory_id": "e080bf78-2c5d-5967-ae3e-ba2452c8a5a1",
+      "result_id": "cluster:684de611ba7c507f"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 13082.07,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "Banashankari Brundavana Park",
+      "landmark_slug": "banashankari-brundavana-park",
+      "landmark_territory_id": "e5cc779c-5d97-5bcd-b084-7785ba36f76a",
+      "result_id": "cluster:d38a89b5a195b242"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 39052.653,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "Yediyur Lake",
+      "landmark_slug": "yediyur-lake",
+      "landmark_territory_id": "e7d1e0d5-8628-5a93-854b-aaaf207e5101",
+      "result_id": "cluster:43265c4785f47af5"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 2777.361,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "Vokkaligara Sangha Dental College",
+      "landmark_slug": "vokkaligara-sangha-dental-college",
+      "landmark_territory_id": "f1793d31-bdb1-5014-99c8-64f33f82a4a5",
+      "result_id": "cluster:bf473dfcc9058192"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 88128.815,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "National Institute of Animal Nutrition and Physiology",
+      "landmark_slug": "national-institute-of-animal-nutrition-and-physiology",
+      "landmark_territory_id": "f369de0e-028f-57bf-bd9a-1606ece19071",
+      "result_id": "cluster:3dc97bff0ae056e1"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 6824.433,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "Jain University",
+      "landmark_slug": "jain-university",
+      "landmark_territory_id": "f4aaddc6-086c-5141-a11e-80a64be66f5a",
+      "result_id": "cluster:a557dd912103f7cb"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 19076.872,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "Byrasandra Lake Park",
+      "landmark_slug": "byrasandra-lake-park",
+      "landmark_territory_id": "f538a748-5a3c-5fe3-8c7a-08f34ba27a6b",
+      "result_id": "cluster:e679086d5d33a9bd"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 11390.683,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "Al-Ameen Arts and Science College",
+      "landmark_slug": "al-ameen-arts-and-science-college",
+      "landmark_territory_id": "f54d3f0b-373e-5c21-9a0d-0b9093b2df7f",
+      "result_id": "cluster:e1d4fe862df96533"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 10173.827,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "Public Park",
+      "landmark_slug": "public-park",
+      "landmark_territory_id": "fb209459-dc00-5d35-ae86-74e546f17b13",
+      "result_id": "cluster:d38a89b5a195b242"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 140420.392,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "Laxman Rao Park",
+      "landmark_slug": "laxman-rao-park",
+      "landmark_territory_id": "fc120550-06f4-586e-b0d9-b2c94f2ab5a8",
+      "result_id": "cluster:7aacf093afc36050"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 1825.249,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "Baldwin Methodist College",
+      "landmark_slug": "baldwin-methodist-college",
+      "landmark_territory_id": "fdba135a-5457-54c3-92a2-53939800394f",
+      "result_id": "cluster:ed991d6425c72617"
+    },
+    {
+      "absorbed_into_kind": "fabric",
+      "area_m2": 1220.51,
+      "decision": "deferred_to_general_clustering",
+      "landmark_name": "Smt. Komala Ramachandra Park",
+      "landmark_slug": "smt-komala-ramachandra-park",
+      "landmark_territory_id": "fdc9cbdf-4164-59a9-ba63-bd801415a3ea",
+      "result_id": "cluster:4ece1c4b08468f84"
+    }
+  ],
+  "atomic_expansions": [],
+  "barrier_blocked_edges": 212,
+  "dedicated_landmark_count": 0,
+  "fabric_input_count": 2368,
+  "fabric_output_count": 33,
+  "input_count": 2370,
+  "merge_failures": [],
+  "merges": 2335,
+  "needs_review_count": 33,
+  "output_count": 35,
+  "parcel_hash": "9aa716bb05c780ee86482b51790c3885e2a6078412fe0e4ad6a94264856caa22",
+  "protected_count": 2,
+  "separators_hash": "c66e65238a6e4bb2947be66968b86c41955016b80178ffc18028eeaed4078f5e",
+  "size": {
+    "above_review_max": 0,
+    "above_soft_max": 4,
+    "area_max_m2": 1397820.476,
+    "area_mean_m2": 1021311.558,
+    "area_median_m2": 1040981.103,
+    "area_min_m2": 475966.611,
+    "below_soft_min": 14,
+    "in_soft_band": 15
+  },
+  "soft_flags": [
+    {
+      "reasons": [
+        "needs_review"
+      ],
+      "slug": "abdul-kalam-nagar"
+    },
+    {
+      "reasons": [
+        "undersized"
+      ],
+      "slug": "ashokanagar"
+    },
+    {
+      "reasons": [
+        "needs_review"
+      ],
+      "slug": "banashankari-temple-ward"
+    },
+    {
+      "reasons": [
+        "undersized"
+      ],
+      "slug": "bhel-ward"
+    },
+    {
+      "reasons": [
+        "needs_review"
+      ],
+      "slug": "bilekahalli"
+    },
+    {
+      "reasons": [
+        "undersized"
+      ],
+      "slug": "d-v-gundappa-ward"
+    },
+    {
+      "reasons": [
+        "needs_review"
+      ],
+      "slug": "dharmagiri-ward"
+    },
+    {
+      "reasons": [
+        "needs_review"
+      ],
+      "slug": "hombegowda-nagara"
+    },
+    {
+      "reasons": [
+        "undersized"
+      ],
+      "slug": "j-p-nagar"
+    },
+    {
+      "reasons": [
+        "undersized"
+      ],
+      "slug": "jayanagar-2nd-block"
+    },
+    {
+      "reasons": [
+        "above_300_acre_target"
+      ],
+      "slug": "jayanagar-4t-block"
+    },
+    {
+      "reasons": [
+        "needs_review"
+      ],
+      "slug": "jayanagar-4th-block"
+    },
+    {
+      "reasons": [
+        "above_300_acre_target"
+      ],
+      "slug": "jayanagar-7th-block"
+    },
+    {
+      "reasons": [
+        "needs_review"
+      ],
+      "slug": "jp-nagar-1st-phase"
+    },
+    {
+      "reasons": [
+        "needs_review"
+      ],
+      "slug": "jp-nagar-3rd-phase"
+    },
+    {
+      "reasons": [
+        "undersized"
+      ],
+      "slug": "k-r-market"
+    },
+    {
+      "reasons": [
+        "undersized"
+      ],
+      "slug": "kanakanapalya"
+    },
+    {
+      "reasons": [
+        "needs_review"
+      ],
+      "slug": "kengal-hanumanthaiah-south"
+    },
+    {
+      "reasons": [
+        "needs_review"
+      ],
+      "slug": "lakkasandra"
+    },
+    {
+      "reasons": [
+        "needs_review"
+      ],
+      "slug": "marenahalli-south"
+    },
+    {
+      "reasons": [
+        "undersized"
+      ],
+      "slug": "n-r-colony"
+    },
+    {
+      "reasons": [
+        "needs_review"
+      ],
+      "slug": "s-g-palya"
+    },
+    {
+      "reasons": [
+        "needs_review"
+      ],
+      "slug": "sarakki"
+    },
+    {
+      "reasons": [
+        "needs_review"
+      ],
+      "slug": "shanthinagar"
+    },
+    {
+      "reasons": [
+        "above_300_acre_target"
+      ],
+      "slug": "silverjubilee-park-ward"
+    },
+    {
+      "reasons": [
+        "undersized"
+      ],
+      "slug": "sunkenahalli"
+    },
+    {
+      "reasons": [
+        "undersized"
+      ],
+      "slug": "sunkenahalli-2"
+    },
+    {
+      "reasons": [
+        "undersized"
+      ],
+      "slug": "tilak-nagara"
+    },
+    {
+      "reasons": [
+        "undersized"
+      ],
+      "slug": "v-v-puram"
+    },
+    {
+      "reasons": [
+        "above_300_acre_target"
+      ],
+      "slug": "vinayakanagar"
+    },
+    {
+      "reasons": [
+        "needs_review"
+      ],
+      "slug": "viswamanava-kuvempu-ward"
+    },
+    {
+      "reasons": [
+        "undersized"
+      ],
+      "slug": "yediyuru"
+    },
+    {
+      "reasons": [
+        "undersized"
+      ],
+      "slug": "yelachenahalli"
+    }
+  ],
+  "stage": "cluster_gameplay",
+  "unabsorbed_atomic": [],
+  "undersized_stuck": 0
+}

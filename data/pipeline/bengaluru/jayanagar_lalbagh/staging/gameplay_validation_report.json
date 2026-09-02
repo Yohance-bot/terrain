@@ -1,0 +1,639 @@
+{
+  "hard": {
+    "failures": [],
+    "passed": true
+  },
+  "metrics": {
+    "aoi_area_m2": 35154722.878,
+    "corner_budget_failures": [],
+    "coverage_ratio": 1.0,
+    "enclave_failures": [],
+    "feature_count": 35,
+    "gap_m2": 0.004461,
+    "legendary_count": 2,
+    "max_aspect_ratio": 3.0,
+    "max_exterior_corners": 10,
+    "ordinary_below_floor": [
+      {
+        "area_acres": 182.969,
+        "area_m2": 740448.295,
+        "aspect_ratio": 3.063258,
+        "exterior_corners": 150,
+        "name": "Ashokanagar",
+        "slug": "ashokanagar",
+        "territory_class": "ordinary",
+        "territory_id": "96bb16dc-3915-5bf0-a58e-b4d862e3db25",
+        "total_exterior_corners": 150
+      },
+      {
+        "area_acres": 203.025,
+        "area_m2": 821611.175,
+        "aspect_ratio": 1.940853,
+        "exterior_corners": 152,
+        "name": "BHEL Ward",
+        "slug": "bhel-ward",
+        "territory_class": "ordinary",
+        "territory_id": "a2f11b32-4b43-5a84-ae5b-dc92140cae8f",
+        "total_exterior_corners": 210
+      },
+      {
+        "area_acres": 199.135,
+        "area_m2": 805869.814,
+        "aspect_ratio": 1.641618,
+        "exterior_corners": 212,
+        "name": "D.V Gundappa Ward",
+        "slug": "d-v-gundappa-ward",
+        "territory_class": "ordinary",
+        "territory_id": "48a9eeac-303c-52db-92f8-a7580686fd9c",
+        "total_exterior_corners": 212
+      },
+      {
+        "area_acres": 117.614,
+        "area_m2": 475966.611,
+        "aspect_ratio": 1.101471,
+        "exterior_corners": 157,
+        "name": "J.P Nagar",
+        "slug": "j-p-nagar",
+        "territory_class": "ordinary",
+        "territory_id": "d2cb7275-462c-53ef-ab21-031a4aaad428",
+        "total_exterior_corners": 157
+      },
+      {
+        "area_acres": 228.97,
+        "area_m2": 926607.235,
+        "aspect_ratio": 2.697163,
+        "exterior_corners": 246,
+        "name": "Jayanagar 2nd Block",
+        "slug": "jayanagar-2nd-block",
+        "territory_class": "ordinary",
+        "territory_id": "ce1bca80-9adf-50db-936e-f79967d7bf43",
+        "total_exterior_corners": 281
+      },
+      {
+        "area_acres": 219.971,
+        "area_m2": 890191.53,
+        "aspect_ratio": 1.222837,
+        "exterior_corners": 114,
+        "name": "K.R Market",
+        "slug": "k-r-market",
+        "territory_class": "ordinary",
+        "territory_id": "74a73762-154c-5635-89cf-182cd0cf0c7a",
+        "total_exterior_corners": 114
+      },
+      {
+        "area_acres": 242.831,
+        "area_m2": 982703.671,
+        "aspect_ratio": 1.142025,
+        "exterior_corners": 189,
+        "name": "Kanakanapalya",
+        "slug": "kanakanapalya",
+        "territory_class": "ordinary",
+        "territory_id": "6f7baf6a-6204-5194-bb3f-602b1c225f58",
+        "total_exterior_corners": 232
+      },
+      {
+        "area_acres": 230.515,
+        "area_m2": 932859.171,
+        "aspect_ratio": 1.205951,
+        "exterior_corners": 138,
+        "name": "N.R Colony",
+        "slug": "n-r-colony",
+        "territory_class": "ordinary",
+        "territory_id": "35b3cd77-3b9d-5647-9bce-2fdf015e8422",
+        "total_exterior_corners": 138
+      },
+      {
+        "area_acres": 227.442,
+        "area_m2": 920424.502,
+        "aspect_ratio": 1.243538,
+        "exterior_corners": 263,
+        "name": "Sunkenahalli",
+        "slug": "sunkenahalli",
+        "territory_class": "ordinary",
+        "territory_id": "b6027fc2-e64f-51b6-b8ee-73d8e4d36cc9",
+        "total_exterior_corners": 263
+      },
+      {
+        "area_acres": 240.777,
+        "area_m2": 974391.9,
+        "aspect_ratio": 1.141926,
+        "exterior_corners": 150,
+        "name": "Sunkenahalli",
+        "slug": "sunkenahalli-2",
+        "territory_class": "ordinary",
+        "territory_id": "23e54dc5-113d-5319-941f-79cf7051eab9",
+        "total_exterior_corners": 150
+      },
+      {
+        "area_acres": 229.519,
+        "area_m2": 928830.177,
+        "aspect_ratio": 1.589653,
+        "exterior_corners": 210,
+        "name": "Tilak Nagara",
+        "slug": "tilak-nagara",
+        "territory_class": "ordinary",
+        "territory_id": "cabd8c7b-1cde-5715-9584-a84ab9b8ba16",
+        "total_exterior_corners": 210
+      },
+      {
+        "area_acres": 240.802,
+        "area_m2": 974492.675,
+        "aspect_ratio": 1.760737,
+        "exterior_corners": 248,
+        "name": "V.V Puram",
+        "slug": "v-v-puram",
+        "territory_class": "ordinary",
+        "territory_id": "bbb6acfa-20e3-514d-843c-1489889c22fc",
+        "total_exterior_corners": 248
+      },
+      {
+        "area_acres": 241.019,
+        "area_m2": 975368.139,
+        "aspect_ratio": 1.280914,
+        "exterior_corners": 282,
+        "name": "Yediyuru",
+        "slug": "yediyuru",
+        "territory_class": "ordinary",
+        "territory_id": "dcf3fde9-e029-5ad0-9f7f-190ef591e24d",
+        "total_exterior_corners": 282
+      },
+      {
+        "area_acres": 164.846,
+        "area_m2": 667106.582,
+        "aspect_ratio": 1.05779,
+        "exterior_corners": 119,
+        "name": "Yelachenahalli",
+        "slug": "yelachenahalli",
+        "territory_class": "ordinary",
+        "territory_id": "324154bc-2dbc-5af3-b978-9642a6fa7d26",
+        "total_exterior_corners": 119
+      }
+    ],
+    "ordinary_count": 33,
+    "overlap_m2": 1e-06,
+    "protected_count": 2
+  },
+  "soft": {
+    "needs_review": [
+      {
+        "area_m2": 1041058.131,
+        "reasons": [
+          "needs_review"
+        ],
+        "slug": "abdul-kalam-nagar"
+      },
+      {
+        "area_m2": 740448.295,
+        "reasons": [
+          "undersized"
+        ],
+        "slug": "ashokanagar"
+      },
+      {
+        "area_m2": 1040981.103,
+        "reasons": [
+          "needs_review"
+        ],
+        "slug": "banashankari-temple-ward"
+      },
+      {
+        "area_m2": 821611.175,
+        "reasons": [
+          "undersized"
+        ],
+        "slug": "bhel-ward"
+      },
+      {
+        "area_m2": 1206324.89,
+        "reasons": [
+          "needs_review"
+        ],
+        "slug": "bilekahalli"
+      },
+      {
+        "area_m2": 805869.814,
+        "reasons": [
+          "undersized"
+        ],
+        "slug": "d-v-gundappa-ward"
+      },
+      {
+        "area_m2": 1181527.469,
+        "reasons": [
+          "needs_review"
+        ],
+        "slug": "dharmagiri-ward"
+      },
+      {
+        "area_m2": 1018376.599,
+        "reasons": [
+          "needs_review"
+        ],
+        "slug": "hombegowda-nagara"
+      },
+      {
+        "area_m2": 475966.611,
+        "reasons": [
+          "undersized"
+        ],
+        "slug": "j-p-nagar"
+      },
+      {
+        "area_m2": 926607.235,
+        "reasons": [
+          "undersized"
+        ],
+        "slug": "jayanagar-2nd-block"
+      },
+      {
+        "area_m2": 1235543.796,
+        "reasons": [
+          "above_300_acre_target"
+        ],
+        "slug": "jayanagar-4t-block"
+      },
+      {
+        "area_m2": 1092904.593,
+        "reasons": [
+          "needs_review"
+        ],
+        "slug": "jayanagar-4th-block"
+      },
+      {
+        "area_m2": 1237766.672,
+        "reasons": [
+          "above_300_acre_target"
+        ],
+        "slug": "jayanagar-7th-block"
+      },
+      {
+        "area_m2": 1051341.668,
+        "reasons": [
+          "needs_review"
+        ],
+        "slug": "jp-nagar-1st-phase"
+      },
+      {
+        "area_m2": 1069377.836,
+        "reasons": [
+          "needs_review"
+        ],
+        "slug": "jp-nagar-3rd-phase"
+      },
+      {
+        "area_m2": 890191.53,
+        "reasons": [
+          "undersized"
+        ],
+        "slug": "k-r-market"
+      },
+      {
+        "area_m2": 982703.671,
+        "reasons": [
+          "undersized"
+        ],
+        "slug": "kanakanapalya"
+      },
+      {
+        "area_m2": 1074483.793,
+        "reasons": [
+          "needs_review"
+        ],
+        "slug": "kengal-hanumanthaiah-south"
+      },
+      {
+        "area_m2": 1094418.003,
+        "reasons": [
+          "needs_review"
+        ],
+        "slug": "lakkasandra"
+      },
+      {
+        "area_m2": 1038156.559,
+        "reasons": [
+          "needs_review"
+        ],
+        "slug": "marenahalli-south"
+      },
+      {
+        "area_m2": 932859.171,
+        "reasons": [
+          "undersized"
+        ],
+        "slug": "n-r-colony"
+      },
+      {
+        "area_m2": 1103642.45,
+        "reasons": [
+          "needs_review"
+        ],
+        "slug": "s-g-palya"
+      },
+      {
+        "area_m2": 1170210.076,
+        "reasons": [
+          "needs_review"
+        ],
+        "slug": "sarakki"
+      },
+      {
+        "area_m2": 1206492.967,
+        "reasons": [
+          "needs_review"
+        ],
+        "slug": "shanthinagar"
+      },
+      {
+        "area_m2": 1241038.499,
+        "reasons": [
+          "above_300_acre_target"
+        ],
+        "slug": "silverjubilee-park-ward"
+      },
+      {
+        "area_m2": 920424.502,
+        "reasons": [
+          "undersized"
+        ],
+        "slug": "sunkenahalli"
+      },
+      {
+        "area_m2": 974391.9,
+        "reasons": [
+          "undersized"
+        ],
+        "slug": "sunkenahalli-2"
+      },
+      {
+        "area_m2": 928830.177,
+        "reasons": [
+          "undersized"
+        ],
+        "slug": "tilak-nagara"
+      },
+      {
+        "area_m2": 974492.675,
+        "reasons": [
+          "undersized"
+        ],
+        "slug": "v-v-puram"
+      },
+      {
+        "area_m2": 1397820.476,
+        "reasons": [
+          "above_300_acre_target"
+        ],
+        "slug": "vinayakanagar"
+      },
+      {
+        "area_m2": 1184944.358,
+        "reasons": [
+          "needs_review"
+        ],
+        "slug": "viswamanava-kuvempu-ward"
+      },
+      {
+        "area_m2": 975368.139,
+        "reasons": [
+          "undersized"
+        ],
+        "slug": "yediyuru"
+      },
+      {
+        "area_m2": 667106.582,
+        "reasons": [
+          "undersized"
+        ],
+        "slug": "yelachenahalli"
+      },
+      {
+        "area_acres": 182.969,
+        "area_m2": 740448.295,
+        "reasons": [
+          "below_250_acre_target"
+        ],
+        "slug": "ashokanagar"
+      },
+      {
+        "area_acres": 203.025,
+        "area_m2": 821611.175,
+        "reasons": [
+          "below_250_acre_target"
+        ],
+        "slug": "bhel-ward"
+      },
+      {
+        "area_acres": 199.135,
+        "area_m2": 805869.814,
+        "reasons": [
+          "below_250_acre_target"
+        ],
+        "slug": "d-v-gundappa-ward"
+      },
+      {
+        "area_acres": 117.614,
+        "area_m2": 475966.611,
+        "reasons": [
+          "below_250_acre_target"
+        ],
+        "slug": "j-p-nagar"
+      },
+      {
+        "area_acres": 228.97,
+        "area_m2": 926607.235,
+        "reasons": [
+          "below_250_acre_target"
+        ],
+        "slug": "jayanagar-2nd-block"
+      },
+      {
+        "area_acres": 219.971,
+        "area_m2": 890191.53,
+        "reasons": [
+          "below_250_acre_target"
+        ],
+        "slug": "k-r-market"
+      },
+      {
+        "area_acres": 242.831,
+        "area_m2": 982703.671,
+        "reasons": [
+          "below_250_acre_target"
+        ],
+        "slug": "kanakanapalya"
+      },
+      {
+        "area_acres": 230.515,
+        "area_m2": 932859.171,
+        "reasons": [
+          "below_250_acre_target"
+        ],
+        "slug": "n-r-colony"
+      },
+      {
+        "area_acres": 227.442,
+        "area_m2": 920424.502,
+        "reasons": [
+          "below_250_acre_target"
+        ],
+        "slug": "sunkenahalli"
+      },
+      {
+        "area_acres": 240.777,
+        "area_m2": 974391.9,
+        "reasons": [
+          "below_250_acre_target"
+        ],
+        "slug": "sunkenahalli-2"
+      },
+      {
+        "area_acres": 229.519,
+        "area_m2": 928830.177,
+        "reasons": [
+          "below_250_acre_target"
+        ],
+        "slug": "tilak-nagara"
+      },
+      {
+        "area_acres": 240.802,
+        "area_m2": 974492.675,
+        "reasons": [
+          "below_250_acre_target"
+        ],
+        "slug": "v-v-puram"
+      },
+      {
+        "area_acres": 241.019,
+        "area_m2": 975368.139,
+        "reasons": [
+          "below_250_acre_target"
+        ],
+        "slug": "yediyuru"
+      },
+      {
+        "area_acres": 164.846,
+        "area_m2": 667106.582,
+        "reasons": [
+          "below_250_acre_target"
+        ],
+        "slug": "yelachenahalli"
+      },
+      {
+        "area_m2": 1235543.796,
+        "aspect_ratio": 3.599688,
+        "reasons": [
+          "strip_aspect"
+        ],
+        "slug": "jayanagar-4t-block"
+      },
+      {
+        "area_m2": 1170210.076,
+        "aspect_ratio": 3.266887,
+        "reasons": [
+          "strip_aspect"
+        ],
+        "slug": "sarakki"
+      },
+      {
+        "area_m2": 1397820.476,
+        "aspect_ratio": 3.495907,
+        "reasons": [
+          "strip_aspect"
+        ],
+        "slug": "vinayakanagar"
+      }
+    ],
+    "needs_review_count": 50,
+    "ordinary_above_300_acre_target": [
+      {
+        "area_acres": 305.31,
+        "area_m2": 1235543.796,
+        "aspect_ratio": 3.599688,
+        "exterior_corners": 202,
+        "name": "Jayanagar 4T Block",
+        "slug": "jayanagar-4t-block",
+        "territory_class": "ordinary",
+        "territory_id": "61bcf239-d77b-517c-8d87-06b1c3dd449f",
+        "total_exterior_corners": 202
+      },
+      {
+        "area_acres": 305.859,
+        "area_m2": 1237766.672,
+        "aspect_ratio": 1.744891,
+        "exterior_corners": 295,
+        "name": "Jayanagar 7th Block",
+        "slug": "jayanagar-7th-block",
+        "territory_class": "ordinary",
+        "territory_id": "409be123-d3b5-58da-9d7a-89e8c9b9847d",
+        "total_exterior_corners": 295
+      },
+      {
+        "area_acres": 306.667,
+        "area_m2": 1241038.499,
+        "aspect_ratio": 1.775837,
+        "exterior_corners": 228,
+        "name": "SilverJubilee Park Ward",
+        "slug": "silverjubilee-park-ward",
+        "territory_class": "ordinary",
+        "territory_id": "c1970d7d-dbc3-58cf-bd22-ce53cfe7f402",
+        "total_exterior_corners": 228
+      },
+      {
+        "area_acres": 345.409,
+        "area_m2": 1397820.476,
+        "aspect_ratio": 3.495907,
+        "exterior_corners": 198,
+        "name": "Vinayakanagar",
+        "slug": "vinayakanagar",
+        "territory_class": "ordinary",
+        "territory_id": "c548247a-bccc-58be-8be7-b4ca50143be5",
+        "total_exterior_corners": 198
+      }
+    ],
+    "ordinary_above_hard_max": [],
+    "protected_natural_strips": [],
+    "size_bands": {
+      "fabric_above_review_max": 0,
+      "fabric_above_soft_max": 4,
+      "fabric_below_soft_min": 14,
+      "fabric_in_soft_band": 15
+    },
+    "strip_violations": [
+      {
+        "area_acres": 305.31,
+        "area_m2": 1235543.796,
+        "aspect_ratio": 3.599688,
+        "exterior_corners": 202,
+        "name": "Jayanagar 4T Block",
+        "slug": "jayanagar-4t-block",
+        "territory_class": "ordinary",
+        "territory_id": "61bcf239-d77b-517c-8d87-06b1c3dd449f",
+        "total_exterior_corners": 202
+      },
+      {
+        "area_acres": 289.165,
+        "area_m2": 1170210.076,
+        "aspect_ratio": 3.266887,
+        "exterior_corners": 287,
+        "name": "Sarakki",
+        "slug": "sarakki",
+        "territory_class": "ordinary",
+        "territory_id": "3c2b359c-8723-5399-b02b-d066f0a92258",
+        "total_exterior_corners": 287
+      },
+      {
+        "area_acres": 345.409,
+        "area_m2": 1397820.476,
+        "aspect_ratio": 3.495907,
+        "exterior_corners": 198,
+        "name": "Vinayakanagar",
+        "slug": "vinayakanagar",
+        "territory_class": "ordinary",
+        "territory_id": "c548247a-bccc-58be-8be7-b4ca50143be5",
+        "total_exterior_corners": 198
+      }
+    ]
+  },
+  "stage": "cluster_gameplay",
+  "status": "pass"
+}

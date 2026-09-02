@@ -31,6 +31,7 @@ yarn-error.*
 *.pem
 
 # local env files
+.env
 .env*.local
 
 # typescript
@@ -41,3 +42,47 @@ app-example
 # generated native folders
 /ios
 /android
+
+# backend
+backend/.venv/
+backend/.env
+backend/__pycache__/
+**/__pycache__/
+.pytest_cache/
+.ruff_cache/
+
+# Territory GeoJSON under data/ is committed on purpose. It is the static,
+# hand-verified dataset for this milestone, not a build artefact.
+
+# Territory generation pipeline
+tools/pipeline/.venv/
+
+# Source extracts are hundreds of megabytes and are reproducible from the
+# pinned URLs in the region config. The checksums beside them are what make the
+# pipeline auditable, so those stay committed.
+data/pipeline/**/raw/**
+!data/pipeline/**/raw/.gitkeep
+!data/pipeline/**/raw/*.sha256
+
+# Regenerable from the raw extracts by re-running the stages. staging/ and
+# published/ are NOT ignored: the reviewed candidates, the APPROVED marker and
+# the publish manifest are the audit trail for what became live game data.
+data/pipeline/**/intermediate/**
+!data/pipeline/**/intermediate/.gitkeep
+
+# Secrets and credentials
+*.key
+*.pem
+*.p12
+*.p8
+*.jks
+.env
+.env.*
+!.env.example
+*.cred
+*.credentials
+credentials.json
+client_secret.json
+ngrok.yml
+ngrok.json
+

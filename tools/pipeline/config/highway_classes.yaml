@@ -1,0 +1,96 @@
+# Which real-world features are allowed to become territory borders.
+#
+# This is the single most consequential piece of configuration in the pipeline.
+# `03_MAP_AND_TERRITORY_PIPELINE` requires borders to follow things people do NOT
+# run along -- arterials, rail, water, walls. A border drawn down a footpath or
+# through the middle of a park invites border-hugging and splits places that
+# players think of as one place.
+#
+# Rule of thumb for anything added here later: if a runner would happily run
+# along it, it must not be a border.
+
+include:
+  # Road classes that legitimately divide neighbourhoods.
+  highway:
+    - motorway
+    - motorway_link
+    - trunk
+    - trunk_link
+    - primary
+    - primary_link
+    - secondary
+    - secondary_link
+    - tertiary
+    - tertiary_link
+    - residential
+    - unclassified
+
+  # Rail is an unambiguous separator: you cannot casually cross it.
+  railway:
+    - rail
+    - light_rail
+    - subway
+    - narrow_gauge
+
+  # Linear water. Drains and canals in Bengaluru are real barriers.
+  waterway:
+    - river
+    - canal
+    - stream
+    - drain
+
+  # Closed features whose OUTER ring is a border. The interior stays whole --
+  # stage 03 promotes these to protected landmarks rather than cutting them up.
+  area_boundary:
+    - leisure=park
+    - leisure=garden
+    - leisure=nature_reserve
+    - leisure=pitch
+    - leisure=stadium
+    - natural=water
+    - landuse=reservoir
+    - landuse=cemetery
+    - amenity=university
+    - amenity=college
+
+  # Administrative and neighbourhood edges, where the data is good enough to
+  # trust. Overture divisions first, OSM place boundaries as fallback.
+  division:
+    - neighborhood
+    - neighbourhood
+    - suburb
+    - quarter
+
+exclude:
+  # These must NEVER create a territory border. Every one of them is either
+  # something people run along, or too small to be a meaningful edge. A border
+  # here would fragment territories into unrecognisable slivers.
+  highway:
+    - footway
+    - cycleway
+    - path
+    - pedestrian
+    - steps
+    - track
+    - bridleway
+    - corridor
+    - service
+    - services
+    - rest_area
+    - construction
+    - proposed
+
+  # Tag-level exclusions that survive even when the highway class is allowed.
+  # A `service=driveway` or `service=parking_aisle` is a service road either
+  # way, but these are called out because they are the most common way a
+  # residential-looking line turns out to be a car park.
+  service:
+    - driveway
+    - parking_aisle
+    - alley
+    - drive-through
+
+  # Paths inside parks are the classic failure case: they are usually tagged
+  # footway, but if a park path ever appears with another class it still must
+  # not cut the park in half.
+  inside_landmarks: true

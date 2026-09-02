@@ -1,0 +1,136 @@
+# Tuning numbers for territory generation. All lengths in metres, all areas in
+# square metres, all measured in the working CRS (UTM 43N) -- never in degrees.
+#
+# READ THIS BEFORE CHANGING ANYTHING:
+#
+# Meaningful geography wins. These are soft balancing metrics, not hard
+# constraints. Lalbagh is one territory because it is one place, and it does not
+# matter that it is far larger than the fabric target. Jayanagar 4th Block is one
+# territory because that is what people call it. The size rules below exist only
+# to stop ordinary residential street fabric -- the parts of the map nobody has a
+# name for -- from becoming either unrunnably huge or meaninglessly tiny.
+#
+# A named place or landmark is NEVER split to satisfy a number on this page.
+
+# Endpoints closer than this are treated as the same node when building the
+# boundary graph. Overture and OSM geometry rarely meets exactly at junctions;
+# without snapping, polygonization leaks and produces one giant face instead of
+# a street grid. Too large and genuinely distinct junctions collapse together.
+snap_m: 3
+
+# A face smaller than this is a scrap, not a place -- typically a triangle
+# between three converging roads. Scraps get merged into the neighbour they
+# share the longest border with, rather than being published as a territory
+# nobody could meaningfully run inside.
+scrap_m2: 5000
+
+# Soft target band for anonymous street fabric.
+#
+# Lower bound: below this a territory is a couple of streets, and a normal run
+# would sweep through six of them, which makes the post-run reveal noise rather
+# than a story.
+#
+# Upper bound: above this a single run cannot realistically cover the territory,
+# so nobody feels they can take it. `01_CORE_MECHANICS` targets roughly one to
+# two territories per normal run, and this band is what produces that.
+fabric_soft_min_m2: 20000
+fabric_soft_max_m2: 80000
+
+# An unnamed fabric territory larger than this is flagged for human review
+# instead of being split blindly. Usually it means a separator is missing from
+# the source data -- the right fix is upstream, not another arbitrary cut.
+fabric_review_max_m2: 250000
+
+# Legacy hard floor used when classifying role=major for campuses/parks that
+# are "named place" scale. Stage 03 now also emits `atomic` / `protected`
+# (standalone) using the gameplay.* floors below -- see lib/landmarks.py.
+territory_min_area_m2: 20000
+
+# Named parks/lakes above this are carved whole in Stage 05 (never split by
+# residential cuts). They may still merge into neighbours in Stage 06/10 if
+# they are below standalone_min_area_m2.
+atomic_min_area_m2: 5000
+
+# Source-protected landmark floor (60 acres). Landmarks already ≥ this floor
+# keep their exact perimeter as legendary. Smaller named atomics (Jain
+# University, Laxman Rao Park, Christ University campus) are absorbed into
+# ordinary fabric in Stage 10.
+standalone_min_area_m2: 242811.385344
+
+# Geometry cleanup. Simplification is applied in UTM, after all topology work,
+# so it can never introduce a gap or an overlap between neighbours.
+simplify_tolerance_m: 1.0
+
+# Validation gates for stage 08. These are hard: a run that violates them must
+# not reach staging, because a gap or an overlap means some runner's distance
+# silently counts twice or not at all.
+validation:
+  max_gap_m2: 1.0
+  max_overlap_m2: 1.0
+  # Fraction of the AOI that must be covered by published territories.
+  min_coverage_ratio: 0.999
+  # A territory with no name and no review flag is a bug, not a candidate.
+  allow_unnamed_publish: false
+
+# Stage 10 gameplay abstraction. Ordinary fabric must be at least 250 acres
+# (hard publish floor), targets ~300 acres, and may absorb leftovers up to the
+# hard 350-acre ceiling. Standalone_min_area_m2 is legendary-only (≥60 acres).
+gameplay:
+  soft_min_m2: 1011714.1056
+  soft_max_m2: 1214056.92672
+  # Place/review ceilings track the ordinary hard cap.
+  place_max_m2: 1416399.74784
+  review_max_m2: 1416399.74784
+  hard_max_m2: 1416399.74784
+  min_shared_border_m: 5.0
+  # Minimum soft score to merge when both sides are already above soft_min.
+  min_merge_score: 0.35
+  # Score weights (must sum conceptually; applied as a weighted sum).
+  w_place: 1.0
+  w_border: 0.5
+  w_size: 0.8
+  w_name: 0.6
+  # Highway classes that remain hard barriers between gameplay territories.
+  # Only motorways — trunk/primary remain mergeable at neighbourhood scale.
+  barrier_highway_classes:
+    - motorway
+    - motorway_link
+  barrier_railway_classes:
+    - rail
+    - light_rail
+    - subway
+    - narrow_gauge
+  barrier_waterway_classes:
+    - river
+    - canal
+  # Park/lake rings must not block absorption of small atomic landmarks.
+  # Empty list is allowed.
+  barrier_area_groups: []
+
+# Stage 11 gameplay beautification critic. Metrics + heuristic suggestions;
+# GIS auto-applies only high-confidence merges / whole-parcel transfers
+# (no freeform vertex edits). Long strips (> max_aspect_ratio) are cleaned
+# before ordinary peninsula/jagged rules.
+beautify:
+  critic: heuristic
+  auto_apply_min_confidence: 0.85
+  min_compactness: 0.40
+  peninsula_border_share: 0.20
+  # Absolute shared-border floor when share is diluted by many neighbours.
+  min_peninsula_shared_border_m: 500
+  jagged_complexity: 1.30
+  # Minimum rotated-rectangle length:breadth. Ordinary + expanded dedicated
+  # territories must stay at or under this; source-protected landmarks are
+  # reported separately when their natural perimeter exceeds it.
+  max_aspect_ratio: 3.0
+  # Parcel transfer must improve aspect by at least this absolute amount
+  # (or bring it under max_aspect_ratio) to be auto-applied.
+  min_aspect_improvement: 0.15
+  # Relative compactness gain required for a transfer to beat a merge.
+  min_transfer_compactness_gain: 0.02
+  max_suggestions: 200
+  # Hard gameplay exterior-corner budget for ordinary + expanded special
+  # territories. Legendary (source-protected) polygons are exempt.
+  max_exterior_corners: 10
+  # Coordinate snap when matching shared vertices across neighbours (metres).
+  corner_snap_m: 0.05
