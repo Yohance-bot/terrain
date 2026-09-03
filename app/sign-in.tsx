@@ -3,6 +3,7 @@ import { useCallback, useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { API_BASE_URL } from '@/constants/config';
 import { createLocalAccount, developerLogin, fetchLocalAccounts, signInLocalAccount } from '@/services/api/client';
 import { DEV_RUNNERS, setDevRunnerId } from '@/lib/device';
 import type { AccountSummary } from '@/services/api/types';
@@ -15,7 +16,13 @@ export default function SignInScreen() {
   const [busy, setBusy] = useState(false);
 
   const load = useCallback(() => {
-    void fetchLocalAccounts().then(setAccounts).catch(() => setAccounts([]));
+    void fetchLocalAccounts().then(setAccounts).catch((e: any) => {
+      console.log("[AUTH DEBUG] (on load)");
+      console.log("API URL:", API_BASE_URL + (e.path || ''));
+      console.log("STATUS:", e.status || 'Network Error / Unknown');
+      console.log("RESPONSE BODY:", e.bodyText || e.message || '');
+      setAccounts([]);
+    });
   }, []);
   useFocusEffect(load);
 
@@ -23,7 +30,15 @@ export default function SignInScreen() {
     if (name.trim().length < 2) return;
     setBusy(true);
     try { await createLocalAccount(name.trim()); router.replace('/'); }
-    catch { Alert.alert('Could not create account', 'Make sure the local backend is online.'); }
+    catch (e: any) { 
+      console.log("[AUTH DEBUG]");
+      console.log("API URL:", API_BASE_URL + (e.path || ''));
+      console.log("REQUEST:", e.method || 'POST');
+      console.log("STATUS:", e.status || 'Network Error / Unknown');
+      console.log("RESPONSE BODY:", e.bodyText || e.message || '');
+      console.log("ERROR TYPE:", e.name || typeof e);
+      Alert.alert('Could not create account', 'Make sure the local backend is online.'); 
+    }
     finally { setBusy(false); }
   };
   const choose = async (account: AccountSummary) => {
