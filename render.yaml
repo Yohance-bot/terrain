@@ -30,7 +30,7 @@ services:
       - key: DEVELOPER_MODE_ENABLED
         value: "false"
       - key: LOCAL_ACCOUNTS_ENABLED
-        value: "false"
+        value: "true"
 
   - type: web
     name: run-admin
