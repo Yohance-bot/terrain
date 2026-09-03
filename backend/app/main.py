@@ -1,6 +1,8 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.v1 import accounts, admin_review, captured_areas, privacy, profile, runs, territories
+from app.api.v1 import accounts, admin_dashboard, admin_review, captured_areas, privacy, profile, runs, territories
+from app.core.config import settings
 from app.core.observability import configure_observability
 
 app = FastAPI(
@@ -12,6 +14,15 @@ app = FastAPI(
     ),
 )
 
+if settings.admin_frontend_url:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=[settings.admin_frontend_url],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
 app.include_router(territories.router, prefix="/v1")
 app.include_router(captured_areas.router, prefix="/v1")
 app.include_router(runs.router, prefix="/v1")
@@ -19,6 +30,7 @@ app.include_router(profile.router, prefix="/v1")
 app.include_router(accounts.router, prefix="/v1")
 app.include_router(privacy.router, prefix="/v1")
 app.include_router(admin_review.router, prefix="/v1")
+app.include_router(admin_dashboard.router, prefix="/v1")
 configure_observability(app)
 
 

@@ -9,6 +9,8 @@ class Settings(BaseSettings):
     # Internal operations are deliberately disabled until a non-empty token is
     # configured. This is a temporary boundary, not a replacement for RBAC.
     admin_operations_token: SecretStr | None = None
+    # Allowed origin for the Admin Dashboard SPA to support CORS.
+    admin_frontend_url: str | None = None
     # Local developer tooling has two independent gates: the mobile client only
     # renders it in a debug bundle and the server refuses it unless this local
     # switch and pin are configured. Never enable these in a deployed backend.

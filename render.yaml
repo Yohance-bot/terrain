@@ -1,0 +1,49 @@
+services:
+  - type: web
+    name: run-backend
+    env: python
+    rootDir: backend
+    buildCommand: "pip install uv && uv sync --frozen --no-dev"
+    startCommand: "uv run uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: ADMIN_OPERATIONS_TOKEN
+        sync: false
+      - key: ADMIN_FRONTEND_URL
+        sync: false
+      - key: MAX_ACCURACY_M
+        value: "50"
+      - key: MIN_PRESENCE_M
+        value: "1"
+      - key: PIPELINE_VERSION
+        value: "1"
+      - key: RULESET_VERSION
+        value: "1"
+      - key: TERRITORY_CITY
+        value: "bengaluru"
+      - key: TERRITORY_AREA
+        value: "mvp"
+      - key: LOG_HTTP_422_RESPONSE_BODIES
+        value: "false"
+      - key: DEVELOPER_MODE_ENABLED
+        value: "false"
+      - key: LOCAL_ACCOUNTS_ENABLED
+        value: "false"
+
+  - type: web
+    name: run-admin
+    env: static
+    rootDir: admin
+    buildCommand: "npm ci && npm run build"
+    staticPublishPath: "./dist"
+    routes:
+      - type: rewrite
+        source: "/*"
+        destination: "/index.html"
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: run-backend
+          envVarKey: RENDER_EXTERNAL_URL
