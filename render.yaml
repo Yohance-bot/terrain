@@ -1,7 +1,8 @@
 services:
   - type: web
     name: run-backend
-    env: python
+    runtime: python
+    plan: free
     rootDir: backend
     buildCommand: "pip install uv && uv sync --frozen --no-dev"
     startCommand: "uv run uvicorn app.main:app --host 0.0.0.0 --port $PORT"
@@ -33,7 +34,7 @@ services:
 
   - type: web
     name: run-admin
-    env: static
+    runtime: static
     rootDir: admin
     buildCommand: "npm ci && npm run build"
     staticPublishPath: "./dist"

@@ -22,8 +22,9 @@
 
     /* Path aliases */
     "paths": {
-      "@/*": ["./src/*"]
-    }
+      "@/*": [
+        "./src/*"
+      ]}
   },
   "include": ["src"]
 }
