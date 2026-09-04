@@ -28,7 +28,7 @@ services:
       - key: LOG_HTTP_422_RESPONSE_BODIES
         value: "false"
       - key: DEVELOPER_MODE_ENABLED
-        value: "false"
+        value: "true"
       - key: LOCAL_ACCOUNTS_ENABLED
         value: "true"
 
