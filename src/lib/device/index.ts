@@ -23,6 +23,25 @@ export const DEV_RUNNERS = [
 
 let devRunnerId: string | null = null;
 
+export function getActiveDevRunnerId(): string {
+  if (devRunnerId && DEV_RUNNERS.some((runner) => runner.id === devRunnerId)) {
+    return devRunnerId;
+  }
+  return DEV_RUNNERS[0].id;
+}
+
+export async function getSelectedDevRunnerId(): Promise<string> {
+  if (devRunnerId && DEV_RUNNERS.some((runner) => runner.id === devRunnerId)) {
+    return devRunnerId;
+  }
+  const saved = await getMeta(DEV_RUNNER_KEY);
+  if (saved && DEV_RUNNERS.some((runner) => runner.id === saved)) {
+    devRunnerId = saved;
+    return saved;
+  }
+  return DEV_RUNNERS[0].id;
+}
+
 /** Local-developer identity override for virtual runs. The backend only grants
  * this role through its local developer PIN gate. */
 export function setDevRunnerId(id: string | null) {

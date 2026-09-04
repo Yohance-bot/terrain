@@ -30,7 +30,7 @@ export default function App() {
         ) : (
           <div className="flex h-screen bg-background text-foreground overflow-hidden">
             <Sidebar onLogout={() => setToken(null)} />
-            <main className="flex-1 overflow-auto">
+            <main className="flex-1 h-full min-h-0 overflow-auto relative flex flex-col">
               <Routes>
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/map" element={<TerritoryMap />} />

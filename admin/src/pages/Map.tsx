@@ -2,8 +2,12 @@
 import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import ReactMap, { Source, Layer, FillLayer, LineLayer } from 'react-map-gl/maplibre';
+import * as maplibregl from 'maplibre-gl';
+import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
 import { api } from '../lib/api';
 import 'maplibre-gl/dist/maplibre-gl.css';
+
+maplibregl.setWorkerUrl(workerUrl);
 
 // For MVP without an explicit key, we can use a free basemap or a simple generic style.
 // Since we don't have a key provided in the prompt, let's use a standard OSM Carto or CartoDB Dark Matter.
@@ -39,16 +43,31 @@ const territoryLine: LineLayer = {
 export default function TerritoryMap() {
   const [hoverInfo, setHoverInfo] = useState<any>(null);
 
-  const { data: territories } = useQuery({
+  const {
+    data: territories,
+    isLoading: territoriesLoading,
+    isError: territoriesError,
+    error: territoriesErr,
+  } = useQuery({
     queryKey: ['territories'],
     queryFn: api.getTerritories,
   });
 
-  const { data: states } = useQuery({
+  const {
+    data: states,
+    isLoading: statesLoading,
+    isError: statesError,
+    error: statesErr,
+  } = useQuery({
     queryKey: ['territory_states'],
     queryFn: api.getTerritoryState,
     refetchInterval: 10000,
   });
+
+  const isLoading = territoriesLoading || statesLoading;
+  const isError = territoriesError || statesError;
+  const errorMessage =
+    (territoriesErr as Error)?.message || (statesErr as Error)?.message || 'Failed to load territory data';
 
   // Merge state into geojson properties
   const geojsonData = useMemo(() => {
@@ -68,12 +87,18 @@ export default function TerritoryMap() {
   }, [territories, states]);
 
   return (
-    <div className="h-full w-full relative flex flex-col">
-      <div className="absolute top-4 left-4 z-10 bg-card/90 backdrop-blur border border-border p-4 rounded-lg shadow-lg w-80">
+    <div className="h-full w-full relative flex flex-col flex-1 min-h-0 overflow-hidden">
+      <div className="absolute top-4 left-4 z-10 bg-card/90 backdrop-blur border border-border p-4 rounded-lg shadow-lg w-80 pointer-events-auto">
         <h2 className="text-xl font-bold text-foreground">Bengaluru MVP</h2>
-        <p className="text-sm text-muted-foreground mt-1">
-          {territories?.features?.length || 0} Territories Loaded
-        </p>
+        {isLoading ? (
+          <p className="text-sm text-yellow-400 mt-1 animate-pulse">Loading territories…</p>
+        ) : isError ? (
+          <p className="text-sm text-red-400 mt-1">Error: {errorMessage}</p>
+        ) : (
+          <p className="text-sm text-muted-foreground mt-1">
+            {territories?.features?.length || 0} Territories Loaded
+          </p>
+        )}
         
         {hoverInfo && (
           <div className="mt-4 pt-4 border-t border-border space-y-2">
@@ -100,6 +125,8 @@ export default function TerritoryMap() {
       </div>
 
       <ReactMap
+        mapLib={maplibregl}
+        style={{ width: '100%', height: '100%' }}
         initialViewState={{
           longitude: 77.5946,
           latitude: 12.9716,

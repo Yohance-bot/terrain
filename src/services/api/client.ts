@@ -17,7 +17,14 @@ import type {
 
 // A tunnel that has expired should not leave a pressable or startup refresh in
 // limbo until iOS eventually gives up on the socket.
-const REQUEST_TIMEOUT_MS = 8_000;
+export const DEFAULT_REQUEST_TIMEOUT_MS = 8_000;
+// Submitting a run requires PostGIS clipping, loop detection, and multiple ledger
+// updates on the server. On cloud deployments this legitimately takes 8.5–15 seconds.
+export const SUBMIT_RUN_TIMEOUT_MS = 45_000;
+
+export interface RequestOptions extends RequestInit {
+  timeoutMs?: number;
+}
 
 function territoryPath(path: string, scope?: TerritoryScope): string {
   if (!scope?.city && !scope?.area) return path;
@@ -28,14 +35,15 @@ function territoryPath(path: string, scope?: TerritoryScope): string {
   return `${path}?${query.toString()}`;
 }
 
-async function requestResponse(path: string, init?: RequestInit): Promise<Response> {
+async function requestResponse(path: string, init?: RequestOptions): Promise<Response> {
   const deviceId = await getDeviceId();
   const controller = new AbortController();
   let timedOut = false;
+  const timeoutMs = init?.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS;
   const timeout = setTimeout(() => {
     timedOut = true;
     controller.abort();
-  }, REQUEST_TIMEOUT_MS);
+  }, timeoutMs);
   const abortFromCaller = () => controller.abort();
   init?.signal?.addEventListener('abort', abortFromCaller, { once: true });
 
@@ -52,7 +60,7 @@ async function requestResponse(path: string, init?: RequestInit): Promise<Respon
     });
   } catch (error) {
     if (timedOut) {
-      throw new Error(`Request timed out after ${REQUEST_TIMEOUT_MS / 1_000}s: ${path}`);
+      throw new Error(`Request timed out after ${timeoutMs / 1_000}s: ${path}`);
     }
     throw error;
   } finally {
@@ -67,7 +75,7 @@ async function requestResponse(path: string, init?: RequestInit): Promise<Respon
   return response;
 }
 
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
+async function request<T>(path: string, init?: RequestOptions): Promise<T> {
   const response = await requestResponse(path, init);
   return response.json() as Promise<T>;
 }
@@ -147,6 +155,7 @@ export function submitRun(submission: RunSubmission): Promise<RunResult> {
   return request<RunResult>('/v1/runs', {
     method: 'POST',
     body: JSON.stringify(submission),
+    timeoutMs: SUBMIT_RUN_TIMEOUT_MS,
   });
 }
 

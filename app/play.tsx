@@ -4,8 +4,8 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-nati
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ENABLE_SIMULATION } from '@/constants/config';
-import { DEV_RUNNERS, setDevRunnerId } from '@/lib/device';
-import { fetchAccount } from '@/services/api/client';
+import { DEV_RUNNERS, getActiveDevRunnerId, getSelectedDevRunnerId, setDevRunnerId } from '@/lib/device';
+import { fetchAccount, getCachedAccount } from '@/services/api/client';
 import type { AccountSummary } from '@/services/api/types';
 import { colors, fontSize, fontWeight, radius, spacing } from '@/theme';
 
@@ -18,12 +18,18 @@ export default function PlayScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
-  const [account, setAccount] = useState<AccountSummary | null>(null);
+  const [account, setAccount] = useState<AccountSummary | null>(() => getCachedAccount());
   const [simulationSelected, setSimulationSelected] = useState(false);
-  const [devRunnerId, setDevRunnerIdState] = useState<string>(DEV_RUNNERS[0].id);
-  const [busy, setBusy] = useState(true);
+  const [devRunnerId, setDevRunnerIdState] = useState<string>(() => getActiveDevRunnerId());
+  const [busy, setBusy] = useState(() => !getCachedAccount());
 
   const developerMode = account?.role === 'developer';
+
+  useEffect(() => {
+    void getSelectedDevRunnerId().then((id) => {
+      setDevRunnerIdState(id);
+    });
+  }, []);
 
   useEffect(() => {
     void fetchAccount()

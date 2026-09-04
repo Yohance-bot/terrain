@@ -15,14 +15,14 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { TerritoryMap } from '@/features/map/TerritoryMap';
 import { ENABLE_SIMULATION, JAYANAGAR_CENTER } from '@/constants/config';
 import { resetRecorderStats, useRecorder } from '@/features/recorder/useRecorder';
-import { DEV_RUNNERS, getDeviceId, setDevRunnerId } from '@/lib/device';
+import { getDeviceId, setDevRunnerId } from '@/lib/device';
 import { formatDistance, formatDuration } from '@/lib/geo';
 import { findActiveTerritoryId, findLoopCandidateTerritoryIds } from '@/lib/pointInPolygon';
 import { buildTraversedRoads, detectLoopCandidate } from '@/lib/runCapture';
 import { runEventCopy, type RunEvent } from '@/lib/runEvents';
 import { ApiRequestError, logApiRequestErrorInDev, queuedRunNotice } from '@/services/api/errors';
-import { fetchAccount, fetchCapturedAreas, fetchOwnedTerritoryAreas, fetchTerritoryDetails, getCachedAccount, resetDeveloperTerritory, submitRun } from '@/services/api/client';
-import type { AccountSummary, TerritoryDetails } from '@/services/api/types';
+import { fetchAccount, fetchCapturedAreas, fetchOwnedTerritoryAreas, fetchRun, fetchTerritoryDetails, getCachedAccount, resetDeveloperTerritory, submitRun } from '@/services/api/client';
+import type { AccountSummary, RunResult, TerritoryDetails } from '@/services/api/types';
 import { loadOwnership, loadTerritories } from '@/services/territories';
 import {
   getLocalRun,
@@ -64,12 +64,11 @@ export default function MapScreen() {
   const [territoryBusy, setTerritoryBusy] = useState(false);
   const territoryRequest = useRef(0);
   const flushingQueue = useRef(false);
+  const autoStartHandled = useRef(false);
   const announcedLoopKey = useRef<string | null>(null);
   const simulatedPosition = useRef<[number, number] | null>(null);
   const joystickVector = useRef({ x: 0, y: 0 });
   const [joystickOffset, setJoystickOffset] = useState({ x: 0, y: 0 });
-  const [simulationSelected, setSimulationSelected] = useState(false);
-  const [devRunnerId, setDevRunnerIdState] = useState<string>(DEV_RUNNERS[0].id);
   const [account, setAccount] = useState<AccountSummary | null>(() => getCachedAccount());
   const [accountChecked, setAccountChecked] = useState(() => Boolean(getCachedAccount()));
   const [layerMode, setLayerMode] = useState<'all' | 'territories' | 'captures'>('all');
@@ -86,8 +85,6 @@ export default function MapScreen() {
   const activationColor = account?.developer_slot
     ? DEVELOPER_ACTIVATION_COLORS[account.developer_slot - 1] ?? colors.route
     : colors.route;
-
-
 
   useEffect(() => {
     void fetchAccount()
@@ -109,16 +106,21 @@ export default function MapScreen() {
     if (!accountChecked || !account || recording) return;
 
     if (params.autoStart === 'real') {
+      if (autoStartHandled.current) return;
+      autoStartHandled.current = true;
       router.setParams({ autoStart: undefined, runnerId: undefined });
       void onStart(false);
     } else if (params.autoStart === 'simulation') {
+      if (autoStartHandled.current) return;
+      autoStartHandled.current = true;
       const runnerId = params.runnerId;
       router.setParams({ autoStart: undefined, runnerId: undefined });
       if (runnerId) {
         setDevRunnerId(runnerId);
-        setDevRunnerIdState(runnerId);
       }
       void onStart(true);
+    } else {
+      autoStartHandled.current = false;
     }
   }, [params.autoStart, params.runnerId, accountChecked, account, recording, router]);
 
@@ -203,11 +205,60 @@ export default function MapScreen() {
     }
   }, []);
 
-  const submitQueuedRun = useCallback(async (runId: string) => {
-    const run = await getLocalRun(runId);
+  const submitQueuedRun = useCallback(async (runId: string): Promise<RunResult | null> => {
+    let run = await getLocalRun(runId);
     if (!run?.endedAt) return null;
-    const leased = await markSubmissionStarted(runId);
-    if (!leased) return null;
+
+    if (run.status === 'synced') {
+      try {
+        return await fetchRun(runId);
+      } catch {
+        return null;
+      }
+    }
+
+    if (run.status === 'rejected') {
+      return null;
+    }
+
+    let leased = await markSubmissionStarted(runId);
+    if (!leased) {
+      // Another queue worker (e.g. background queue flush) may have leased this run.
+      // Cooperate instead of racing: observe the in-flight submission.
+      for (let attempt = 0; attempt < 10; attempt++) {
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        run = await getLocalRun(runId);
+        if (!run) return null;
+        if (run.status === 'synced') {
+          try {
+            return await fetchRun(runId);
+          } catch {
+            return null;
+          }
+        }
+        if (run.status === 'rejected') {
+          return null;
+        }
+        if (run.status === 'queued') {
+          leased = await markSubmissionStarted(runId);
+          if (leased) break;
+        }
+      }
+
+      if (!leased) {
+        // Still couldn't acquire lease or still in 'submitting'. Check if the server already processed it.
+        try {
+          const serverRun = await fetchRun(runId);
+          if (serverRun && serverRun.status !== 'rejected') {
+            await markSynced(runId);
+            return serverRun;
+          }
+        } catch {
+          // Server reconciliation 404 or request failed
+        }
+        return null;
+      }
+    }
 
     const samples = await loadSamples(runId);
     if (samples.length < 2) {
@@ -216,11 +267,14 @@ export default function MapScreen() {
       return null;
     }
 
+    const finalRun = await getLocalRun(runId);
+    if (!finalRun?.endedAt) return null;
+
     try {
       const result = await submitRun({
         run_id: runId,
-        started_at: run.startedAt.toISOString(),
-        ended_at: run.endedAt.toISOString(),
+        started_at: finalRun.startedAt.toISOString(),
+        ended_at: finalRun.endedAt.toISOString(),
         samples,
       });
       await markSynced(runId);
@@ -252,6 +306,24 @@ export default function MapScreen() {
           return null;
         }
       }
+
+      // If submission timed out, disconnected, or returned 5xx, the server may have completed
+      // spatial processing and committed the run. Check the server by run_id before failing.
+      try {
+        const reconciled = await fetchRun(runId);
+        if (reconciled && reconciled.status !== 'rejected') {
+          console.log(`[RunSubmission] Reconciled run ${runId} via GET /v1/runs: server status=${reconciled.status}`);
+          await markSynced(runId);
+          return reconciled;
+        } else if (reconciled?.status === 'rejected') {
+          console.warn(`[RunSubmission] Run ${runId} reconciled but rejected by server.`);
+          await markRejected(runId, 'server_rejection: rejected');
+          return null;
+        }
+      } catch {
+        // Server check didn't find the run or network remains unreachable
+      }
+
       await markSubmissionFailed(runId, submissionError);
       throw submissionError;
     }
@@ -412,7 +484,7 @@ export default function MapScreen() {
       // Start at the map center so the virtual runner and joystick are usable
       // immediately. A map tap can still reposition the runner at any time.
       simulatedPosition.current = JAYANAGAR_CENTER;
-      await addSimulatedPoint(...JAYANAGAR_CENTER);
+      await addSimulatedPoint(JAYANAGAR_CENTER[0], JAYANAGAR_CENTER[1]);
       setNotice('Simulation active — use the joystick to move the runner.');
     } catch (simulationError) {
       logApiRequestErrorInDev(simulationError, 'start virtual run');
@@ -443,12 +515,36 @@ export default function MapScreen() {
     setBusy(true);
     try {
       const result = await submitQueuedRun(finished.runId);
-      if (!result) {
-        setNotice('Run ended. Routes require at least two distinct GPS points to claim territory.');
+      if (result) {
+        await refresh();
+        router.push(`/run/${result.run_id}`);
         return;
       }
-      await refresh();
-      router.push(`/run/${result.run_id}`);
+
+      // If result is null, inspect the local run state to determine the accurate reason
+      const localRun = await getLocalRun(finished.runId);
+      if (localRun?.status === 'synced') {
+        await refresh();
+        router.push(`/run/${finished.runId}`);
+        return;
+      }
+
+      if (localRun?.status === 'rejected') {
+        const err = localRun.lastSubmissionError ?? '';
+        if (err.includes('insufficient_samples')) {
+          setNotice('Run ended. Routes require at least two distinct GPS points to claim territory.');
+        } else {
+          setNotice(`Run rejected: ${err.replace(/^server_rejection_\d+:\s*/, '')}`);
+        }
+        return;
+      }
+
+      if (localRun?.status === 'submitting') {
+        setNotice('Run saved. Submission in progress…');
+        return;
+      }
+
+      setNotice('Run saved on device and queued for submission.');
     } catch (submissionError) {
       logApiRequestErrorInDev(submissionError, `finish run run_id=${finished.runId}`);
       setNotice(queuedRunNotice(submissionError));
