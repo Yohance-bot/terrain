@@ -5,6 +5,7 @@ from secrets import compare_digest
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import delete, func, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.api.deps import device_id_header, resolve_device
@@ -39,6 +40,29 @@ def account_for_device(session: Session, device_id: uuid.UUID) -> Account | None
         .where(DeviceLink.device_id == device_id)
     )
     return session.execute(statement).scalar_one_or_none()
+
+
+def link_device_to_account(
+    session: Session, device_id: uuid.UUID, account_id: uuid.UUID
+) -> DeviceLink:
+    """Idempotently link a device to an account.
+
+    Reuses existing links, avoids duplicate inserts within the same unit of work,
+    and updates the account if the device is switching accounts.
+    """
+    resolve_device(session, device_id)
+    link = session.get(DeviceLink, device_id)
+    if link is None:
+        for pending in session.new:
+            if isinstance(pending, DeviceLink) and pending.device_id == device_id:
+                link = pending
+                break
+    if link is None:
+        link = DeviceLink(device_id=device_id, account_id=account_id)
+        session.add(link)
+    else:
+        link.account_id = account_id
+    return link
 
 
 def summary(session: Session, account: Account) -> AccountSummary:
@@ -171,19 +195,32 @@ def developer_login(
         account = session.get(Account, method.account_id)
         assert account is not None
         account.role = "developer"
-    link = session.get(DeviceLink, device_id)
-    if link is None:
-        session.add(DeviceLink(device_id=device_id, account_id=account.id))
-    else:
-        link.account_id = account.id
     simulated_device_id = DEVELOPER_DEVICE_IDS[slot - 1]
-    resolve_device(session, simulated_device_id)
-    simulated_link = session.get(DeviceLink, simulated_device_id)
-    if simulated_link is None:
-        session.add(DeviceLink(device_id=simulated_device_id, account_id=account.id))
-    else:
-        simulated_link.account_id = account.id
-    session.flush()
+    target_device_ids = {device_id, simulated_device_id}
+    for target_id in target_device_ids:
+        link_device_to_account(session, target_id, account.id)
+
+    try:
+        session.flush()
+    except IntegrityError:
+        session.rollback()
+        # Recover gracefully if a concurrent request already initialized this slot
+        method = session.execute(
+            select(AccountAuthMethod).where(
+                AccountAuthMethod.provider == "developer",
+                AccountAuthMethod.provider_subject == subject,
+            )
+        ).scalar_one_or_none()
+        if method is not None:
+            account = session.get(Account, method.account_id)
+            if account is not None:
+                account.role = "developer"
+                for target_id in target_device_ids:
+                    link_device_to_account(session, target_id, account.id)
+                session.flush()
+                return summary(session, account)
+        raise
+
     return summary(session, account)
 
 
@@ -218,11 +255,7 @@ def create_local_account(
             account_id=account.id, provider="local", provider_subject=f"local:{account.id}"
         )
     )
-    link = session.get(DeviceLink, device_id)
-    if link is None:
-        session.add(DeviceLink(device_id=device_id, account_id=account.id))
-    else:
-        link.account_id = account.id
+    link_device_to_account(session, device_id, account.id)
     session.flush()
     return summary(session, account)
 
@@ -238,11 +271,7 @@ def sign_in_local_account(
     account = session.get(Account, account_id)
     if account is None or account.role != "player":
         raise HTTPException(status_code=404, detail="Player account not found")
-    link = session.get(DeviceLink, device_id)
-    if link is None:
-        session.add(DeviceLink(device_id=device_id, account_id=account.id))
-    else:
-        link.account_id = account.id
+    link_device_to_account(session, device_id, account.id)
     session.flush()
     return summary(session, account)
 
