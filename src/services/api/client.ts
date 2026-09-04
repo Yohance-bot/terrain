@@ -170,41 +170,63 @@ export function updateHomeTerritory(update: HomeTerritoryUpdate): Promise<Profil
   });
 }
 
-export function fetchAccount(): Promise<AccountSummary | null> {
-  return request<AccountSummary | null>('/v1/account');
+let memoryCachedAccount: AccountSummary | null = null;
+
+export function getCachedAccount(): AccountSummary | null {
+  return memoryCachedAccount;
 }
 
-export function updateAccount(display_name: string): Promise<AccountSummary> {
-  return request<AccountSummary>('/v1/account', { method: 'PUT', body: JSON.stringify({ display_name }) });
+export function setCachedAccount(account: AccountSummary | null): void {
+  memoryCachedAccount = account;
+}
+
+export async function fetchAccount(): Promise<AccountSummary | null> {
+  const account = await request<AccountSummary | null>('/v1/account');
+  memoryCachedAccount = account;
+  return account;
+}
+
+export async function updateAccount(display_name: string): Promise<AccountSummary> {
+  const res = await request<AccountSummary>('/v1/account', { method: 'PUT', body: JSON.stringify({ display_name }) });
+  memoryCachedAccount = res;
+  return res;
 }
 
 export async function signOutAccount(): Promise<void> {
+  memoryCachedAccount = null;
   await requestResponse('/v1/account/sign-out', { method: 'POST' });
 }
 
 export async function requestAccountDeletion(): Promise<void> {
+  memoryCachedAccount = null;
   await requestResponse('/v1/account/deletion-request', { method: 'POST' });
 }
 
-export function developerLogin(pin: string): Promise<AccountSummary> {
-  return request<AccountSummary>('/v1/account/developer-login', { method: 'POST', body: JSON.stringify({ pin }) });
+export async function developerLogin(pin: string): Promise<AccountSummary> {
+  const res = await request<AccountSummary>('/v1/account/developer-login', { method: 'POST', body: JSON.stringify({ pin }) });
+  memoryCachedAccount = res;
+  return res;
 }
 
 export function fetchLocalAccounts(): Promise<AccountSummary[]> {
   return request<AccountSummary[]>('/v1/account/local-accounts');
 }
 
-export function createLocalAccount(display_name: string): Promise<AccountSummary> {
-  return request<AccountSummary>('/v1/account/local-accounts', {
+export async function createLocalAccount(display_name: string): Promise<AccountSummary> {
+  const res = await request<AccountSummary>('/v1/account/local-accounts', {
     method: 'POST',
     body: JSON.stringify({ display_name }),
   });
+  memoryCachedAccount = res;
+  return res;
 }
 
-export function signInLocalAccount(accountId: string): Promise<AccountSummary> {
-  return request<AccountSummary>(`/v1/account/local-accounts/${accountId}/sign-in`, {
+export async function signInLocalAccount(accountId: string): Promise<AccountSummary> {
+  const res = await request<AccountSummary>(`/v1/account/local-accounts/${accountId}/sign-in`, {
     method: 'POST',
   });
+  memoryCachedAccount = res;
+  return res;
 }
 
 export async function resetDeveloperTerritory(territoryId: string): Promise<void> {

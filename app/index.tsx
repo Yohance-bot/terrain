@@ -20,14 +20,15 @@ import { formatDistance, formatDuration } from '@/lib/geo';
 import { findActiveTerritoryId, findLoopCandidateTerritoryIds } from '@/lib/pointInPolygon';
 import { buildTraversedRoads, detectLoopCandidate } from '@/lib/runCapture';
 import { runEventCopy, type RunEvent } from '@/lib/runEvents';
-import { logApiRequestErrorInDev, queuedRunNotice } from '@/services/api/errors';
-import { fetchAccount, fetchCapturedAreas, fetchOwnedTerritoryAreas, fetchTerritoryDetails, resetDeveloperTerritory, submitRun } from '@/services/api/client';
+import { ApiRequestError, logApiRequestErrorInDev, queuedRunNotice } from '@/services/api/errors';
+import { fetchAccount, fetchCapturedAreas, fetchOwnedTerritoryAreas, fetchTerritoryDetails, getCachedAccount, resetDeveloperTerritory, submitRun } from '@/services/api/client';
 import type { AccountSummary, TerritoryDetails } from '@/services/api/types';
 import { loadOwnership, loadTerritories } from '@/services/territories';
 import {
   getLocalRun,
   listQueuedRuns,
   loadSamples,
+  markRejected,
   markSubmissionFailed,
   markSubmissionStarted,
   markSynced,
@@ -69,8 +70,8 @@ export default function MapScreen() {
   const [joystickOffset, setJoystickOffset] = useState({ x: 0, y: 0 });
   const [simulationSelected, setSimulationSelected] = useState(false);
   const [devRunnerId, setDevRunnerIdState] = useState<string>(DEV_RUNNERS[0].id);
-  const [account, setAccount] = useState<AccountSummary | null>(null);
-  const [accountChecked, setAccountChecked] = useState(false);
+  const [account, setAccount] = useState<AccountSummary | null>(() => getCachedAccount());
+  const [accountChecked, setAccountChecked] = useState(() => Boolean(getCachedAccount()));
   const [layerMode, setLayerMode] = useState<'all' | 'territories' | 'captures'>('all');
   const [layersPanelOpen, setLayersPanelOpen] = useState(false);
   const [captureColorIndex, setCaptureColorIndex] = useState(0);
@@ -94,7 +95,11 @@ export default function MapScreen() {
         setAccount(next);
         if (!next) router.replace('/sign-in');
       })
-      .catch(() => router.replace('/sign-in'))
+      .catch(() => {
+        if (!getCachedAccount()) {
+          router.replace('/sign-in');
+        }
+      })
       .finally(() => setAccountChecked(true));
 
     void getCaptureColorIndex().then(setCaptureColorIndex);
@@ -204,17 +209,49 @@ export default function MapScreen() {
     const leased = await markSubmissionStarted(runId);
     if (!leased) return null;
 
+    const samples = await loadSamples(runId);
+    if (samples.length < 2) {
+      console.warn(`[RunSubmission] Discarding run ${runId}: only ${samples.length} sample(s), at least 2 required to form a route.`);
+      await markRejected(runId, 'insufficient_samples');
+      return null;
+    }
+
     try {
       const result = await submitRun({
         run_id: runId,
         started_at: run.startedAt.toISOString(),
         ended_at: run.endedAt.toISOString(),
-        samples: await loadSamples(runId),
+        samples,
       });
       await markSynced(runId);
       return result;
     } catch (submissionError) {
       logApiRequestErrorInDev(submissionError, `POST /v1/runs run_id=${runId}`);
+      if (submissionError instanceof ApiRequestError) {
+        const is422 = submissionError.status === 422;
+        const isNonRetryable4xx =
+          submissionError.status >= 400 &&
+          submissionError.status < 500 &&
+          submissionError.status !== 408 &&
+          submissionError.status !== 429;
+
+        if (is422 || isNonRetryable4xx) {
+          let reason = submissionError.bodyText || `HTTP ${submissionError.status}`;
+          if (
+            typeof submissionError.body === 'object' &&
+            submissionError.body !== null &&
+            'detail' in submissionError.body
+          ) {
+            const detail = (submissionError.body as { detail: unknown }).detail;
+            reason = typeof detail === 'string' ? detail : JSON.stringify(detail);
+          }
+          console.warn(
+            `[RunSubmission] Run ${runId} permanently rejected by server (${submissionError.status}): ${reason}`
+          );
+          await markRejected(runId, `server_rejection_${submissionError.status}: ${reason}`);
+          return null;
+        }
+      }
       await markSubmissionFailed(runId, submissionError);
       throw submissionError;
     }
@@ -407,7 +444,7 @@ export default function MapScreen() {
     try {
       const result = await submitQueuedRun(finished.runId);
       if (!result) {
-        setNotice(queuedRunNotice());
+        setNotice('Run ended. Routes require at least two distinct GPS points to claim territory.');
         return;
       }
       await refresh();

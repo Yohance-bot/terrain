@@ -59,7 +59,13 @@ export function logApiRequestErrorInDev(error: unknown, context: string): void {
 
 export function queuedRunNotice(error?: unknown): string {
   if (error instanceof ApiRequestError) {
-    return 'Run saved on device. The server rejected it for now — it will retry automatically.';
+    if (error.status === 422) {
+      return 'Run ended, but could not be processed by the server.';
+    }
+    if (error.status >= 400 && error.status < 500) {
+      return 'Run ended, but was not accepted by the server.';
+    }
+    return 'Run saved on device. Submission failed — will retry automatically.';
   }
 
   return 'Run saved on device and queued for submission.';

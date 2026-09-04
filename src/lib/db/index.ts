@@ -92,6 +92,15 @@ async function migrateRunsSchema(db: SQLite.SQLiteDatabase): Promise<void> {
   for (const [column, statement] of migrations) {
     if (!existing.has(column)) await db.execAsync(statement);
   }
+
+  // One-time safe cleanup: any existing runs queued/submitting with < 2 samples are marked rejected
+  await db.runAsync(
+    `UPDATE runs
+        SET status = 'rejected',
+            last_submission_error = 'insufficient_samples'
+      WHERE status IN ('queued', 'submitting')
+        AND (SELECT COUNT(*) FROM samples WHERE samples.run_id = runs.id) < 2`
+  );
 }
 
 export type StoredSample = {
@@ -104,7 +113,7 @@ export type StoredSample = {
   is_mock: boolean;
 };
 
-export type LocalRunStatus = 'recording' | 'queued' | 'submitting' | 'synced';
+export type LocalRunStatus = 'recording' | 'queued' | 'submitting' | 'synced' | 'rejected';
 
 export type LocalRun = {
   id: string;
@@ -214,6 +223,22 @@ export async function loadSamples(runId: string): Promise<StoredSample[]> {
  */
 export async function finishLocalRun(runId: string, endedAt: Date): Promise<void> {
   const db = await getDb();
+  const sampleCountRow = await db.getFirstAsync<{ count: number }>(
+    'SELECT COUNT(*) as count FROM samples WHERE run_id = ?',
+    [runId]
+  );
+  const sampleCount = sampleCountRow?.count ?? 0;
+  if (sampleCount < 2) {
+    await db.runAsync(
+      `UPDATE runs
+          SET ended_at = ?,
+              status = 'rejected',
+              last_submission_error = 'insufficient_samples'
+        WHERE id = ?`,
+      [endedAt.toISOString(), runId]
+    );
+    return;
+  }
   await db.runAsync('UPDATE runs SET ended_at = ?, status = ? WHERE id = ?', [
     endedAt.toISOString(),
     'queued',
@@ -245,20 +270,35 @@ export async function recordRunInterruption(
 
 /**
  * Converts runs left active by a terminated process into uploadable work.
- * It does not imply that a route was valid, complete, or accepted; that remains
- * entirely a server decision after submission.
+ * Runs with fewer than 2 samples are permanently rejected with 'insufficient_samples'
+ * so they are never queued for submission.
  */
 export async function recoverInterruptedRuns(recoveredAt = new Date()): Promise<LocalRun[]> {
   const db = await getDb();
   const timestamp = recoveredAt.toISOString();
   await db.withTransactionAsync(async () => {
+    // 1. Recovered runs with >= 2 samples get queued for upload
     await db.runAsync(
       `UPDATE runs
          SET status = 'queued',
              ended_at = COALESCE(ended_at, last_sample_at, ?),
              interrupted_at = COALESCE(interrupted_at, ?),
              interruption_reason = COALESCE(interruption_reason, 'process_restarted')
-       WHERE status IN ('recording', 'submitting')`,
+       WHERE status IN ('recording', 'submitting')
+         AND (SELECT COUNT(*) FROM samples WHERE samples.run_id = runs.id) >= 2`,
+      [timestamp, timestamp]
+    );
+
+    // 2. Recovered runs with < 2 samples cannot form a route and are permanently marked rejected
+    await db.runAsync(
+      `UPDATE runs
+         SET status = 'rejected',
+             ended_at = COALESCE(ended_at, last_sample_at, ?),
+             interrupted_at = COALESCE(interrupted_at, ?),
+             interruption_reason = COALESCE(interruption_reason, 'process_restarted'),
+             last_submission_error = 'insufficient_samples'
+       WHERE status IN ('recording', 'submitting')
+         AND (SELECT COUNT(*) FROM samples WHERE samples.run_id = runs.id) < 2`,
       [timestamp, timestamp]
     );
   });
@@ -307,6 +347,18 @@ export async function markSubmissionFailed(runId: string, error: unknown): Promi
      SET status = 'queued', last_submission_error = ?
      WHERE id = ? AND status = 'submitting'`,
     [message, runId]
+  );
+}
+
+/** Permanently marks a run as rejected so it is never retried by the background queue. */
+export async function markRejected(runId: string, reason: string): Promise<void> {
+  const db = await getDb();
+  await db.runAsync(
+    `UPDATE runs
+        SET status = 'rejected',
+            last_submission_error = ?
+      WHERE id = ?`,
+    [reason, runId]
   );
 }
 
