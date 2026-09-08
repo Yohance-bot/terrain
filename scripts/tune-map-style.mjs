@@ -6,42 +6,13 @@ const style = JSON.parse(await readFile(STYLE_PATH, 'utf8'));
 
 style.metadata = {
   ...(style.metadata ?? {}),
-  'run:fork': 'pokemon-roads-parks-v5',
+  'run:fork': 'terrarun-garden-city-v6',
   'run:description': 'Deterministic OpenFreeMap Liberty fork for the Run game map',
 };
 
 const layersById = new Map(style.layers.map((layer) => [layer.id, layer]));
 
-const ROAD_WIDTHS = {
-  path: {
-    surface: [12, 0.25, 14, 0.8, 16, 1.8, 18, 3.2, 20, 5],
-    casing: [12, 0.5, 14, 1.4, 16, 2.8, 18, 4.6, 20, 6.8],
-  },
-  service: {
-    surface: [12, 0, 13, 0.2, 14, 2.1, 16, 5.8, 18, 11, 20, 18],
-    casing: [12, 0, 13, 0.7, 14, 3.6, 16, 8, 18, 14, 20, 22],
-  },
-  link: {
-    surface: [10, 0.2, 12, 0.5, 14, 2.6, 16, 6.5, 18, 13, 20, 24],
-    casing: [10, 0.8, 12, 1.3, 14, 4.2, 16, 8.8, 18, 16, 20, 28],
-  },
-  minor: {
-    surface: [12, 0, 13, 0.35, 14, 3.2, 16, 8.5, 18, 17, 20, 29],
-    casing: [12, 0, 13, 1, 14, 5, 16, 11, 18, 21, 20, 34],
-  },
-  secondary: {
-    surface: [8, 0.25, 10, 0.45, 12, 0.8, 14, 3.8, 16, 9.5, 18, 18.5, 20, 31],
-    casing: [8, 0.8, 10, 1, 12, 1.5, 14, 5.7, 16, 12, 18, 22.5, 20, 36],
-  },
-  primary: {
-    surface: [7, 0.4, 10, 0.7, 12, 1.2, 14, 4.5, 16, 11, 18, 21, 20, 34],
-    casing: [7, 1, 10, 1.3, 12, 2, 14, 6.5, 16, 14, 18, 25, 20, 40],
-  },
-  motorway: {
-    surface: [5, 0.5, 8, 0.8, 10, 1.1, 12, 1.6, 14, 5.4, 16, 13, 18, 24, 20, 38],
-    casing: [5, 1.1, 8, 1.5, 10, 1.9, 12, 2.6, 14, 7.5, 16, 16, 18, 28, 20, 44],
-  },
-};
+const ROAD_WIDTHS = JSON.parse(await readFile(new URL('../assets/map/road-widths.json', import.meta.url), 'utf8'));
 
 function roadCategory(id) {
   if (id.includes('path') || id.includes('pedestrian')) return 'path';
@@ -58,14 +29,9 @@ function zoomWidth(stops) {
 }
 
 function roadSurfaceColor(id) {
-  if (id.includes('path') || id.includes('pedestrian')) return '#D7DEDC';
-  if (id.includes('service') || id.includes('track')) return '#737F84';
-  if (id.includes('minor') || id.includes('street')) return '#69757D';
-  if (id.includes('secondary') || id.includes('tertiary')) return '#606C74';
-  if (id.includes('motorway') || id.includes('trunk') || id.includes('primary')) {
-    return '#56616A';
-  }
-  return '#626E76';
+  if (/path|pedestrian/.test(id)) return '#C9F2E1';
+  if (/motorway|trunk|primary/.test(id)) return '#FFE3A1';
+  return '#FFF2D4';
 }
 
 for (const layer of style.layers) {
@@ -81,14 +47,15 @@ for (const layer of style.layers) {
   if (!layer.paint) layer.paint = {};
 
   if (layer.id.includes('centerline')) {
-    layer.paint['line-color'] = '#EEF2F2';
+    layer.filter = layersById.get(layer.id.replace('_centerline', ''))?.filter ?? layer.filter;
+    layer.paint['line-color'] = '#D5B980';
     layer.paint['line-opacity'] = 0.82;
     continue;
   }
 
   const isCasing = layer.id.includes('casing');
   if (isCasing) {
-    layer.paint['line-color'] = layer.id.startsWith('bridge_') ? '#AEB7BE' : '#B9C1C6';
+    layer.paint['line-color'] = '#5C948B';
   } else {
     layer.paint['line-color'] = roadSurfaceColor(layer.id);
   }
@@ -126,7 +93,7 @@ Object.assign(layersById.get('landcover_grass')?.paint ?? {}, {
   'fill-opacity': 0.64,
 });
 
-// Drop all building geometry — the game map stays flat for clarity and performance.
+// Structures are owned by the runtime WorldStructures component. Avoid duplicates.
 const structureLayerIds = new Set([
   'building',
   'building-3d',
@@ -149,5 +116,8 @@ if (parkOutlineIndex >= 0 && !layersById.has('park_highlight')) {
     },
   });
 }
+
+style.light = { anchor: 'viewport', color: '#FFF4DC', intensity: 0.42, position: [1.5, 210, 35] };
+style.metadata['run:world-revision'] = 1;
 
 await writeFile(STYLE_PATH, `${JSON.stringify(style, null, 2)}\n`);

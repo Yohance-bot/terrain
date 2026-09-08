@@ -5,9 +5,9 @@ import {
   Layer,
   Map,
   type MapRef,
-  UserLocation,
+  useCurrentPosition,
 } from '@maplibre/maplibre-react-native';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useMemo, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import {
@@ -18,6 +18,21 @@ import {
   MAP_ATTRIBUTION,
   MAP_STYLE,
 } from '@/constants/config';
+import { useHudDiagnostics } from '@/features/hud/useHudDiagnostics';
+import { useRunCamera } from '@/features/hud/useRunCamera';
+import { useRecorder } from '@/features/recorder/useRecorder';
+import { useHudPreferences } from '@/features/hud/usePresentation';
+import { WorldStructures } from './WorldStructures';
+import { useWorldFeatures } from './useWorldFeatures';
+import { illuminateStreets } from './streetMatching';
+import { StreetTrailLayers } from './StreetTrailLayers';
+import { TrailLayers } from '@/features/hud/TrailLayers';
+import { CueMapLayers } from '@/features/hud/CueMapLayers';
+import { ContestedBorders } from '@/features/hud/ContestedBorders';
+import { mockAdjacentBorders, sharedBorders, selectBorders } from '@/features/hud/borders';
+import { ThemeLayers } from '@/features/hud/ThemeLayers';
+import { useLighting } from '@/features/hud/useLighting';
+import type { RunFix } from '@/features/hud/telemetry';
 import { MAP_ART } from '@/features/map/mapArt';
 import { assignTerritoryColors } from '@/lib/territoryColors';
 import { colors, CAPTURE_COLOR_PALETTE, DEFAULT_CAPTURE_COLOR_INDEX } from '@/theme';
@@ -48,9 +63,17 @@ type Props = {
    * Cleaned GPS route while recording.
    * This is the authoritative path for rendering — never raw GPS noise.
    * Accuracy-filtered, spike-rejected, EMA-smoothed during the run;
-   * RDP + turn-smoothed on run completion.
+   * Visual LOD is gap-aware; the recorded evidence stays unchanged.
    */
-  traversedRoads: GeoJSON.Feature<GeoJSON.MultiLineString> | null;
+  traversedRoads: GeoJSON.FeatureCollection<GeoJSON.LineString>;
+  fix?: RunFix | null;
+  presentationActive?: boolean;
+  reducedMotion?: boolean;
+  economy?: boolean;
+  simulation?: boolean;
+  bottomInset?: number;
+  /** Future multiplayer feed: only shared line geometry, never whole territories. */
+  contestedBorders?: GeoJSON.FeatureCollection<GeoJSON.LineString>;
   loopCandidate: GeoJSON.Feature<GeoJSON.Polygon> | null;
   /**
    * Territory IDs visited in the current run (populated via point-in-polygon
@@ -58,13 +81,10 @@ type Props = {
    * These territories receive an extra visual pulse to communicate activation.
    */
   activeTerritoryIds: Set<string>;
-  /** Server-confirmed captures only. Pulsed briefly before settling to ownership colour. */
-  justCapturedTerritoryIds?: Set<string>;
   recording: boolean;
   isRunning?: boolean;
   onTerritoryPress?: (territoryId: string) => void;
   onSimulationMove?: (coordinate: [number, number]) => void;
-  simulationPosition?: [number, number];
   activationColor?: string;
   /** Index into CAPTURE_COLOR_PALETTE for the player's chosen capture color. */
   captureColorIndex?: number;
@@ -103,10 +123,10 @@ function withOwnerColors(collection: GeoJSON.FeatureCollection | null | undefine
  * game logic, and forbids MapLibre from calculating gameplay.
  *
  * Live run visual design:
- *   cleanPath → glowing road-hugging highlight (NOT a raw GPS polyline)
+ *   cleanPath → user-selected GPS trail or matched street illumination
  *   activeTerritoryIds → territory fill pulses cyan as the runner enters it
  */
-export function TerritoryMap({
+export const TerritoryMap = memo(function TerritoryMap({
   territories,
   capturedAreas,
   ownedTerritoryAreas,
@@ -115,22 +135,31 @@ export function TerritoryMap({
   traversedRoads,
   loopCandidate,
   activeTerritoryIds,
-  justCapturedTerritoryIds,
   recording,
   isRunning = false,
   onTerritoryPress,
   onSimulationMove,
-  simulationPosition,
   activationColor = colors.route,
   captureColorIndex = DEFAULT_CAPTURE_COLOR_INDEX,
   visibleLayers = 'all',
+  fix = null, presentationActive = true, reducedMotion = false, economy = false, simulation = false, bottomInset = 8, contestedBorders,
 }: Props) {
   const showTerritories = visibleLayers === 'all' || visibleLayers === 'territories';
   const showCaptures = visibleLayers === 'all' || visibleLayers === 'captures';
+  const onRenderedFrame = useHudDiagnostics(presentationActive && recording);
   const mapRef = useRef<MapRef>(null);
   const cameraRef = useRef<CameraRef>(null);
-  const [capturePulseOpacity, setCapturePulseOpacity] = useState(0);
-  const capturedKey = [...(justCapturedTerritoryIds ?? [])].sort().join(',');
+  const [mapReady, setMapReady] = useState(false);
+  const nativePosition = useCurrentPosition({ enabled: !recording && presentationActive && !simulation, minDisplacement: 5 });
+  const browseFix = useMemo<RunFix | null>(() => nativePosition ? { coordinate: [nativePosition.coords.longitude, nativePosition.coords.latitude], ts: nativePosition.timestamp, speedMps: 0, bearing: null, accuracyM: nativePosition.coords.accuracy, segment: 0 } : null, [nativePosition]);
+  const effectiveFix = recording || simulation ? fix : browseFix ?? fix;
+  const follow = useRunCamera(cameraRef, effectiveFix, recording, presentationActive, reducedMotion, economy, mapReady);
+  const [zoom, setZoom] = useState(DEFAULT_ZOOM);
+  const runId = useRecorder(s => s.runId);
+  const routeDisplay = useHudPreferences(s => s.routeDisplay);
+  const world = useWorldFeatures(mapRef, mapReady, presentationActive, economy, zoom, recording ? runId : null);
+  const streetTrail = useMemo(() => routeDisplay === 'streets' && recording ? illuminateStreets(traversedRoads, world.roads) : null, [routeDisplay, recording, traversedRoads, world.roads]);
+  const palette = useLighting(effectiveFix, presentationActive, simulation);
   const hasOwnedAreaGeometry = Boolean(ownedTerritoryAreas?.features.length);
   const ownerColouredAreas = useMemo(() => withOwnerColors(ownedTerritoryAreas), [ownedTerritoryAreas]);
 
@@ -151,26 +180,6 @@ export function TerritoryMap({
       })),
     } as GeoJSON.FeatureCollection;
   }, [capturedAreas, captureColor]);
-
-  // A deliberately short, state-driven pulse. MapLibre receives only a few
-  // layer updates, then the territory settles into its ordinary owner colour.
-  useEffect(() => {
-    if (!capturedKey) return;
-    setCapturePulseOpacity(0.64);
-    let phase = false;
-    const timer = setInterval(() => {
-      phase = !phase;
-      setCapturePulseOpacity(phase ? 0.26 : 0.7);
-    }, 360);
-    const finish = setTimeout(() => {
-      clearInterval(timer);
-      setCapturePulseOpacity(0);
-    }, 2_400);
-    return () => {
-      clearInterval(timer);
-      clearTimeout(finish);
-    };
-  }, [capturedKey]);
 
   const sourceTerritories = useMemo(
     () => (territories?.features?.length ? territories : OFFLINE_TERRITORIES),
@@ -201,7 +210,7 @@ export function TerritoryMap({
             // Keep transparency in the color itself. MapLibre React Native's
             // fill-opacity bridge can dereference a released style value on
             // iOS when these layers are updated during a style swap.
-            terrain_fill: withAlpha(zoneColor, 0.74),
+            terrain_fill: withAlpha(zoneColor, 0.16),
             fill_color: zoneColor,
             outline_color: zoneColor,
           },
@@ -225,26 +234,8 @@ export function TerritoryMap({
     return { type: 'FeatureCollection', features: activeFeatures };
   }, [decorated, activeTerritoryIds]);
 
-  const capturedPulseCollection = useMemo((): GeoJSON.FeatureCollection | null => {
-    if (!decorated || !justCapturedTerritoryIds?.size) return null;
-    const features = decorated.features.filter((feature) =>
-      justCapturedTerritoryIds.has(String(feature.properties?.territory_id ?? '')),
-    );
-    return features.length ? { type: 'FeatureCollection', features } : null;
-  }, [decorated, justCapturedTerritoryIds]);
-
-  /**
-   * Mute the base map layers so territory zones pop visually.
-   * Applied once after the style finishes loading — uses runtime property
-   * overrides, so no forked style JSON to maintain.
-   */
-  const muteBaseMap = useCallback(() => {
-    const map = mapRef.current;
-    if (!map) return;
-
-    // Mute POI labels — they clutter the game aesthetic.
-    void map.setSourceVisibility(false, 'openmaptiles', 'poi');
-  }, []);
+  const edges = useMemo(() => sharedBorders(sourceTerritories.features), [sourceTerritories]);
+  const borders = useMemo(() => contestedBorders ?? (simulation ? mockAdjacentBorders(JAYANAGAR_CENTER) : selectBorders(edges, ownedByYou, ownedByOthers)), [contestedBorders, edges, ownedByYou, ownedByOthers, simulation]);
 
   const handleTerritoryPress = useCallback(
     (event: { nativeEvent?: { features?: GeoJSON.Feature[] } }) => {
@@ -268,40 +259,27 @@ export function TerritoryMap({
         compass={false}
         logo={false}
         scaleBar={false}
-        onDidFinishLoadingMap={muteBaseMap}
+        onDidFinishLoadingMap={() => setMapReady(true)}
+        onRegionWillChange={event => follow.onGesture(event.nativeEvent)}
+        onDidFinishRenderingFrame={onRenderedFrame}
+        preferredFramesPerSecond={recording ? 30 : 60}
+        onRegionDidChange={event => setZoom(event.nativeEvent.zoom)}
         onPress={(event) => {
           if (!onSimulationMove) return;
           const [lon, lat] = event.nativeEvent.lngLat;
           onSimulationMove([lon, lat]);
         }}
       >
+        <ThemeLayers palette={palette} reducedMotion={reducedMotion} />
         <Camera
           ref={cameraRef}
           initialViewState={{
             center: JAYANAGAR_CENTER,
             zoom: DEFAULT_ZOOM,
-            pitch: DEFAULT_PITCH,
-            bearing: DEFAULT_BEARING,
+            pitch: reducedMotion || economy ? 0 : DEFAULT_PITCH,
+            bearing: reducedMotion || economy ? 0 : DEFAULT_BEARING,
           }}
-          // North-up follows the player without making the whole game world spin.
-          trackUserLocation={recording ? 'default' : undefined}
-        />
 
-        {/* Real OSM building footprints, rendered as restrained toy-world massing. */}
-        <Layer
-          id="toy-buildings"
-          type="fill-extrusion"
-          source="openmaptiles"
-          source-layer="building"
-          beforeId={MAP_ART.firstRoadLayerId}
-          minzoom={14}
-          layout={{ visibility: isRunning ? 'none' : 'visible' }}
-          paint={{
-            'fill-extrusion-color': ['match', ['%', ['to-number', ['coalesce', ['get', 'id'], 0]], 3], 0, '#D6C6A8', 1, '#BDD4B2', '#C8B6D9'],
-            'fill-extrusion-height': ['interpolate', ['linear'], ['to-number', ['coalesce', ['get', 'render_height'], ['get', 'height'], 5]], 0, 2, 40, 16],
-            'fill-extrusion-base': 0,
-            'fill-extrusion-opacity': isRunning ? 0.52 : 0.66,
-          }}
         />
 
         {/* ── Territory Zone Overlays ─────────────────────────── */}
@@ -349,8 +327,8 @@ export function TerritoryMap({
                 'text-max-width': 8,
               }}
               paint={{
-                'text-color': isRunning ? '#274B2A' : '#35563B',
-                'text-halo-color': '#E7F6D7',
+                'text-color': palette.label,
+                'text-halo-color': palette.halo,
                 'text-halo-width': 1.2,
                 'text-opacity': 0.82,
               }}
@@ -401,7 +379,7 @@ export function TerritoryMap({
             />
 
             {/* Outer glow border — wider, semi-transparent */}
-            <Layer
+            <Layer beforeId="hud-base-anchor"
               id="territory-outline-glow"
               type="line"
               filter={hasOwnedAreaGeometry ? ['==', ['get', 'ownership'], 'none'] : undefined}
@@ -416,7 +394,7 @@ export function TerritoryMap({
                   colors.ownedByOther,
                   ['get', 'outline_color'],
                 ],
-                'line-opacity': isRunning ? 0.46 : 0.52,
+                'line-opacity': isRunning ? 0.16 : 0.22,
                 'line-width': [
                   'interpolate',
                   ['linear'],
@@ -443,7 +421,7 @@ export function TerritoryMap({
             />
 
             {/* Inner border — crisp, narrow */}
-            <Layer
+            <Layer beforeId="hud-base-anchor"
               id="territory-outline"
               type="line"
               filter={hasOwnedAreaGeometry ? ['==', ['get', 'ownership'], 'none'] : undefined}
@@ -458,7 +436,7 @@ export function TerritoryMap({
                   colors.ownedByOther,
                   ['get', 'outline_color'],
                 ],
-                'line-opacity': 0.9,
+                'line-opacity': 0.5,
                 'line-width': [
                   'interpolate',
                   ['linear'],
@@ -490,7 +468,7 @@ export function TerritoryMap({
                 'fill-color': ['get', 'owner_fill'],
               }}
             />
-            <Layer
+            <Layer beforeId="hud-base-anchor"
               id="owned-territory-area-glow"
               type="line"
               layout={{ 'line-join': 'round', 'line-cap': 'round' }}
@@ -501,7 +479,7 @@ export function TerritoryMap({
                 'line-blur': 1.5,
               }}
             />
-            <Layer
+            <Layer beforeId="hud-base-anchor"
               id="owned-territory-area-outline"
               type="line"
               layout={{ 'line-join': 'round', 'line-cap': 'round' }}
@@ -529,7 +507,7 @@ export function TerritoryMap({
                 'fill-color': ['get', 'capture_fill'],
               }}
             />
-            <Layer
+            <Layer beforeId="hud-base-anchor"
               id="captured-area-glow"
               type="line"
               layout={{ 'line-join': 'round', 'line-cap': 'round' }}
@@ -540,7 +518,7 @@ export function TerritoryMap({
                 'line-blur': 4,
               }}
             />
-            <Layer
+            <Layer beforeId="hud-base-anchor"
               id="captured-area-outline"
               type="line"
               layout={{ 'line-join': 'round', 'line-cap': 'round' }}
@@ -573,7 +551,7 @@ export function TerritoryMap({
               }}
             />
             {/* Bright border pulse — territory edge lights up */}
-            <Layer
+            <Layer beforeId="hud-base-anchor"
               id="territory-active-border"
               type="line"
               layout={{ 'line-join': 'round', 'line-cap': 'round' }}
@@ -597,167 +575,57 @@ export function TerritoryMap({
           </GeoJSONSource>
         )}
 
-        {/* Server-confirmed capture reveal: flash, then settle to player ownership. */}
-        {capturedPulseCollection && capturePulseOpacity > 0 && (
-          <GeoJSONSource id="territories-captured" data={capturedPulseCollection}>
-            <Layer
-              id="territory-captured-flash"
-              type="fill"
-              beforeId={MAP_ART.firstRoadLayerId}
-              paint={{
-                'fill-color': withAlpha(colors.route, capturePulseOpacity * 0.42),
-              }}
-            />
-            <Layer
-              id="territory-captured-flash-outline"
-              type="line"
-              layout={{ 'line-join': 'round', 'line-cap': 'round' }}
-              paint={{
-                'line-color': '#FFFFFF',
-                'line-width': 5,
-                'line-opacity': capturePulseOpacity,
-                'line-blur': 1.5,
-              }}
-            />
-          </GeoJSONSource>
-        )}
-
-        {/* ── Live Route — Road Glow Effect ───────────────────── */}
-        {/*
-         * The clean path (not raw GPS) is rendered as a wide glowing highlight.
-         * At zoom 14-16 the glow width is enough to visually fill the road corridor,
-         * giving the appearance of the street itself lighting up rather than an
-         * arbitrary line drawn on top of the map.
-         *
-         * Map-matching to exact OSM road centre-lines is a future milestone.
-         * The EMA + RDP cleaning means the line hugs roads naturally.
-         */}
-        {/* Live-only activation. A completed run should persist territory state,
-            not leave its GPS-derived corridor network over the home map. */}
-        {recording && traversedRoads && (
-          <GeoJSONSource id="traversed-roads" data={traversedRoads}>
-            {/* Layer 1: Wide ambient atmosphere — the road "corridor" glows */}
-            <Layer
-              id="traversed-roads-glow-outer"
-              type="line"
-              paint={{
-                'line-color': activationColor,
-                'line-width': [
-                  'interpolate',
-                  ['linear'],
-                  ['zoom'],
-                  12, 18,
-                  15, 28,
-                  17, 35,
-                ],
-                'line-opacity': 0.08,
-                'line-blur': 14,
-              }}
-              layout={{ 'line-cap': 'round', 'line-join': 'round' }}
-            />
-            {/* Layer 2: Road-fill glow — vivid, fills the street width */}
-            <Layer
-              id="traversed-roads-activation"
-              type="line"
-              paint={{
-                'line-color': activationColor,
-                'line-width': [
-                  'interpolate',
-                  ['linear'],
-                  ['zoom'],
-                  12, 9,
-                  15, 14,
-                  17, 18,
-                ],
-                'line-opacity': 0.32,
-                'line-blur': 5,
-              }}
-              layout={{ 'line-cap': 'round', 'line-join': 'round' }}
-            />
-          </GeoJSONSource>
-        )}
+        <WorldStructures details={world.details} palette={palette} />
+        {showTerritories && <ContestedBorders data={borders} active={presentationActive} reducedMotion={reducedMotion} economy={economy} zoom={zoom} />}
+        {recording && (streetTrail ? <StreetTrailLayers {...streetTrail} economy={economy} /> : <TrailLayers data={traversedRoads} economy={economy} />)}
+        <CueMapLayers active={presentationActive} reducedMotion={reducedMotion} territories={sourceTerritories} />
 
         {!isRunning && loopCandidate && (
           <GeoJSONSource id="loop-candidate" data={loopCandidate}>
-            <Layer id="loop-candidate-fill" type="fill" paint={{ 'fill-color': withAlpha(colors.route, 0.1) }} />
-            <Layer id="loop-candidate-outline" type="line" layout={{ 'line-join': 'round' }} paint={{ 'line-color': colors.route, 'line-width': 3, 'line-opacity': 0.75, 'line-dasharray': [2, 1] }} />
+            <Layer beforeId="hud-base-anchor" id="loop-candidate-fill" type="fill" paint={{ 'fill-color': withAlpha(colors.route, 0.1) }} />
+            <Layer beforeId="hud-base-anchor" id="loop-candidate-outline" type="line" layout={{ 'line-join': 'round' }} paint={{ 'line-color': colors.route, 'line-width': 3, 'line-opacity': 0.75, 'line-dasharray': [2, 1] }} />
           </GeoJSONSource>
         )}
 
-        {simulationPosition && (
-          <GeoJSONSource id="simulation-runner" data={{ type: 'Feature', properties: {}, geometry: { type: 'Point', coordinates: simulationPosition } }}>
-            <Layer id="simulation-runner-glow" type="circle" paint={{ 'circle-radius': 18, 'circle-color': activationColor, 'circle-opacity': 0.2, 'circle-blur': 0.55 }} />
-            <Layer id="simulation-runner-dot" type="circle" paint={{ 'circle-radius': 7, 'circle-color': activationColor, 'circle-stroke-width': 3, 'circle-stroke-color': colors.surface }} />
+        {effectiveFix && presentationActive && (
+          <GeoJSONSource id="player-marker" data={{ type: 'Feature', properties: {}, geometry: { type: 'Point', coordinates: effectiveFix.coordinate } }}>
+            <Layer beforeId="hud-player-anchor" id="player-marker-glow" type="circle" paint={{ 'circle-radius': 18, 'circle-color': activationColor, 'circle-opacity': 0.2, 'circle-blur': 0.55 }} />
+            <Layer beforeId="hud-player-anchor" id="player-marker-dot" type="circle" paint={{ 'circle-radius': 7, 'circle-color': activationColor, 'circle-stroke-width': 3, 'circle-stroke-color': colors.surface }} />
           </GeoJSONSource>
         )}
 
-        {/* ── Custom User Location ───────────────────────────── */}
-        <UserLocation animated heading>
-          {/* Pulsing outer glow ring */}
-          <Layer
-            id="user-location-glow"
-            type="circle"
-            paint={{
-              'circle-radius': 24,
-              'circle-color': colors.userGlow,
-              'circle-opacity': 0.15,
-              'circle-blur': 0.7,
-            }}
-          />
-          {/* Middle ring */}
-          <Layer
-            id="user-location-ring"
-            type="circle"
-            paint={{
-              'circle-radius': 12,
-              'circle-color': colors.userGlow,
-              'circle-opacity': 0.25,
-              'circle-blur': 0.4,
-            }}
-          />
-          {/* Border ring */}
-          <Layer
-            id="user-location-border"
-            type="circle"
-            paint={{
-              'circle-radius': 7,
-              'circle-color': colors.userDotBorder,
-              'circle-opacity': 0.9,
-            }}
-          />
-          {/* White center dot */}
-          <Layer
-            id="user-location-dot"
-            type="circle"
-            paint={{
-              'circle-radius': 4.5,
-              'circle-color': colors.userDot,
-              'circle-opacity': 1,
-            }}
-          />
-        </UserLocation>
       </Map>
 
+      {recording && <Pressable accessibilityRole="button" accessibilityLabel={`Trail display: ${routeDisplay === 'streets' ? 'light up streets' : 'GPS trail'}. Tap to switch.`} onPress={() => useHudPreferences.getState().setRouteDisplay(routeDisplay === 'streets' ? 'gps' : 'streets')} style={[styles.trailMode, simulation && { left: undefined, right: 66 }, { bottom: bottomInset + 44 }]}>
+        <Text style={styles.trailModeLabel}>{routeDisplay === 'streets' ? '▰  LIT STREETS' : '⌁  GPS TRAIL'}</Text>
+      </Pressable>}
       {/* Required by ODbL at all times, no exceptions. Do not remove. */}
-      <Text style={styles.attribution}>{MAP_ATTRIBUTION}</Text>
+      <View pointerEvents="none" style={[styles.mapFootnote, { bottom: bottomInset }]}>
+        <Text style={styles.environment}>{palette.name}{simulation && borders.features.length ? ' · DEMO BORDER' : borders.features.length ? ' · Rival border' : ''}</Text>
+        <Text style={styles.attribution}>{MAP_ATTRIBUTION} · Weather: Open-Meteo</Text>
+      </View>
       <Pressable
-        accessibilityLabel="Recenter on your location"
-        style={styles.recenter}
-        onPress={() => void cameraRef.current?.easeTo({ center: JAYANAGAR_CENTER, zoom: DEFAULT_ZOOM, duration: 350 })}
+        accessibilityLabel={follow.following ? "Recenter on your location" : "Resume following your location"}
+        accessibilityRole="button"
+        disabled={!effectiveFix}
+        style={[styles.recenter, { bottom: bottomInset + 45 }]}
+        onPress={follow.recenter}
       >
-        <Text style={styles.recenterText}>◎</Text>
+        <Text style={styles.recenterText}>{follow.following ? '◎' : '↗'}</Text>
       </Pressable>
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
   map: { flex: 1 },
+  trailMode: { position: 'absolute', left: 14, paddingHorizontal: 14, height: 40, justifyContent: 'center', borderRadius: 20, backgroundColor: '#0E3445F2', borderWidth: 1, borderColor: '#7EC3BB' },
+  trailModeLabel: { fontSize: 10, color: '#E9FFF4', fontWeight: '700', letterSpacing: 1 },
+  mapFootnote: { position: 'absolute', left: 12, right: 6, alignItems: 'flex-end' },
+  environment: { color: '#ECFFF6', backgroundColor: '#0A1929D9', fontSize: 10, padding: 4, borderRadius: 4, marginBottom: 3 },
   attribution: {
-    position: 'absolute',
-    bottom: 4,
-    right: 6,
+
     fontSize: 10,
     color: colors.textMuted,
     backgroundColor: 'rgba(255,255,255,0.75)',

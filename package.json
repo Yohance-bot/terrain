@@ -11,7 +11,8 @@
     "typecheck": "tsc --noEmit",
     "map-style:tune": "node scripts/tune-map-style.mjs",
     "map-style:validate": "node scripts/validate-map-style.mjs",
-    "test:run-samples": "node scripts/test-run-sample-timestamps.mjs"
+    "test:run-samples": "node scripts/test-run-sample-timestamps.mjs",
+    "test:hud": "node scripts/test-hud.mjs"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",

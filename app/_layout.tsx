@@ -1,4 +1,4 @@
-import { Stack } from 'expo-router';
+import { Stack, usePathname } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import 'react-native-reanimated';
@@ -10,6 +10,7 @@ export const unstable_settings = {
 };
 
 export default function RootLayout() {
+  const pathname = usePathname();
   return (
     <SafeAreaProvider>
       <Stack
@@ -18,7 +19,7 @@ export default function RootLayout() {
           contentStyle: { backgroundColor: colors.background },
         }}
       />
-      <StatusBar style="dark" />
+      <StatusBar style={pathname === "/" ? "light" : "dark"} />
     </SafeAreaProvider>
   );
 }

@@ -1,13 +1,16 @@
 import { readFile } from 'node:fs/promises';
+import { validateStyleMin } from '@maplibre/maplibre-gl-style-spec';
 
 const STYLE_PATH = new URL('../assets/map/liberty-run.json', import.meta.url);
 const style = JSON.parse(await readFile(STYLE_PATH, 'utf8'));
-const errors = [];
+const errors = validateStyleMin(style).map(error => error.message);
 
 function requireValue(condition, message) {
   if (!condition) errors.push(message);
 }
 
+requireValue(!JSON.stringify(style).includes('hud-fog-anchor'), 'fog anchor must stay removed');
+requireValue(style.metadata?.['run:world-revision'] === 1, 'world art revision is stale');
 requireValue(style.version === 8, 'style.version must be 8');
 requireValue(style.sources?.openmaptiles?.type === 'vector', 'openmaptiles vector source is missing');
 requireValue(style.sources?.ne2_shaded?.type === 'raster', 'Natural Earth raster source is missing');
@@ -21,6 +24,7 @@ const layers = Array.isArray(style.layers) ? style.layers : [];
 const layerIds = new Set(layers.map((layer) => layer.id));
 const requiredLayerIds = [
   'background',
+  'hud-base-anchor', 'hud-border-anchor', 'hud-trail-anchor', 'hud-cue-anchor', 'hud-player-anchor',
   'park',
   'park_outline',
   'park_highlight',
@@ -40,6 +44,9 @@ requireValue(!layerIds.has('building'), 'flat building layer must be removed');
 requireValue(!layerIds.has('building-3d'), '3D building layer must be removed');
 requireValue(!layerIds.has('game-structure-body'), 'game structure body layer must be removed');
 requireValue(!layerIds.has('game-structure-roof'), 'game structure roof layer must be removed');
+
+const anchors = ['base', 'border', 'trail', 'cue', 'player'].map(name => layers.findIndex(layer => layer.id === `hud-${name}-anchor`));
+requireValue(anchors.every((index, i) => i === 0 || index > anchors[i - 1]), 'HUD layer anchors must preserve base/border/trail/cue/player order');
 
 const extrusionLayers = layers.filter((layer) => layer.type === 'fill-extrusion');
 requireValue(extrusionLayers.length === 0, 'style must not contain fill-extrusion layers');

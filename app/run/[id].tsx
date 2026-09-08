@@ -7,7 +7,8 @@ import { TerritoryMap } from '@/features/map/TerritoryMap';
 import { loadSamples } from '@/lib/db';
 import { formatDistance, formatDuration } from '@/lib/geo';
 import { cleanGps, type GeoCoord } from '@/lib/gpsClean';
-import { buildTraversedRoads, detectLoopCandidate } from '@/lib/runCapture';
+import { detectLoopCandidate } from '@/lib/runCapture';
+import { buildTrail } from '@/features/hud/trail';
 import { fetchRun } from '@/services/api/client';
 import type { RunResult } from '@/services/api/types';
 import { colors, fontSize, fontWeight, radius, spacing } from '@/theme';
@@ -100,7 +101,7 @@ export default function RunSummaryScreen() {
   );
   const defended = confirmedLoopCaptures.filter((segment) => !segment.ownership_changed);
   const captureCount = confirmedLoopCaptures.length;
-  const traversedRoads = buildTraversedRoads(completedPath);
+  const traversedRoads = buildTrail(completedPath, []);
   const loopCandidate = detectLoopCandidate(completedPath);
   const hasCaptured = captureCount > 0;
   const ctaText = hasCaptured ? 'Claim your territory' : 'Keep running';
@@ -161,7 +162,6 @@ export default function RunSummaryScreen() {
               traversedRoads={traversedRoads}
               loopCandidate={loopCandidate.polygon}
               activeTerritoryIds={new Set(result.segments.map((segment) => segment.territory_id))}
-              justCapturedTerritoryIds={new Set(confirmedLoopCaptures.map((segment) => segment.territory_id))}
               recording={false}
             />
           </View>

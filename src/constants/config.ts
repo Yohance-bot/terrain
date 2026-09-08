@@ -14,9 +14,9 @@ export const MAP_STYLE = BROWSE_MAP_STYLE;
 export const MAP_ATTRIBUTION = '© OpenStreetMap contributors · OpenFreeMap';
 
 export const JAYANAGAR_CENTER: [number, number] = [77.5838, 12.925];
-export const DEFAULT_ZOOM = 14.2;
-export const DEFAULT_PITCH = 0;
-export const DEFAULT_BEARING = -15;
+export const DEFAULT_ZOOM = 17.65;
+export const DEFAULT_PITCH = 55;
+export const DEFAULT_BEARING = -18;
 
 /** Bump when `gameplay_territories.geojson` is republished to bust on-device cache. */
 export const TERRITORY_DATA_VERSION = '16a6f8f18813';

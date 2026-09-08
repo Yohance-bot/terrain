@@ -4,19 +4,21 @@ import * as TaskManager from 'expo-task-manager';
 import { create } from 'zustand';
 import { AppState, type AppStateStatus } from 'react-native';
 
-import { ENABLE_SIMULATION, GPS_INTERVAL_MS, MAX_ACCURACY_M } from '@/constants/config';
+import { ENABLE_SIMULATION, GPS_INTERVAL_MS } from '@/constants/config';
 import {
   appendSample,
   createLocalRun,
   finishLocalRun,
   getMeta,
   recordRunInterruption,
+  recoverInterruptedRuns,
   setMeta,
   type StoredSample,
 } from '@/lib/db';
 import { haversineMetres } from '@/lib/geo';
 import { IncrementalGpsCleaner, type GeoCoord } from '@/lib/gpsClean';
 import { normalizeSampleTimestampMs } from '@/lib/runSamples';
+import { bearingBetween, type RunFix, type TimedDistance } from '@/features/hud/telemetry';
 
 /**
  * Run recorder with an optional background location task.
@@ -29,12 +31,11 @@ import { normalizeSampleTimestampMs } from '@/lib/runSamples';
  *   cleanPath — accuracy-filtered, spike-rejected, EMA-smoothed coords
  *               (use this for map rendering and territory activation)
  *
- * On run end, cleanPath is finalized with RDP + turn smoothing via flush().
+ * Visual simplification is gap-aware and performed by the trail presentation layer.
  * Raw samples in SQLite are untouched — the backend remains authoritative.
  *
- * Note what this store does NOT expose: any territory information. Per
- * `01_CORE_MECHANICS` Chapters 10 and 12, nothing about territories is shown
- * while a run is in progress. Distance and elapsed time only.
+ * Territory ownership stays server-authoritative. HUD presentation consumes
+ * timestamped accepted fixes; visual cadence never controls durable GPS writes.
  */
 
 export type RecorderStatus = 'idle' | 'starting' | 'recording' | 'stopping';
@@ -60,9 +61,13 @@ type RecorderState = {
   /**
    * Cleaned GPS coords: accuracy-filtered, spike-rejected, EMA-smoothed.
    * This is the authoritative path for map rendering and territory activation.
-   * On run end it is finalized with RDP + turn smoothing.
+   * Segment indices remain stable through stop; the trail layer handles LOD.
    */
   cleanPath: GeoCoord[];
+  liveFix: RunFix | null;
+  paceWindow: TimedDistance[];
+  /** Indices starting a new observed section after signal loss. */
+  segmentStarts: number[];
   error: string | null;
   start: () => Promise<void>;
   /** Development-only virtual recorder; never shown in production UI. */
@@ -75,6 +80,20 @@ let subscription: Location.LocationSubscription | null = null;
 let appStateSubscription: ReturnType<typeof AppState.addEventListener> | null = null;
 let appState: AppStateStatus = AppState.currentState;
 let sampleWriteQueue: Promise<void> = Promise.resolve();
+let lastDisplayTimestamp = 0;
+let recovery: Promise<unknown> | null = null;
+
+/** One cold-process recovery; never finalize a recorder just because a view remounts. */
+export function recoverRecorderOnce(): Promise<unknown> {
+  if (useRecorder.getState().status !== 'idle') return Promise.resolve();
+  if (!recovery) recovery = (async () => {
+    await Location.stopLocationUpdatesAsync(BACKGROUND_LOCATION_TASK).catch(() => undefined);
+    await sampleWriteQueue;
+    await setActiveRun(null);
+    return recoverInterruptedRuns();
+  })().catch(error => { recovery = null; throw error; });
+  return recovery;
+}
 
 // Module-level cleaner — lives as long as the JS bundle, reset on each run.
 const gpsCleaner = new IncrementalGpsCleaner();
@@ -127,45 +146,34 @@ function enqueueLocationSample(location: Location.LocationObject): Promise<void>
       }
 
       const recorder = useRecorder.getState();
-      if (recorder.status !== 'recording' || recorder.runId !== activeRun.runId) return;
-
-      // Push through the cleaning pipeline (applies its own accuracy + spike filters).
-      // This runs for every sample, including ones that fail MAX_ACCURACY_M below,
-      // so the cleaner's tighter GPS_ACCURACY_CUTOFF_M gate fires independently.
-      const newCleanPath = gpsCleaner.push({
-        lat: latitude,
-        lon: longitude,
-        accuracy: accuracy ?? undefined,
-      });
-
-      // Raw path: loose accuracy gate (MAX_ACCURACY_M). Used for debug stats only.
-      const usable = accuracy == null || accuracy <= MAX_ACCURACY_M;
-      if (!usable) {
-        useRecorder.setState((state) => ({
-          droppedCount: state.droppedCount + 1,
-          cleanPath: newCleanPath,
-        }));
+      if (!['recording', 'stopping'].includes(recorder.status) || recorder.runId !== activeRun.runId) return;
+      // Preserve raw evidence above, but duplicate/out-of-order fixes cannot move the HUD.
+      if (sample.ts <= lastDisplayTimestamp) return;
+      lastDisplayTimestamp = sample.ts;
+      const previousFix = recorder.liveFix;
+      const gap = Boolean(previousFix && sample.ts - previousFix.ts > 15_000 && haversineMetres({ lon: previousFix.coordinate[0], lat: previousFix.coordinate[1] }, { lon: longitude, lat: latitude }) > 30);
+      if (gap) gpsCleaner.breakSegment();
+      const newCleanPath = gpsCleaner.push({ lat: latitude, lon: longitude, accuracy: accuracy ?? undefined });
+      if (newCleanPath === recorder.cleanPath || newCleanPath.length <= recorder.cleanPath.length) {
+        useRecorder.setState({ droppedCount: recorder.droppedCount + 1 });
         return;
       }
-
-      // The HUD follows accepted cleaned points, not every raw device fix.
-      // That keeps both distance and pace aligned with what the map activates.
-      const previousCleanPoint = recorder.cleanPath.at(-1);
-      const latestCleanPoint = newCleanPath.at(-1);
-      const acceptedNewCleanPoint =
-        latestCleanPoint && latestCleanPoint !== previousCleanPoint
-          ? haversineMetres(
-              { lon: previousCleanPoint?.[0] ?? latestCleanPoint[0], lat: previousCleanPoint?.[1] ?? latestCleanPoint[1] },
-              { lon: latestCleanPoint[0], lat: latestCleanPoint[1] },
-            )
-          : 0;
-
-      useRecorder.setState((state) => ({
-        sampleCount: state.sampleCount + 1,
-        liveDistanceM: state.liveDistanceM + acceptedNewCleanPoint,
-        path: [...state.path, [longitude, latitude]],
+      const coordinate = newCleanPath.at(-1)!;
+      const distanceM = previousFix && !gap
+        ? haversineMetres({ lon: previousFix.coordinate[0], lat: previousFix.coordinate[1] }, { lon: coordinate[0], lat: coordinate[1] }) : 0;
+      const seconds = previousFix ? (sample.ts - previousFix.ts) / 1000 : 0;
+      const speedMps = seconds > 0 && !gap ? Math.min(12, distanceM / seconds) : 0;
+      const liveDistanceM = recorder.liveDistanceM + distanceM;
+      const segment = (previousFix?.segment ?? 0) + (gap ? 1 : 0);
+      useRecorder.setState({
+        sampleCount: recorder.sampleCount + 1,
+        liveDistanceM,
+        path: [...recorder.path, [longitude, latitude]],
         cleanPath: newCleanPath,
-      }));
+        segmentStarts: gap ? [...recorder.segmentStarts, newCleanPath.length - 1] : recorder.segmentStarts,
+        liveFix: { coordinate, ts: sample.ts, speedMps, bearing: previousFix && distanceM > 1 && !gap ? bearingBetween(previousFix.coordinate, coordinate) : previousFix?.bearing ?? null, accuracyM: accuracy, segment },
+        paceWindow: [...(gap ? [] : recorder.paceWindow.filter(p => p.ts >= sample.ts - 25_000)), { ts: sample.ts, distanceM: liveDistanceM }],
+      });
     });
 
   return sampleWriteQueue;
@@ -220,96 +228,80 @@ export const useRecorder = create<RecorderState>((set, get) => ({
   path: [],
   cleanPath: [],
   error: null,
+  liveFix: null, paceWindow: [], segmentStarts: [],
 
   start: async () => {
     if (get().status !== 'idle') return;
-    set({ status: 'starting', error: null, isSimulation: false });
-
-    const { status } = await Location.requestForegroundPermissionsAsync();
-    if (status !== 'granted') {
-      set({ status: 'idle', error: 'Location permission is required to record a run.' });
+    try { await recoverRecorderOnce(); } catch {
+      set({ error: 'Could not recover saved runs. Please try again.' });
       return;
     }
-
-    const runId = Crypto.randomUUID();
-    const startedAt = new Date();
-    await createLocalRun(runId, startedAt);
-
-    gpsCleaner.reset();
-
+    if (get().status !== 'idle') return;
+    set({ status: 'starting', error: null, isSimulation: false });
+    let runId: string | null = null;
     try {
+      const permission = await Location.requestForegroundPermissionsAsync();
+      if (!permission.granted) throw new Error('Location permission is required to record a run.');
+      runId = Crypto.randomUUID();
+      const startedAt = new Date();
+      await createLocalRun(runId, startedAt);
+      gpsCleaner.reset();
+      lastDisplayTimestamp = 0;
       await setActiveRun({ runId, nextSequence: 0 });
-
-      const locationOptions = {
-        accuracy: Location.Accuracy.BestForNavigation,
-        timeInterval: GPS_INTERVAL_MS,
-        distanceInterval: 0,
-      };
-      const canUseBackgroundTask =
-        (await TaskManager.isAvailableAsync()) && (await Location.isBackgroundLocationAvailableAsync());
-      const backgroundPermission = canUseBackgroundTask
-        ? await Location.requestBackgroundPermissionsAsync()
-        : null;
-
+      const locationOptions = { accuracy: Location.Accuracy.High, timeInterval: GPS_INTERVAL_MS, distanceInterval: 1 };
+      const canUseBackgroundTask = (await TaskManager.isAvailableAsync()) && (await Location.isBackgroundLocationAvailableAsync());
+      const backgroundPermission = canUseBackgroundTask ? await Location.requestBackgroundPermissionsAsync() : null;
+      // Publish context before the subscription can deliver its first fix.
+      set({ status: 'recording', runId, startedAt, sampleCount: 0, droppedCount: 0, liveDistanceM: 0, path: [], cleanPath: [], liveFix: null, paceWindow: [], segmentStarts: [] });
       if (backgroundPermission?.granted) {
         await Location.startLocationUpdatesAsync(BACKGROUND_LOCATION_TASK, {
-          ...locationOptions,
-          activityType: Location.ActivityType.Fitness,
+          ...locationOptions, activityType: Location.ActivityType.Fitness,
+          pausesUpdatesAutomatically: false,
+          deferredUpdatesInterval: 5_000,
           showsBackgroundLocationIndicator: true,
-          foregroundService: {
-            notificationTitle: 'Run recording in progress',
-            notificationBody: 'Your route is being recorded.',
-            killServiceOnDestroy: true,
-          },
+          foregroundService: { notificationTitle: 'Run recording in progress', notificationBody: 'Your route is being recorded.', killServiceOnDestroy: true },
         });
       } else {
-        // Background permission and TaskManager availability are enhancements,
-        // not prerequisites for recording a run.
-        subscription = await Location.watchPositionAsync(locationOptions, (position) => {
-          void enqueueLocationSample(position);
+        subscription = await Location.watchPositionAsync(locationOptions, position => {
+          void enqueueLocationSample(position).catch(() => set({ error: 'A GPS fix could not be saved.' }));
         });
+        set({ error: 'Keep TerraRun open to record: background location is unavailable.' });
       }
       observeForegroundInterruption(runId);
-      set({
-        status: 'recording',
-        runId,
-        startedAt,
-        sampleCount: 0,
-        droppedCount: 0,
-        liveDistanceM: 0,
-        path: [],
-        cleanPath: [],
-      });
     } catch (error) {
-      const endedAt = new Date();
-      subscription?.remove();
-      subscription = null;
+      subscription?.remove(); subscription = null;
+      removeAppStateListener();
       await Location.stopLocationUpdatesAsync(BACKGROUND_LOCATION_TASK).catch(() => undefined);
-      await setActiveRun(null);
-      await recordRunInterruption(runId, 'location_subscription_failed', endedAt);
-      await finishLocalRun(runId, endedAt);
+      await setActiveRun(null).catch(() => undefined);
+      if (runId) {
+        await recordRunInterruption(runId, 'location_subscription_failed').catch(() => undefined);
+        await finishLocalRun(runId, new Date()).catch(() => undefined);
+      }
       gpsCleaner.reset();
-      set({
-        status: 'idle',
-        runId: null,
-        startedAt: null,
-        error: error instanceof Error ? error.message : 'Could not start location recording.',
-      });
+      set({ status: 'idle', runId: null, startedAt: null, liveFix: null, paceWindow: [], error: error instanceof Error ? error.message : 'Could not start recording.' });
     }
   },
 
   startSimulation: async () => {
     if (!ENABLE_SIMULATION || get().status !== 'idle') return;
-    const runId = Crypto.randomUUID();
-    const startedAt = new Date();
-    await createLocalRun(runId, startedAt);
-    gpsCleaner.reset();
-    await setActiveRun({ runId, nextSequence: 0 });
-    set({ status: 'recording', runId, startedAt, sampleCount: 0, droppedCount: 0, liveDistanceM: 0, path: [], cleanPath: [], error: null, isSimulation: true });
+    await recoverRecorderOnce();
+    if (get().status !== 'idle') return;
+    set({ status: 'starting', error: null });
+    try {
+      const runId = Crypto.randomUUID();
+      const startedAt = new Date();
+      await createLocalRun(runId, startedAt);
+      gpsCleaner.reset(); lastDisplayTimestamp = 0;
+      await setActiveRun({ runId, nextSequence: 0 });
+      set({ status: 'recording', runId, startedAt, sampleCount: 0, droppedCount: 0, liveDistanceM: 0, path: [], cleanPath: [], error: null, isSimulation: true, liveFix: null, paceWindow: [], segmentStarts: [] });
+    } catch (error) {
+      set({ status: 'idle', error: 'Could not start simulation.' });
+      throw error;
+    }
   },
 
   addSimulatedPoint: async (lon: number, lat: number) => {
-    if (!ENABLE_SIMULATION || get().status !== 'recording') return;
+    if (!ENABLE_SIMULATION || get().status !== 'recording' || !get().isSimulation) return;
     const from = get().cleanPath.at(-1);
     const distance = from
       ? haversineMetres({ lon: from[0], lat: from[1] }, { lon, lat })
@@ -326,7 +318,7 @@ export const useRecorder = create<RecorderState>((set, get) => ({
           accuracy: 5,
           speed: 3,
         },
-        timestamp: Date.now() + index * 1_000,
+        timestamp: Math.max(Date.now(), lastDisplayTimestamp + 1),
         mocked: false,
       } as Location.LocationObject);
     }
@@ -344,12 +336,13 @@ export const useRecorder = create<RecorderState>((set, get) => ({
     await sampleWriteQueue;
     await setActiveRun(null);
 
-    // Finalize the clean path with RDP + turn smoothing before clearing state.
-    const finalCleanPath = gpsCleaner.flush();
-    gpsCleaner.reset();
+    // Preserve indices at GPS gaps. The trail layer simplifies each section
+    // independently; flushing the whole path here would join unobserved gaps.
+    const finalCleanPath = get().cleanPath;
 
     const endedAt = new Date();
     await finishLocalRun(runId, endedAt);
+    gpsCleaner.reset();
 
     set({ status: 'idle', runId: null, startedAt: null, cleanPath: finalCleanPath, isSimulation: false });
     return { runId, startedAt, endedAt };
@@ -357,5 +350,5 @@ export const useRecorder = create<RecorderState>((set, get) => ({
 }));
 
 export function resetRecorderStats() {
-  useRecorder.setState({ sampleCount: 0, droppedCount: 0, liveDistanceM: 0, path: [], cleanPath: [], isSimulation: false });
+  useRecorder.setState({ sampleCount: 0, droppedCount: 0, liveDistanceM: 0, path: [], cleanPath: [], isSimulation: false, liveFix: null, paceWindow: [], segmentStarts: [] });
 }

@@ -300,6 +300,7 @@ export class IncrementalGpsCleaner {
   private smoothedBuffer: LatLon[] = [];
   private lastCleanPoint: LatLon | null = null;
   private _droppedCount = 0;
+  private coordinates: GeoCoord[] = [];
 
   get droppedCount(): number {
     return this._droppedCount;
@@ -315,6 +316,10 @@ export class IncrementalGpsCleaner {
    * Dropped points return the existing clean path unchanged.
    */
   push(pt: LatLon): GeoCoord[] {
+    if (!Number.isFinite(pt.lat) || !Number.isFinite(pt.lon) || Math.abs(pt.lat) > 90 || Math.abs(pt.lon) > 180 || (pt.accuracy != null && (!Number.isFinite(pt.accuracy) || pt.accuracy < 0))) {
+      this._droppedCount++;
+      return this.coordinates;
+    }
     // Step 1: accuracy filter
     if (pt.accuracy != null && pt.accuracy > this.opts.accuracyCutoffM) {
       this._droppedCount++;
@@ -345,13 +350,14 @@ export class IncrementalGpsCleaner {
     const smoothed: LatLon = { lat: this.emaLat, lon: this.emaLon, accuracy: pt.accuracy };
     this.smoothedBuffer.push(smoothed);
     this.lastCleanPoint = smoothed;
+    this.coordinates = [...this.coordinates, [smoothed.lon, smoothed.lat]];
 
     return this.liveCleanPath();
   }
 
   /** Live path — EMA-smoothed buffer, no RDP (applied only on flush). */
   private liveCleanPath(): GeoCoord[] {
-    return this.smoothedBuffer.map((p) => [p.lon, p.lat]);
+    return this.coordinates;
   }
 
   /**
@@ -368,11 +374,19 @@ export class IncrementalGpsCleaner {
     return final.map((p) => [p.lon, p.lat]);
   }
 
+  /** Reacquire after missing GPS without smoothing across the unobserved gap. */
+  breakSegment(): void {
+    this.emaLat = null;
+    this.emaLon = null;
+    this.lastCleanPoint = null;
+  }
+
   /** Reset all accumulated state. Call before starting a new run. */
   reset(): void {
     this.emaLat = null;
     this.emaLon = null;
     this.smoothedBuffer = [];
+    this.coordinates = [];
     this.lastCleanPoint = null;
     this._droppedCount = 0;
   }

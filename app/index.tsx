@@ -1,4 +1,12 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useShallow } from 'zustand/react/shallow';
+import { TelemetryPill } from '@/features/hud/TelemetryPill';
+import { CueOverlay } from '@/features/hud/CueOverlay';
+import { useCheckpoints, useRunCues } from '@/features/hud/useRunCues';
+import { usePresentation, useHudPreferences } from '@/features/hud/usePresentation';
+import { useVisualRun } from '@/features/hud/useVisualRun';
+import { confirmedClaimCue } from '@/features/hud/claims';
+import { buildTrail } from '@/features/hud/trail';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
@@ -14,11 +22,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { TerritoryMap } from '@/features/map/TerritoryMap';
 import { ENABLE_SIMULATION, JAYANAGAR_CENTER } from '@/constants/config';
-import { resetRecorderStats, useRecorder } from '@/features/recorder/useRecorder';
+import { recoverRecorderOnce, resetRecorderStats, useRecorder } from '@/features/recorder/useRecorder';
 import { getDeviceId, setDevRunnerId } from '@/lib/device';
-import { formatDistance, formatDuration } from '@/lib/geo';
+import { formatDistance } from '@/lib/geo';
 import { findActiveTerritoryId, findLoopCandidateTerritoryIds } from '@/lib/pointInPolygon';
-import { buildTraversedRoads, detectLoopCandidate } from '@/lib/runCapture';
+import { detectLoopCandidate } from '@/lib/runCapture';
 import { runEventCopy, type RunEvent } from '@/lib/runEvents';
 import { ApiRequestError, logApiRequestErrorInDev, queuedRunNotice } from '@/services/api/errors';
 import { fetchAccount, fetchCapturedAreas, fetchOwnedTerritoryAreas, fetchRun, fetchTerritoryDetails, getCachedAccount, resetDeveloperTerritory, submitRun } from '@/services/api/client';
@@ -32,7 +40,8 @@ import {
   markSubmissionFailed,
   markSubmissionStarted,
   markSynced,
-  recoverInterruptedRuns,
+  getMeta,
+  setMeta,
 } from '@/lib/db';
 import { colors, fontSize, fontWeight, radius, spacing } from '@/theme';
 import { getCaptureColorIndex } from '@/lib/preferences';
@@ -57,7 +66,6 @@ export default function MapScreen() {
   const [ownedByOthers, setOwnedByOthers] = useState<Set<string>>(new Set());
   const [notice, setNotice] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [elapsed, setElapsed] = useState(0);
   const [activeTerritoryIds, setActiveTerritoryIds] = useState<Set<string>>(new Set());
   const [runEvent, setRunEvent] = useState<RunEvent | null>(null);
   const [selectedTerritory, setSelectedTerritory] = useState<TerritoryDetails | null>(null);
@@ -75,16 +83,36 @@ export default function MapScreen() {
   const [layersPanelOpen, setLayersPanelOpen] = useState(false);
   const [captureColorIndex, setCaptureColorIndex] = useState(0);
 
-  const { status, startedAt, liveDistanceM, cleanPath, error, isSimulation, start, startSimulation, addSimulatedPoint, stop } =
-    useRecorder();
+  const { status, error, isSimulation, start, startSimulation, addSimulatedPoint, stop } =
+    useRecorder(useShallow(s => ({ status: s.status, error: s.error, isSimulation: s.isSimulation, start: s.start, startSimulation: s.startSimulation, addSimulatedPoint: s.addSimulatedPoint, stop: s.stop })));
+  const presentation = usePresentation();
+  const { cleanPath, fix, segmentStarts } = useVisualRun(presentation.active, presentation.economy);
+  useCheckpoints(presentation.active);
+  const presentationActive = useRef(presentation.active);
+  presentationActive.current = presentation.active;
   const recording = status === 'recording';
   const developerMode = account?.role === 'developer';
   const territoryFeatures = territories?.features?.length ? territories.features : LOCAL_TERRITORY_FEATURES;
-  const traversedRoads = useMemo(() => buildTraversedRoads(cleanPath), [cleanPath]);
-  const loopCandidate = useMemo(() => detectLoopCandidate(cleanPath), [cleanPath]);
+  const traversedRoads = useMemo(() => buildTrail(cleanPath, segmentStarts, presentation.economy), [cleanPath, segmentStarts, presentation.economy]);
+  const loopCandidate = useMemo(() => detectLoopCandidate(segmentStarts.length ? [] : cleanPath), [cleanPath, segmentStarts]);
   const activationColor = account?.developer_slot
     ? DEVELOPER_ACTIVATION_COLORS[account.developer_slot - 1] ?? colors.route
     : colors.route;
+
+  const celebrateClaim = useCallback(async (result: RunResult): Promise<boolean> => {
+    if (!presentationActive.current || AppState.currentState !== 'active' || useRecorder.getState().status !== 'idle') return false;
+    if (!confirmedClaimCue(result, [0, 0])) return false;
+    const key = `hud.claim-played.${result.run_id}`;
+    if (await getMeta(key).catch(() => null)) return false;
+    const samples = await loadSamples(result.run_id);
+    const last = samples.at(-1);
+    if (!last || !Number.isFinite(last.lon) || !Number.isFinite(last.lat) || Math.abs(last.lon) > 180 || Math.abs(last.lat) > 90) return false;
+    if (!presentationActive.current || useRecorder.getState().status !== 'idle') return false;
+    const cue = confirmedClaimCue(result, [last.lon, last.lat])!;
+    await setMeta(key, 'true').catch(() => undefined);
+    useRunCues.getState().emit(cue);
+    return true;
+  }, []);
 
   useEffect(() => {
     void fetchAccount()
@@ -102,27 +130,10 @@ export default function MapScreen() {
     void getCaptureColorIndex().then(setCaptureColorIndex);
   }, [router]);
 
-  useEffect(() => {
-    if (!accountChecked || !account || recording) return;
-
-    if (params.autoStart === 'real') {
-      if (autoStartHandled.current) return;
-      autoStartHandled.current = true;
-      router.setParams({ autoStart: undefined, runnerId: undefined });
-      void onStart(false);
-    } else if (params.autoStart === 'simulation') {
-      if (autoStartHandled.current) return;
-      autoStartHandled.current = true;
-      const runnerId = params.runnerId;
-      router.setParams({ autoStart: undefined, runnerId: undefined });
-      if (runnerId) {
-        setDevRunnerId(runnerId);
-      }
-      void onStart(true);
-    } else {
-      autoStartHandled.current = false;
-    }
-  }, [params.autoStart, params.runnerId, accountChecked, account, recording, router]);
+  const onSimulationMove = useCallback(([lon, lat]: [number, number]) => {
+    simulatedPosition.current = [lon, lat];
+    void addSimulatedPoint(lon, lat);
+  }, [addSimulatedPoint]);
 
   const joystickResponder = useMemo(
     () => PanResponder.create({
@@ -180,7 +191,7 @@ export default function MapScreen() {
         getDeviceId(),
       ]);
       const { collection, fromCache } = territoryResult;
-      void fetchAccount().then(setAccount).catch(() => setAccount(null));
+      void fetchAccount().then(setAccount).catch(() => undefined);
       setTerritories(collection);
       const ownership = await loadOwnership(deviceId);
       setOwnedByYou(ownership.ownedByYou);
@@ -338,7 +349,10 @@ export default function MapScreen() {
       for (const run of queued) {
         try {
           const result = await submitQueuedRun(run.id);
-          if (result) submittedCount++;
+          if (result) {
+            submittedCount++;
+            await celebrateClaim(result).catch(() => false);
+          }
         } catch (queueError) {
           logApiRequestErrorInDev(queueError, `queued run flush run_id=${run.id}`);
           // Keep the run queued; a later launch or manual refresh retries it.
@@ -349,7 +363,7 @@ export default function MapScreen() {
     } finally {
       flushingQueue.current = false;
     }
-  }, [submitQueuedRun]);
+  }, [submitQueuedRun, celebrateClaim]);
 
   // A queued run is idempotent on its device-generated ID. Retry whenever the
   // app returns to the foreground and periodically while it remains open, so a
@@ -358,6 +372,7 @@ export default function MapScreen() {
     let retryTimer: ReturnType<typeof setInterval> | null = null;
 
     const retryQueuedRuns = () => {
+      if (AppState.currentState !== 'active' || useRecorder.getState().status !== 'idle') return;
       void (async () => {
         try {
           const submittedCount = await flushQueuedRuns();
@@ -387,7 +402,7 @@ export default function MapScreen() {
   useEffect(() => {
     void (async () => {
       const queuedBeforeRecovery = await listQueuedRuns();
-      await recoverInterruptedRuns();
+      await recoverRecorderOnce();
       const queuedAfterRecovery = await listQueuedRuns();
       const recoveredCount = Math.max(0, queuedAfterRecovery.length - queuedBeforeRecovery.length);
       const queuedBeforeFlush = queuedAfterRecovery.length;
@@ -409,18 +424,8 @@ export default function MapScreen() {
         );
       }
       void refresh();
-    })();
+    })().catch(() => { setNotice('Could not recover saved runs. Please try again.'); void refresh(); });
   }, [flushQueuedRuns, refresh]);
-
-  // Elapsed time ticks locally; it is display only and never leaves the device.
-  useEffect(() => {
-    if (!recording || !startedAt) return;
-    const id = setInterval(
-      () => setElapsed((Date.now() - startedAt.getTime()) / 1000),
-      1000
-    );
-    return () => clearInterval(id);
-  }, [recording, startedAt]);
 
   // Point-in-polygon: update activeTerritoryIds whenever the clean path grows.
   // Only runs while recording; uses the last added clean point for efficiency.
@@ -432,27 +437,16 @@ export default function MapScreen() {
     if (lon == null || lat == null) return;
     const territoryId = findActiveTerritoryId(lon, lat, territoryFeatures);
     if (!territoryId) return;
-    setActiveTerritoryIds((prev) => {
-      if (prev.has(territoryId)) return prev; // no unnecessary re-render
-      const next = new Set(prev);
-      next.add(territoryId);
-      setRunEvent({
-        type: 'TERRITORY_ENTERED',
-        territoryId,
-        territoryName: territories?.features.find((feature) => String(feature.properties?.territory_id) === territoryId)?.properties?.name ?? 'New territory',
-      });
-      return next;
-    });
+    setActiveTerritoryIds(prev => prev.has(territoryId) ? prev : new Set([...prev, territoryId]));
   }, [cleanPath, recording, territoryFeatures, territories]);
 
   useEffect(() => {
-    if (!recording || !loopCandidate.closed || !loopCandidate.polygon) return;
+    if (!recording || !presentation.active || !loopCandidate.closed || !loopCandidate.polygon || announcedLoopKey.current) return;
     const ids = findLoopCandidateTerritoryIds(loopCandidate.polygon.geometry, territoryFeatures);
-    const loopKey = `${loopCandidate.areaM2}:${ids.sort().join(',')}`;
-    if (announcedLoopKey.current === loopKey) return;
-    announcedLoopKey.current = loopKey;
+    announcedLoopKey.current = useRecorder.getState().runId;
     setRunEvent({ type: 'LOOP_DETECTED', areaM2: loopCandidate.areaM2, territoryIds: ids });
-  }, [loopCandidate, recording, territoryFeatures]);
+    useRunCues.getState().emit({ id: `${announcedLoopKey.current}:closure`, kind: 'closure', title: 'LOOP CLOSED', detail: 'Pending validation · finish to claim', coordinate: cleanPath.at(-1)!, polygon: loopCandidate.polygon, createdAt: Date.now() });
+  }, [loopCandidate, recording, territoryFeatures, cleanPath, presentation.active]);
 
   useEffect(() => {
     if (!runEvent) return;
@@ -460,22 +454,9 @@ export default function MapScreen() {
     return () => clearTimeout(timeout);
   }, [runEvent]);
 
-  const onStart = async (isVirtual: boolean = false) => {
+  const onStartSimulation = useCallback(async () => {
     resetRecorderStats();
-    setElapsed(0);
-    setActiveTerritoryIds(new Set());
-    setRunEvent(null);
-    announcedLoopKey.current = null;
-    if (developerMode && isVirtual) {
-      await onStartSimulation();
-      return;
-    }
-    await start();
-  };
-
-  const onStartSimulation = async () => {
-    resetRecorderStats();
-    setElapsed(0);
+    useRunCues.getState().clear();
     setActiveTerritoryIds(new Set());
     setRunEvent(null);
     announcedLoopKey.current = null;
@@ -490,7 +471,43 @@ export default function MapScreen() {
       logApiRequestErrorInDev(simulationError, 'start virtual run');
       setNotice('Could not start the virtual run. Try again.');
     }
-  };
+  }, [startSimulation, addSimulatedPoint]);
+
+  const onStart = useCallback(async (isVirtual: boolean = false) => {
+    if (busy || useRecorder.getState().status !== 'idle') return;
+    resetRecorderStats();
+    useRunCues.getState().clear();
+    setActiveTerritoryIds(new Set());
+    setRunEvent(null);
+    announcedLoopKey.current = null;
+    if (developerMode && isVirtual) {
+      await onStartSimulation();
+      return;
+    }
+    await start();
+  }, [busy, developerMode, onStartSimulation, start]);
+
+  useEffect(() => {
+    if (!accountChecked || !account || recording) return;
+
+    if (params.autoStart === 'real') {
+      if (autoStartHandled.current) return;
+      autoStartHandled.current = true;
+      router.setParams({ autoStart: undefined, runnerId: undefined });
+      void onStart(false);
+    } else if (params.autoStart === 'simulation') {
+      if (autoStartHandled.current) return;
+      autoStartHandled.current = true;
+      const runnerId = params.runnerId;
+      router.setParams({ autoStart: undefined, runnerId: undefined });
+      if (runnerId) {
+        setDevRunnerId(runnerId);
+      }
+      void onStart(true);
+    } else {
+      autoStartHandled.current = false;
+    }
+  }, [params.autoStart, params.runnerId, accountChecked, account, recording, router, onStart]);
 
   const onTerritoryPress = useCallback(async (territoryId: string) => {
     if (recording) return;
@@ -516,7 +533,8 @@ export default function MapScreen() {
     try {
       const result = await submitQueuedRun(finished.runId);
       if (result) {
-        await refresh();
+        const celebration = celebrateClaim(result).catch(() => false).then(played => played ? new Promise(resolve => setTimeout(resolve, 3200)) : undefined);
+        await Promise.all([refresh(), celebration]);
         router.push(`/run/${result.run_id}`);
         return;
       }
@@ -560,6 +578,12 @@ export default function MapScreen() {
   return (
     <View style={styles.container}>
       <TerritoryMap
+        fix={fix}
+        presentationActive={presentation.active}
+        reducedMotion={presentation.reducedMotion}
+        economy={presentation.economy}
+        simulation={isSimulation}
+        bottomInset={insets.bottom + (recording ? 112 : 72)}
         territories={territories}
         capturedAreas={capturedAreas}
         ownedTerritoryAreas={ownedTerritoryAreas}
@@ -571,15 +595,17 @@ export default function MapScreen() {
         recording={recording}
         isRunning={recording}
         onTerritoryPress={onTerritoryPress}
-        onSimulationMove={developerMode && ENABLE_SIMULATION && isSimulation ? ([lon, lat]) => {
-          simulatedPosition.current = [lon, lat];
-          void addSimulatedPoint(lon, lat);
-        } : undefined}
-        simulationPosition={isSimulation ? cleanPath.at(-1) : undefined}
+        onSimulationMove={developerMode && ENABLE_SIMULATION && isSimulation ? onSimulationMove : undefined}
         activationColor={activationColor}
         visibleLayers={layerMode}
         captureColorIndex={captureColorIndex}
       />
+
+      <View pointerEvents="none" style={{ position: 'absolute', top: 0, left: 0, right: 0, height: insets.top, backgroundColor: '#081D354D' }} />
+      {recording && <TelemetryPill active={presentation.active} />}
+      <CueOverlay {...presentation} />
+      {recording && <Pressable accessibilityRole="button" accessibilityLabel="Toggle battery saver" accessibilityState={{ selected: presentation.economy }} style={[styles.economy, { bottom: insets.bottom + 115 }]} onPress={() => useHudPreferences.getState().setEconomy(!presentation.economy)}><Text style={styles.economyText}>{presentation.economy ? '◐ BATTERY SAVER' : '◉ FULL EFFECTS'}</Text></Pressable>}
+      {!recording && error && <View style={[styles.notice, { top: insets.top + 76 }]}><Text style={styles.noticeText}>{error}</Text></View>}
 
       {!recording && runEvent && (
         <View style={styles.runEvent} pointerEvents="none">
@@ -662,14 +688,14 @@ export default function MapScreen() {
       {notice && (
         <Pressable
           onPress={() => void refresh(true)}
-          style={[styles.notice, { top: insets.top + spacing.sm }]}
+          style={[styles.notice, { top: insets.top + (recording ? 240 : 76) }]}
         >
           <Text style={styles.noticeText}>{notice}</Text>
         </Pressable>
       )}
 
       {/* ── Top Bar ─────────────────────────────────────── */}
-      {!recording && (
+      {!recording && !busy && (
         <View style={[styles.topBar, { top: insets.top + spacing.sm }]}>
           <Pressable onPress={() => router.push('/profile')} style={styles.topBarLeft}>
             <View style={styles.avatarCircle}>
@@ -691,7 +717,7 @@ export default function MapScreen() {
       )}
 
       {/* ── Right Side Buttons ────────────────────────────── */}
-      {!recording && (
+      {!recording && !busy && (
         <View style={[styles.sideButtons, { top: insets.top + 72 }]}>
           <Pressable style={styles.sideBtn}>
             <Text style={styles.sideBtnIcon}>⊕</Text>
@@ -724,13 +750,9 @@ export default function MapScreen() {
         </View>
       )}
 
+      {busy && !recording && <View style={[styles.runPanel, { paddingBottom: insets.bottom + spacing.md }]}><ActivityIndicator color="#80FFDD" /><Text style={styles.savingText}>Saving your run…</Text></View>}
       {recording && (
         <View style={[styles.runPanel, { paddingBottom: insets.bottom + spacing.md }]}>
-          <View style={[styles.stats, styles.runStats]}>
-            <Stat prominent label="Distance" value={formatDistance(liveDistanceM)} />
-            <Stat prominent label="Time" value={formatDuration(elapsed)} />
-            <Stat prominent label="Pace" value={elapsed > 0 && liveDistanceM >= 100 ? `${Math.floor((elapsed / (liveDistanceM / 1000)) / 60)}:${String(Math.round((elapsed / (liveDistanceM / 1000)) % 60)).padStart(2, '0')} /km` : '—'} />
-          </View>
           {error && <Text style={styles.error}>{error}</Text>}
           <Pressable onPress={onStop} disabled={busy} style={({ pressed }) => [styles.finishButton, (pressed || busy) && styles.buttonPressed]}>
             {busy ? <ActivityIndicator color={colors.surface} /> : <Text style={styles.finishButtonText}>Finish run</Text>}
@@ -739,7 +761,7 @@ export default function MapScreen() {
       )}
 
       {/* ── Tab Bar ─────────────────────────────────────── */}
-      {!recording && (
+      {!recording && !busy && (
         <View style={[styles.tabBar, { paddingBottom: insets.bottom }]}>
           <Pressable style={styles.tab}>
             <Text style={[styles.tabIcon, styles.tabIconActive]}>▣</Text>
@@ -759,16 +781,10 @@ export default function MapScreen() {
   );
 }
 
-function Stat({ label, value, prominent = false }: { label: string; value: string; prominent?: boolean }) {
-  return (
-    <View style={styles.stat}>
-      <Text style={[styles.statValue, prominent && styles.runStatValue]}>{value}</Text>
-      <Text style={styles.statLabel}>{label}</Text>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
+  savingText: { color: '#DBFFF3', textAlign: 'center', paddingTop: 10 },
+  economy: { position: 'absolute', left: 16, padding: 12, backgroundColor: '#0A1929EF', borderRadius: 18 },
+  economyText: { color: '#B6E9D9', fontSize: 10, fontWeight: '700', letterSpacing: 0.6 },
   container: { flex: 1, backgroundColor: colors.background },
   loadingScreen: { flex: 1, backgroundColor: colors.background, alignItems: 'center', justifyContent: 'center' },
   notice: { position: 'absolute', zIndex: 10, alignSelf: 'center', backgroundColor: colors.text, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderRadius: radius.pill },
@@ -843,7 +859,7 @@ const styles = StyleSheet.create({
   devResetText: { color: '#B42318', fontSize: fontSize.xs, fontWeight: fontWeight.semibold },
 
   // ── Run Panel (recording state) ─────────────────────
-  runPanel: { flex: 0.5, justifyContent: 'space-between', backgroundColor: '#F8FFF1', paddingHorizontal: spacing.lg, paddingTop: spacing.xl },
+  runPanel: { position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: '#0A1929F5', paddingHorizontal: spacing.lg, paddingTop: spacing.md, borderTopLeftRadius: 24, borderTopRightRadius: 24 },
   stats: { flexDirection: 'row', justifyContent: 'space-around', marginBottom: spacing.md },
   runStats: { marginTop: spacing.lg, marginBottom: spacing.xl },
   stat: { alignItems: 'center' },
