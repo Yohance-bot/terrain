@@ -5,6 +5,6 @@ module.exports = () => ({
   ...appJson.expo,
   extra: {
     ...(appJson.expo.extra ?? {}),
-    apiUrl: process.env.EXPO_PUBLIC_API_URL ?? null,
+    apiUrl: process.env.EXPO_PUBLIC_API_URL?.trim() || 'https://run-backend-ngyo.onrender.com',
   },
 });
