@@ -237,3 +237,32 @@ const courtyardRoofs = buildRoofDetails([courtyard],[77,13]);
 assert.ok(courtyardRoofs.features.length > 0,'courtyard buildings get a safe pavilion on a wing');
 for(const f of courtyardRoofs.features) for(const p of f.geometry.coordinates[0]) assert.ok(!(p[0]>77.0003&&p[0]<77.0007&&p[1]>13.0003&&p[1]<13.0007),'a pavilion cannot cover a courtyard');
 console.log(`Cyan curve and complete rooftop coverage tests passed (${(performance.now()-coverageStart).toFixed(1)} ms desktop coverage/complex-footprint checks).`);
+
+const { territoryColorAt, territoryFill, buildingTerritoryPaint } = load('src/features/map/territoryAppearance.ts');
+const zone = { ...courtyard, properties: { terrain_color: '#A855F7' } };
+const captureZone = { ...zone, properties: { capture_color: '#22C55E' } };
+const colorAt = territoryColorAt([captureZone, zone]);
+assert.equal(colorAt([77.0001,13.0001]), '#22C55E', 'visible captures take precedence over fixed territory color');
+assert.equal(colorAt([77.0005,13.0005]), undefined, 'territory holes must not tint another building');
+assert.equal(colorAt([76,12]), undefined);
+assert.equal(territoryColorAt([{...zone,geometry:{type:'MultiPolygon',coordinates:[zone.geometry.coordinates]}}])([77.0001,13.0001]), '#A855F7');
+const coloredRoofs = buildRoofDetails([footprint],[77,13],false,undefined,[zone]);
+assert.ok(coloredRoofs.features.every(f=>f.properties.territoryColor === '#A855F7' && /^#[0-9a-f]{6}$/i.test(f.properties.color)));
+const recoloredRoofs = buildRoofDetails([footprint],[77,13],false,undefined,[captureZone]);
+assert.deepEqual(coloredRoofs.features.map(f=>f.geometry),recoloredRoofs.features.map(f=>f.geometry),'ownership changes recolor buildings without changing architecture');
+assert.equal(new Set(coverage.features.map(f=>f.properties.variant)).size,12,'all twelve architectural families are represented');
+const allRoofs = buildRoofDetails(manyBuildings,[77,13],false,undefined,[zone]);
+for(const roof of allRoofs.features) {
+ const owner = manyBuildings.find(b => buildRoofDetails([b],[77,13],true).features[0]?.properties.buildingKey===roof.properties.buildingKey);
+ assert.ok(owner);
+ const ring=owner.geometry.coordinates[0];const xs=ring.map(p=>p[0]),ys=ring.map(p=>p[1]);
+ for(const p of roof.geometry.coordinates[0]) assert.ok(p[0]>=Math.min(...xs)&&p[0]<=Math.max(...xs)&&p[1]>=Math.min(...ys)&&p[1]<=Math.max(...ys),'offset towers stay inside footprints');
+}
+const facade = buildingTerritoryPaint([{...footprint,id:42}],[zone],'#C6DEDC');
+assert.ok(Array.isArray(facade));
+assert.equal(buildingTerritoryPaint([footprint],[zone],'#C6DEDC'),'#C6DEDC','missing vector IDs retain safe facade fallback');
+assert.deepEqual(validateStyleMin({...nativeStyle,layers:[
+ {id:'zoom-fill',source:'test',type:'fill',paint:{'fill-color':territoryFill('terrain_fill')}},
+ {id:'facade',source:'test',type:'fill-extrusion',paint:{'fill-extrusion-color':facade}},
+]}).map(e=>e.message),[]);
+console.log('Twelve roof families, footprint containment, territory recoloring, facade fallback and zoom colour expressions passed.');

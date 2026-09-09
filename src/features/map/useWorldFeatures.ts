@@ -1,5 +1,7 @@
 import type { MapRef } from '@maplibre/maplibre-react-native';
 import { useEffect, useRef, useState, type RefObject } from 'react';
+import { buildingTerritoryPaint } from './territoryAppearance';
+import type { ExpressionSpecification } from '@maplibre/maplibre-gl-style-spec';
 import { MAP_STYLE } from '@/constants/config';
 import { buildRoofDetails, geometryKey } from './worldGeometry';
 
@@ -7,7 +9,8 @@ const ROAD_LAYERS = (MAP_STYLE.layers as { id: string; type: string }[]).filter(
 const EMPTY: GeoJSON.FeatureCollection<GeoJSON.Polygon> = { type: 'FeatureCollection', features: [] };
 /** Loaded vector geometry only. No extra map provider or GPS upload. Native
  * queries are bounded to one batch every 3/6 seconds, with one batch in flight. */
-export function useWorldFeatures(map: RefObject<MapRef | null>, ready: boolean, active: boolean, economy: boolean, zoom: number, runId: string | null) {
+export function useWorldFeatures(map: RefObject<MapRef | null>, ready: boolean, active: boolean, economy: boolean, zoom: number, runId: string | null, territories: GeoJSON.Feature[], buildingColor: string) {
+  const [facadeTint, setFacadeTint] = useState<ExpressionSpecification | string>(buildingColor);
   const [roads, setRoads] = useState<GeoJSON.Feature[]>([]);
   const [details, setDetails] = useState(EMPTY);
   const roadCache = useRef(new Map<string, GeoJSON.Feature>());
@@ -35,7 +38,9 @@ export function useWorldFeatures(map: RefObject<MapRef | null>, ready: boolean, 
         ]);
         if (!alive) return;
         lastView = viewKey; lastQueryAt = Date.now();
-        const next = buildRoofDetails(buildings, view.center, economy, view.bounds);
+        const next = buildRoofDetails(buildings, view.center, economy, view.bounds, territories);
+        const tint = buildingTerritoryPaint(buildings, territories, buildingColor);
+        setFacadeTint(old => JSON.stringify(old) === JSON.stringify(tint) ? old : tint);
         setDetails(previous => JSON.stringify(previous) === JSON.stringify(next) ? previous : next);
         if (runId) {
           let changed = false;
@@ -65,6 +70,6 @@ export function useWorldFeatures(map: RefObject<MapRef | null>, ready: boolean, 
     void update();
     const timer = setInterval(() => void update(), economy ? 6000 : 3000);
     return () => { alive = false; clearInterval(timer); };
-  }, [map, ready, active, economy, runId]);
-  return { roads, details };
+  }, [map, ready, active, economy, runId, territories, buildingColor]);
+  return { roads, details, facadeTint };
 }

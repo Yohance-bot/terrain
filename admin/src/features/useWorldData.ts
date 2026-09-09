@@ -1,3 +1,4 @@
+import { assignTerritoryColors } from '../../../src/lib/territoryColors';
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { api } from "../lib/api";
@@ -18,6 +19,7 @@ export function useWorldData() {
     queryFn: api.getCapturedAreas,
     refetchInterval: 15000,
   });
+  const zoneColors = useMemo(() => assignTerritoryColors(territories.data?.features ?? []), [territories.data]);
   const data = useMemo(() => {
     if (!territories.data || !states.data) return undefined;
     const byId = new Map<string, any>(
@@ -34,12 +36,12 @@ export function useWorldData() {
             ...state,
             color: state?.owner_device_id
               ? ownerColor(state.owner_device_id)
-              : "#6B9584",
+              : zoneColors.get(String(f.properties?.territory_id)) ?? "#6B9584",
           },
         };
       }),
     };
-  }, [territories.data, states.data]);
+  }, [territories.data, states.data, zoneColors]);
   const coloredCaptures = useMemo(
     () =>
       captures.data

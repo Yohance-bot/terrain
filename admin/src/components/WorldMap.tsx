@@ -1,3 +1,4 @@
+import { buildingTerritoryPaint } from '../../../src/features/map/territoryAppearance';
 import { useEffect, useRef, useState } from "react";
 import {
   type GeoJSONSource,
@@ -118,12 +119,14 @@ export default function WorldMap(props: Props) {
       const buildingFeatures = m.queryRenderedFeatures({
         layers: ["world-buildings"],
       });
+      const zones = [...(latest.current.captures?.features ?? []), ...(latest.current.territories?.features ?? [])];
+      m.setPaintProperty("world-buildings", "fill-extrusion-color", buildingTerritoryPaint(buildingFeatures, zones, "#C6DEDC"));
       const data = buildRoofDetails(buildingFeatures, [c.lng, c.lat], false, [
         b.getWest(),
         b.getSouth(),
         b.getEast(),
         b.getNorth(),
-      ]);
+      ], zones);
       (m.getSource("roofs") as GeoJSONSource).setData(data);
     }
     m.on("load", () => {
@@ -155,7 +158,7 @@ export default function WorldMap(props: Props) {
           paint: {
             "fill-extrusion-base": ["get", "base"],
             "fill-extrusion-height": ["get", "height"],
-            "fill-extrusion-color": [
+            "fill-extrusion-color": ["coalesce", ["get", "color"], [
               "match",
               ["get", "tone"],
               "aqua",
@@ -167,7 +170,7 @@ export default function WorldMap(props: Props) {
               "slate",
               "#5C948B",
               "#E4F0ED",
-            ],
+            ]],
           },
         },
         anchor,
@@ -181,7 +184,7 @@ export default function WorldMap(props: Props) {
           source: "territories",
           paint: {
             "fill-color": ["coalesce", ["get", "color"], "#90ACA1"],
-            "fill-opacity": 0.17,
+            "fill-opacity": ["interpolate", ["linear"], ["zoom"], 12, .58, 16, .38, 18, .22],
           },
         },
         anchor,
@@ -203,7 +206,7 @@ export default function WorldMap(props: Props) {
           id: "capture-fill",
           type: "fill",
           source: "captures",
-          paint: { "fill-color": ["get", "color"], "fill-opacity": 0.3 },
+          paint: { "fill-color": ["get", "color"], "fill-opacity": ["interpolate", ["linear"], ["zoom"], 12, .62, 16, .44, 18, .3] },
         },
         anchor,
       );

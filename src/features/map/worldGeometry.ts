@@ -1,5 +1,7 @@
 import type { ExpressionSpecification } from '@maplibre/maplibre-gl-style-spec';
 
+import { territoryColorAt, mixTerritoryColor } from './territoryAppearance';
+
 type Point = [number, number];
 export const BUILDING_HEIGHT: ExpressionSpecification = ['min', 32, ['max', 5, ['*', 0.7, ['to-number', ['coalesce', ['get', 'render_height'], ['get', 'height'], 12]]]]];
 export function buildingHeight(properties: GeoJSON.GeoJsonProperties): number {
@@ -70,7 +72,8 @@ const roofPlans = new Map<string, ReturnType<typeof roofPlan>>();
  * pavilion instead of losing coverage. All footprints in territory areas are
  * included, regardless of ownership. Nothing is persisted or sent to a server.
  */
-export function buildRoofDetails(features: GeoJSON.Feature[], center: Point, economy = false, bounds?: [number, number, number, number]): GeoJSON.FeatureCollection<GeoJSON.Polygon> {
+export function buildRoofDetails(features: GeoJSON.Feature[], center: Point, economy = false, bounds?: [number, number, number, number], territories: GeoJSON.Feature[] = []): GeoJSON.FeatureCollection<GeoJSON.Polygon> {
+  const colorAt = territoryColorAt(territories);
   const seen = new Set<string>();
   const candidates: { ring: Point[]; center: Point; key: string; height: number; area: number }[] = [];
   for (const feature of features) {
@@ -100,18 +103,24 @@ export function buildRoofDetails(features: GeoJSON.Feature[], center: Point, eco
   candidates.sort((a, b) => distance(a.center) - distance(b.center));
   const result: GeoJSON.Feature<GeoJSON.Polygon>[] = [];
   for (const { ring, center: c, key, height, area } of candidates) {
-    const seed = hash(key), variant = seed % 4;
-    const add = (sx: number, sy: number, base: number, top: number, tone: string) => {
-      const points: Point[] = ring.map(p => [c[0] + (p[0] - c[0]) * sx, c[1] + (p[1] - c[1]) * sy]);
+    const seed = hash(key), variant = seed % 12;
+    const territoryColor = colorAt(c);
+    const add = (sx: number, sy: number, base: number, top: number, tone: string, offset = 0, corner = 0) => {
+      // Uniform scaling + translation toward a vertex is a convex combination:
+      // scale + offset <= 1 keeps every component inside the safe roof plan.
+      const anchor = ring[(corner + (seed >>> 8)) % ring.length]!;
+      const points: Point[] = ring.map(p => [c[0] + (p[0] - c[0]) * sx + (anchor[0] - c[0]) * offset, c[1] + (p[1] - c[1]) * sy + (anchor[1] - c[1]) * offset]);
       points.push(points[0]!);
       // Every roof tier uses uniform scaling inside its convex footprint.
-      result.push({ type: 'Feature', properties: { base, height: top, tone, variant, buildingKey: seed.toString(36) }, geometry: { type: 'Polygon', coordinates: [points] } });
+      result.push({ type: 'Feature', properties: { base, height: top, tone, variant, ...(territoryColor ? { territoryColor, color: mixTerritoryColor(territoryColor, tone === 'slate' ? '#183A43' : '#F3F7ED', tone === 'cream' ? 0.65 : tone === 'slate' ? 0.42 : tone === 'garden' ? 0.2 : 0.12) } : {}), buildingKey: seed.toString(36) }, geometry: { type: 'Polygon', coordinates: [points] } });
     };
     const tone = ['aqua', 'clay', 'slate', 'cream'][seed % 4]!;
-    if (economy || distance(c) > 230 || area < 25) {
+    if (territoryColor) add(0.98, 0.98, height + 0.61, height + 0.85, 'aqua');
+    if (economy || distance(c) > 480 || area < 25) {
       // Coverage stays complete at low LOD. A raised, tinted roof pavilion is
       // cheaper than dropping whole buildings from the decoration pass.
-      add(0.68, 0.68, height + 0.6, height + (area < 25 ? 1.6 : 2.6), tone);
+      const scale = [0.76, 0.48, 0.88, 0.6, 0.38, 0.7][variant % 6]!;
+      add(scale, scale, height + 0.85, height + (area < 25 ? 1.8 : 2 + variant % 4), tone, variant % 2 ? 0.16 : 0);
       continue;
     }
     if (variant === 0) {
@@ -128,11 +137,52 @@ export function buildRoofDetails(features: GeoJSON.Feature[], center: Point, eco
       add(0.78, 0.78, height + 1.3, height + 1.5, 'garden');
       add(0.34, 0.34, height + 1.5, height + (area > 250 ? 5 : 3), 'aqua');
       add(0.40, 0.40, height + (area > 250 ? 5 : 3), height + (area > 250 ? 5.6 : 3.6), 'cream');
-    } else {
+    } else if (variant === 3) {
       // Floating canopy over a narrow rooftop core.
       add(0.34, 0.34, height + 0.6, height + 3.6, 'slate');
       add(0.75, 0.75, height + 3.6, height + 4.2, 'aqua');
       add(0.60, 0.60, height + 4.2, height + 4.6, 'cream');
+    } else if (variant === 4) {
+      // Twin pavilions, with a shared landscaped podium.
+      add(.88, .88, height + .85, height + 1.4, 'garden');
+      add(.24, .24, height + 1.4, height + 4.8, tone, .46, 0);
+      add(.24, .24, height + 1.4, height + 3.6, 'aqua', .46, Math.floor(ring.length / 2));
+    } else if (variant === 5) {
+      // Asymmetric terraced penthouse.
+      add(.86, .86, height + .85, height + 1.3, 'cream');
+      add(.48, .48, height + 1.3, height + 3.6, tone, .26);
+      add(.31, .31, height + 3.6, height + 4.1, 'slate', .26);
+      add(.18, .18, height + 1.3, height + 1.9, 'garden', .55, Math.floor(ring.length / 2));
+    } else if (variant === 6) {
+      // Lantern tower with a broad cap.
+      add(.66, .66, height + .85, height + 1.4, 'cream');
+      add(.26, .26, height + 1.4, height + 5.6, 'aqua');
+      add(.44, .44, height + 5.6, height + 6.1, tone);
+      add(.18, .18, height + 6.1, height + 6.8, 'cream');
+    } else if (variant === 7) {
+      // Two low solar/glass wings.
+      add(.9, .9, height + .85, height + 1.2, 'cream');
+      add(.29, .29, height + 1.2, height + 1.9, 'slate', .4);
+      add(.29, .29, height + 1.2, height + 2.4, 'aqua', .4, Math.floor(ring.length / 2));
+    } else if (variant === 8) {
+      // Ring of corner turrets.
+      add(.85, .85, height + .85, height + 1.4, 'garden');
+      for (let i = 0; i < 4; i++) add(.18, .18, height + 1.4, height + 3.2 + (i % 2), tone, .62, Math.floor(i * ring.length / 4));
+    } else if (variant === 9) {
+      // Art-deco crown: alternating setbacks and pale cornices.
+      for (let i = 0; i < 5; i++) add(.84 - i * .13, .84 - i * .13, height + .85 + i * .85, height + 1.7 + i * .85, i % 2 ? 'cream' : tone);
+    } else if (variant === 10) {
+      // Garden deck with an offset observation pavilion.
+      add(.92, .92, height + .85, height + 1.2, 'cream');
+      add(.8, .8, height + 1.2, height + 1.5, 'garden');
+      add(.22, .22, height + 1.5, height + 4.1, 'aqua', .52);
+      add(.32, .32, height + 4.1, height + 4.6, tone, .52);
+    } else {
+      // Stacked floating terraces.
+      add(.28, .28, height + .85, height + 5.2, 'slate');
+      add(.86, .86, height + 2, height + 2.5, tone);
+      add(.64, .64, height + 3.5, height + 4, 'garden');
+      add(.46, .46, height + 5.2, height + 5.7, 'cream');
     }
   }
   return { type: 'FeatureCollection', features: result };

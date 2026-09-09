@@ -22,6 +22,7 @@ import { useHudDiagnostics } from '@/features/hud/useHudDiagnostics';
 import { useRunCamera } from '@/features/hud/useRunCamera';
 import { useRecorder } from '@/features/recorder/useRecorder';
 import { useHudPreferences } from '@/features/hud/usePresentation';
+import { territoryFill } from './territoryAppearance';
 import { WorldStructures } from './WorldStructures';
 import { useWorldFeatures } from './useWorldFeatures';
 import { illuminateStreets } from './streetMatching';
@@ -111,7 +112,9 @@ function withOwnerColors(collection: GeoJSON.FeatureCollection | null | undefine
       properties: {
         ...feature.properties,
         owner_color: colourForOwner(feature.properties?.owner_device_id),
-        owner_fill: withAlpha(colourForOwner(feature.properties?.owner_device_id), 0.18),
+        owner_fill: withAlpha(colourForOwner(feature.properties?.owner_device_id), 0.25),
+        owner_fill_mid: withAlpha(colourForOwner(feature.properties?.owner_device_id), 0.40),
+        owner_fill_far: withAlpha(colourForOwner(feature.properties?.owner_device_id), 0.58),
       },
     })),
   } as GeoJSON.FeatureCollection;
@@ -157,8 +160,6 @@ export const TerritoryMap = memo(function TerritoryMap({
   const [zoom, setZoom] = useState(DEFAULT_ZOOM);
   const runId = useRecorder(s => s.runId);
   const routeDisplay = useHudPreferences(s => s.routeDisplay);
-  const world = useWorldFeatures(mapRef, mapReady, presentationActive, economy, zoom, recording ? runId : null);
-  const streetTrail = useMemo(() => routeDisplay === 'streets' && recording ? illuminateStreets(traversedRoads, world.roads) : null, [routeDisplay, recording, traversedRoads, world.roads]);
   const palette = useLighting(effectiveFix, presentationActive, simulation);
   const hasOwnedAreaGeometry = Boolean(ownedTerritoryAreas?.features.length);
   const ownerColouredAreas = useMemo(() => withOwnerColors(ownedTerritoryAreas), [ownedTerritoryAreas]);
@@ -175,7 +176,9 @@ export const TerritoryMap = memo(function TerritoryMap({
         properties: {
           ...feature.properties,
           capture_color: captureColor,
-          capture_fill: withAlpha(captureColor, 0.28),
+          capture_fill: withAlpha(captureColor, 0.3),
+          capture_fill_mid: withAlpha(captureColor, 0.44),
+          capture_fill_far: withAlpha(captureColor, 0.6),
         },
       })),
     } as GeoJSON.FeatureCollection;
@@ -210,7 +213,9 @@ export const TerritoryMap = memo(function TerritoryMap({
             // Keep transparency in the color itself. MapLibre React Native's
             // fill-opacity bridge can dereference a released style value on
             // iOS when these layers are updated during a style swap.
-            terrain_fill: withAlpha(zoneColor, 0.16),
+            terrain_fill: withAlpha(zoneColor, 0.22),
+            terrain_fill_mid: withAlpha(zoneColor, 0.35),
+            terrain_fill_far: withAlpha(zoneColor, 0.52),
             fill_color: zoneColor,
             outline_color: zoneColor,
           },
@@ -218,6 +223,14 @@ export const TerritoryMap = memo(function TerritoryMap({
       }),
     };
   }, [colorByTerritory, ownedByYou, ownedByOthers, sourceTerritories]);
+
+  const buildingTerritories = useMemo(() => [
+    ...(showCaptures && !isRunning ? styledCapturedAreas?.features ?? [] : []),
+    ...(showTerritories ? ownerColouredAreas?.features ?? [] : []),
+    ...(showTerritories ? decorated?.features ?? [] : []),
+  ], [showCaptures, isRunning, styledCapturedAreas, showTerritories, ownerColouredAreas, decorated]);
+  const world = useWorldFeatures(mapRef, mapReady, presentationActive, economy, zoom, recording ? runId : null, buildingTerritories, palette.building);
+  const streetTrail = useMemo(() => routeDisplay === 'streets' && recording ? illuminateStreets(traversedRoads, world.roads) : null, [routeDisplay, recording, traversedRoads, world.roads]);
 
   /**
    * Subset of territories that the runner is currently traversing.
@@ -290,10 +303,10 @@ export const TerritoryMap = memo(function TerritoryMap({
               id="territory-vitality"
               type="fill"
               beforeId={MAP_ART.firstRoadLayerId}
-              filter={['!=', ['get', 'kind'], 'park']}
+              filter={hasOwnedAreaGeometry ? ['all', ['!=', ['get', 'kind'], 'park'], ['==', ['get', 'ownership'], 'none']] : ['!=', ['get', 'kind'], 'park']}
               layout={{ visibility: isRunning ? 'none' : 'visible' }}
               paint={{
-                'fill-color': ['get', 'terrain_fill'],
+                'fill-color': territoryFill('terrain_fill'),
               }}
             />
 
@@ -458,14 +471,14 @@ export const TerritoryMap = memo(function TerritoryMap({
         {/* Connected fixed territories with the same owner arrive already
             dissolved from PostGIS. This hides internal borders but never joins
             a real gap or territories held by different players. */}
-        {ownerColouredAreas?.features.length ? (
+        {showTerritories && ownerColouredAreas?.features.length ? (
           <GeoJSONSource id="owned-territory-areas" data={ownerColouredAreas}>
             <Layer
               id="owned-territory-area-fill"
               type="fill"
               beforeId={MAP_ART.firstRoadLayerId}
               paint={{
-                'fill-color': ['get', 'owner_fill'],
+                'fill-color': territoryFill('owner_fill'),
               }}
             />
             <Layer beforeId="hud-base-anchor"
@@ -504,7 +517,7 @@ export const TerritoryMap = memo(function TerritoryMap({
               type="fill"
               beforeId={MAP_ART.firstRoadLayerId}
               paint={{
-                'fill-color': ['get', 'capture_fill'],
+                'fill-color': territoryFill('capture_fill'),
               }}
             />
             <Layer beforeId="hud-base-anchor"
@@ -575,7 +588,7 @@ export const TerritoryMap = memo(function TerritoryMap({
           </GeoJSONSource>
         )}
 
-        <WorldStructures details={world.details} palette={palette} />
+        <WorldStructures details={world.details} palette={palette} facadeTint={world.facadeTint} />
         {showTerritories && <ContestedBorders data={borders} active={presentationActive} reducedMotion={reducedMotion} economy={economy} zoom={zoom} />}
         {recording && (streetTrail ? <StreetTrailLayers {...streetTrail} economy={economy} /> : <TrailLayers data={traversedRoads} economy={economy} />)}
         <CueMapLayers active={presentationActive} reducedMotion={reducedMotion} territories={sourceTerritories} />
