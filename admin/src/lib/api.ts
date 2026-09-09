@@ -1,8 +1,19 @@
-export const getToken = () => localStorage.getItem("admin_token");
-export const setToken = (token: string) => localStorage.setItem("admin_token", token);
-export const clearToken = () => localStorage.removeItem("admin_token");
+export const API_BASE_URL = (
+  import.meta.env.VITE_API_URL || "https://run-backend-ngyo.onrender.com"
+)
+  .replace(/\/+$/, "")
+  .replace(/\/v1$/, "");
+export const getToken = () => sessionStorage.getItem("admin_token");
+export const setToken = (token: string) => {
+  localStorage.removeItem("admin_token");
+  sessionStorage.setItem("admin_token", token);
+};
+export const clearToken = () => {
+  sessionStorage.removeItem("admin_token");
+  localStorage.removeItem("admin_token");
+};
 
-class ApiError extends Error {
+export class ApiError extends Error {
   status: number;
   constructor(message: string, status: number) {
     super(message);
@@ -10,49 +21,107 @@ class ApiError extends Error {
   }
 }
 
-async function fetchWithToken(endpoint: string, options: RequestInit = {}) {
-  const token = getToken();
-  
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-    ...(options.headers as Record<string, string> || {}),
-  };
-
-  // Only inject admin token for /admin endpoints
-  if (endpoint.includes("/admin/") && token) {
-    headers["X-Admin-Token"] = token;
+export async function request<T = any>(
+  endpoint: string,
+  options: RequestInit = {},
+  token = getToken(),
+): Promise<T> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 180000);
+  try {
+    const headers = new Headers(options.headers);
+    headers.set("Content-Type", "application/json");
+    if (token) headers.set("Authorization", `Bearer ${token}`);
+    const response = await fetch(`${API_BASE_URL}/v1${endpoint}`, {
+      ...options,
+      headers,
+      signal: controller.signal,
+    });
+    if (!response.ok) {
+      const body = await response.json().catch(() => null);
+      const detail =
+        typeof body?.detail === "string"
+          ? body.detail
+          : `Request failed (${response.status})`;
+      if (
+        response.status === 401 &&
+        token &&
+        !endpoint.startsWith("/auth/profile")
+      ) {
+        clearToken();
+        window.dispatchEvent(new Event("storage"));
+      }
+      throw new ApiError(detail, response.status);
+    }
+    return response.status === 204 ? (null as T) : await response.json();
+  } catch (error) {
+    if (controller.signal.aborted)
+      throw new Error(
+        "The server took too long to respond. It may be waking up. Retry shortly.",
+      );
+    throw error;
+  } finally {
+    clearTimeout(timer);
   }
-
-  let baseUrl = import.meta.env.VITE_API_URL || '/api/v1';
-  if (baseUrl.startsWith('http') && !baseUrl.endsWith('/v1')) {
-    baseUrl = baseUrl.replace(/\/$/, '') + '/v1';
-  }
-
-  const response = await fetch(`${baseUrl}${endpoint}`, {
-    ...options,
-    headers,
-  });
-
-  if (!response.ok) {
-    throw new ApiError(`Request failed: ${response.statusText}`, response.status);
-  }
-
-  return response.json();
 }
-
-// API methods
+const post = (path: string, body: unknown) =>
+  request(path, { method: "POST", body: JSON.stringify(body) });
 export const api = {
-  // Dashboard
-  getStats: () => fetchWithToken("/admin/dashboard/stats"),
-  
-  // Territories (using existing public endpoints)
-  getTerritories: () => fetchWithToken("/territories"),
-  getTerritoryState: () => fetchWithToken("/territories/state"),
-  getTerritoryDetails: (id: string) => fetchWithToken(`/territories/${id}`),
-  
-  // Admin entities
-  getPlayers: (offset = 0, limit = 50) => fetchWithToken(`/admin/dashboard/players?offset=${offset}&limit=${limit}`),
-  getRuns: (offset = 0, limit = 50) => fetchWithToken(`/admin/dashboard/runs?offset=${offset}&limit=${limit}`),
-  getRunDetails: (id: string) => fetchWithToken(`/runs/${id}`),
-  getAuditEvents: (offset = 0, limit = 50) => fetchWithToken(`/admin/dashboard/audit-events?offset=${offset}&limit=${limit}`),
+  login: (username: string, password: string) =>
+    request(
+      "/auth/login",
+      {
+        method: "POST",
+        body: JSON.stringify({ username, password, scope: "admin" }),
+      },
+      null,
+    ),
+  logout: () => post("/auth/logout?scope=admin", {}),
+  me: () => request("/admin/console/me"),
+  members: () => request("/admin/console/members"),
+  addMember: (body: unknown) => post("/admin/console/members", body),
+  memberState: (id: string, active: boolean) =>
+    request(`/admin/console/members/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify({ active }),
+    }),
+  credentials: () => request("/auth/profile?scope=admin"),
+  updateCredentials: (body: object) =>
+    request("/auth/profile", {
+      method: "PUT",
+      body: JSON.stringify({ ...body, scope: "admin" }),
+    }),
+  notes: () => request("/admin/console/notes"),
+  addNote: (body: unknown) => post("/admin/console/notes", body),
+  editNote: (id: string, body: unknown) =>
+    request(`/admin/console/notes/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(body),
+    }),
+  assistant: (question: string, history: unknown[]) =>
+    post("/admin/console/assistant", { question, history }),
+  getStats: () => request("/admin/dashboard/stats"),
+  getTerritories: () => request("/territories"),
+  getTerritoryState: () => request("/territories/state"),
+  getTerritoryDetails: (id: string) => request(`/territories/${id}`),
+  getCapturedAreas: () =>
+    request("/captured-areas?linked_only=true", {
+      headers: { "X-Device-Id": "00000000-0000-4000-8000-000000000000" },
+    }),
+  getPlayers: (offset = 0, limit = 50) =>
+    request(`/admin/dashboard/players?offset=${offset}&limit=${limit}`),
+  getRuns: (offset = 0, limit = 50) =>
+    request(`/admin/dashboard/runs?offset=${offset}&limit=${limit}`),
+  getRunDetails: (id: string) => request(`/admin/dashboard/runs/${id}`),
+  getAuditEvents: (offset = 0, limit = 50) =>
+    request(`/admin/dashboard/audit-events?offset=${offset}&limit=${limit}`),
+  getSystem: () => request("/admin/dashboard/system"),
+  simulate: (body: unknown) => post("/admin/dashboard/simulate", body),
+  reverseRun: (id: string, operator_ref: string, reason: string) =>
+    post(`/admin/review/runs/${id}/reverse`, { operator_ref, reason }),
+  rebuildTerritory: (id: string, operator_ref: string, reason: string) =>
+    post(`/admin/dashboard/territories/${id}/rebuild`, {
+      operator_ref,
+      reason,
+    }),
 };

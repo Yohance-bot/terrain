@@ -1,5 +1,7 @@
 import { API_BASE_URL } from '@/constants/config';
-import { getDeviceId } from '@/lib/device';
+import { getMeta } from '@/lib/db';
+import { readAuth, writeAuth } from '@/lib/auth/storage';
+import { DEV_RUNNERS, setDevRunnerId, getDeviceId } from '@/lib/device';
 
 import { ApiRequestError } from './errors';
 import type {
@@ -18,6 +20,9 @@ import type {
 // A tunnel that has expired should not leave a pressable or startup refresh in
 // limbo until iOS eventually gives up on the socket.
 export const DEFAULT_REQUEST_TIMEOUT_MS = 8_000;
+// The free Render instance can need 50+ seconds to wake up. Even a warm
+// account list took 10.45s across the Oregon → Mumbai database connection.
+export const ACCOUNT_REQUEST_TIMEOUT_MS = 90_000;
 // Submitting a run requires PostGIS clipping, loop detection, and multiple ledger
 // updates on the server. On cloud deployments this legitimately takes 8.5–15 seconds.
 export const SUBMIT_RUN_TIMEOUT_MS = 45_000;
@@ -37,9 +42,11 @@ function territoryPath(path: string, scope?: TerritoryScope): string {
 
 async function requestResponse(path: string, init?: RequestOptions): Promise<Response> {
   const deviceId = await getDeviceId();
+  const token = await readAuth("token");
   const controller = new AbortController();
   let timedOut = false;
-  const timeoutMs = init?.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS;
+  const timeoutMs = init?.timeoutMs ?? (path.startsWith('/v1/account') || path.startsWith('/v1/auth')
+    ? ACCOUNT_REQUEST_TIMEOUT_MS : DEFAULT_REQUEST_TIMEOUT_MS);
   const timeout = setTimeout(() => {
     timedOut = true;
     controller.abort();
@@ -55,6 +62,7 @@ async function requestResponse(path: string, init?: RequestOptions): Promise<Res
       headers: {
         'Content-Type': 'application/json',
         'X-Device-Id': deviceId,
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...init?.headers,
       },
     });
@@ -151,7 +159,11 @@ export function syncTerritoryState(
  * the idempotency key, so a retry after a failed upload returns the original
  * result rather than counting the distance twice.
  */
-export function submitRun(submission: RunSubmission): Promise<RunResult> {
+export async function submitRun(submission: RunSubmission): Promise<RunResult> {
+  const owner = await getMeta(`run.owner.${submission.run_id}`);
+  if (!owner || owner !== await getDeviceId()) {
+    throw new Error('This saved run belongs to another or an earlier account. Sign in with its original runner before uploading.');
+  }
   return request<RunResult>('/v1/runs', {
     method: 'POST',
     body: JSON.stringify(submission),
@@ -190,6 +202,7 @@ export function setCachedAccount(account: AccountSummary | null): void {
 }
 
 export async function fetchAccount(): Promise<AccountSummary | null> {
+  if (!await readAuth("token")) return null;
   const account = await request<AccountSummary | null>('/v1/account');
   memoryCachedAccount = account;
   return account;
@@ -203,7 +216,8 @@ export async function updateAccount(display_name: string): Promise<AccountSummar
 
 export async function signOutAccount(): Promise<void> {
   memoryCachedAccount = null;
-  await requestResponse('/v1/account/sign-out', { method: 'POST' });
+  try { await requestResponse('/v1/auth/logout', { method: 'POST' }); }
+  finally { await writeAuth('token',''); await writeAuth('device',''); setDevRunnerId(null); }
 }
 
 export async function requestAccountDeletion(): Promise<void> {
@@ -240,4 +254,24 @@ export async function signInLocalAccount(accountId: string): Promise<AccountSumm
 
 export async function resetDeveloperTerritory(territoryId: string): Promise<void> {
   await requestResponse(`/v1/account/developer/territories/${territoryId}/reset`, { method: 'POST' });
+}
+
+interface SessionResponse { token: string; device_id: string; account: AccountSummary }
+async function acceptSession(result: SessionResponse): Promise<AccountSummary> {
+  await writeAuth('device',result.device_id);
+  await writeAuth('token',result.token);
+  setDevRunnerId(result.account.developer_slot ? DEV_RUNNERS[result.account.developer_slot-1]?.id ?? null : null);
+  memoryCachedAccount=result.account;
+  return result.account;
+}
+export async function passwordLogin(username:string,password:string,display_name?:string) {
+  return acceptSession(await request<SessionResponse>(`/v1/auth/${display_name?'register':'login'}`,{
+    method:'POST',body:JSON.stringify({username,password,...(display_name?{display_name}:{})})}));
+}
+export async function googleLogin(access_token:string) {
+  return acceptSession(await request<SessionResponse>('/v1/auth/google',{method:'POST',body:JSON.stringify({access_token})}));
+}
+export function fetchCredentials() {return request<{username:string|null;has_password:boolean}>('/v1/auth/profile');}
+export function updateCredentials(username:string,current_password:string,new_password:string) {
+  return request('/v1/auth/profile',{method:'PUT',body:JSON.stringify({username,current_password,...(new_password?{new_password}:{})})});
 }

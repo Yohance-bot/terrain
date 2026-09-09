@@ -23,6 +23,24 @@ export class ApiRequestError extends Error {
   }
 }
 
+export function accountErrorMessage(error: unknown): string {
+  if (error instanceof ApiRequestError) {
+    const detail=(error.body as {detail?:unknown})?.detail;
+    if (typeof detail==='string') return detail;
+    if (error.status === 401) return 'Username or password is incorrect. Please try again.';
+    if (error.status === 403) return 'This sign-in is unavailable. Check your account access.';
+    if (error.status === 404) return 'The account service was not found. Check the configured backend URL and account settings.';
+    if (error.status === 422) return 'Check your username and use a password of at least 12 characters when creating an account.';
+    if (error.status >= 500) return `The server returned an error (${error.status}). Please try again shortly.`;
+    return `Sign-in was rejected (${error.status}). Please try again.`;
+  }
+  if (error instanceof Error && /timed out/i.test(error.message)) {
+    return 'The server took too long to respond. It may be waking up. Please try again.';
+  }
+  if (error instanceof Error && /Google|sign-in.*expired/i.test(error.message)) return error.message;
+  return 'Could not reach the cloud server. Check your internet connection and try again.';
+}
+
 function parseResponseBody(bodyText: string): unknown {
   if (!bodyText) return null;
   try {

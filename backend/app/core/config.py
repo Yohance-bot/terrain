@@ -5,6 +5,13 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
+    supabase_url: str = "https://wqhwnfnesigiytyhikuj.supabase.co"
+    supabase_publishable_key: str = "sb_publishable_NEaAQwLQLCNXxYVyNtIKpg_sWZAg0xL"
+    groq_api_key: SecretStr | None = None
+    api_key: SecretStr | None = None  # Compatibility with the user-provided .env name.
+    groq_model: str = "openai/gpt-oss-120b"
+    authenticated_accounts_enabled: bool = True
+
     database_url: str = "postgresql+psycopg://localhost:5432/run_prototype"
     # Internal operations are deliberately disabled until a non-empty token is
     # configured. This is a temporary boundary, not a replacement for RBAC.

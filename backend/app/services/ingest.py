@@ -33,7 +33,11 @@ from app.services.influence import (
     effort_for_segment,
     influence_for_effort,
 )
-from app.services.matching import create_public_captured_area, match_loop_capture_territories, match_run
+from app.services.matching import (
+    create_public_captured_area,
+    match_loop_capture_territories,
+    match_run,
+)
 from app.services.ownership import recompute_ownership
 
 
@@ -66,9 +70,7 @@ def _tuning() -> InfluenceTuning:
     )
 
 
-def _transition(
-    session: Session, run: Run, to_status: str, *, reason: str | None = None
-) -> None:
+def _transition(session: Session, run: Run, to_status: str, *, reason: str | None = None) -> None:
     """Advance a persisted run and append its corresponding lifecycle event."""
     from_status = run.status
     run.lifecycle_version += 1
@@ -91,6 +93,8 @@ def _transition(
 def process_run(session: Session, device: Device, submission: RunSubmission) -> RunResult:
     existing = session.get(Run, submission.run_id)
     if existing is not None:
+        if existing.device_id != device.id:
+            raise HTTPException(409, "Run ID belongs to another runner")
         # Idempotent by client-generated run id, so a retry after a flaky upload
         # returns the original result instead of double-counting distance.
         return build_result(session, existing)
@@ -153,7 +157,9 @@ def process_run(session: Session, device: Device, submission: RunSubmission) -> 
     if run.source == "tracked":
         create_public_captured_area(session, run.id, device.id)
 
-    matched_segments = {segment.territory_id: segment for segment in match_run(session, run.id, duration_s)}
+    matched_segments = {
+        segment.territory_id: segment for segment in match_run(session, run.id, duration_s)
+    }
     for loop_capture in match_loop_capture_territories(session, run.id):
         existing = matched_segments.get(loop_capture.territory_id)
         matched_segments[loop_capture.territory_id] = (
@@ -201,7 +207,9 @@ def process_run(session: Session, device: Device, submission: RunSubmission) -> 
             ).scalar_one()
             granted = max(
                 float(settings.loop_capture_margin),
-                float(highest_active or 0) - float(active or 0) + float(settings.loop_capture_margin),
+                float(highest_active or 0)
+                - float(active or 0)
+                + float(settings.loop_capture_margin),
             )
             effort = granted
         else:

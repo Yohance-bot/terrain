@@ -78,13 +78,18 @@ def register_validation_error_logging(app: FastAPI) -> None:
     async def log_request_validation_error(
         request: Request, exc: RequestValidationError
     ) -> Response:
+        if request.url.path.startswith(("/v1/auth/", "/v1/admin/console/")):
+            from starlette.responses import JSONResponse
+
+            safe = [{"loc": e["loc"], "msg": e["msg"], "type": e["type"]} for e in exc.errors()]
+            return JSONResponse(status_code=422, content={"detail": safe})
         if settings.log_http_422_response_bodies:
             logger.warning(
                 "request_validation_failed",
                 extra={
                     **_validation_log_extra(request),
                     "validation_errors": exc.errors(),
-                    "response_body": json.dumps({"detail": exc.errors()}),
+                    "response_body": json.dumps({"detail": exc.errors()}, default=str),
                 },
             )
         return await request_validation_exception_handler(request, exc)

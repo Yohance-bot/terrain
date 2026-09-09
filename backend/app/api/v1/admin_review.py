@@ -2,7 +2,7 @@
 
 import uuid
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
 
 from app.api.deps import require_admin_operations_token
@@ -46,6 +46,7 @@ def get_device_review_queue(
 def manually_reverse_run(
     run_id: uuid.UUID,
     decision: ManualRunReversal,
+    request: Request,
     session: Session = Depends(get_session),
 ) -> ManualRunReversalResult:
     """Record an accountable reversal and rebuild derived affected territories."""
@@ -53,7 +54,9 @@ def manually_reverse_run(
     outcome = reverse_run(
         session,
         run_id=run_id,
-        operator_ref=decision.operator_ref,
+        operator_ref=str(request.state.admin_user.id)
+        if hasattr(request.state, "admin_user")
+        else decision.operator_ref,
         reason=decision.reason,
     )
     return ManualRunReversalResult(

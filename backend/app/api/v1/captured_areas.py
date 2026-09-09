@@ -12,9 +12,9 @@ from geoalchemy2 import Geometry
 from sqlalchemy import String, func, select
 from sqlalchemy.orm import Session
 
-from app.api.deps import device_id_header
+from app.api.deps import public_device_id
 from app.core.db import get_session
-from app.models import CapturedArea, DeviceLink
+from app.models import CapturedArea, DeviceLink, Run
 
 router = APIRouter(prefix="/captured-areas", tags=["captured-areas"])
 
@@ -22,13 +22,14 @@ router = APIRouter(prefix="/captured-areas", tags=["captured-areas"])
 @router.get("")
 def list_captured_areas(
     linked_only: bool = False,
-    device_id: uuid.UUID = Depends(device_id_header),
+    device_id: uuid.UUID = Depends(public_device_id),
     session: Session = Depends(get_session),
 ) -> dict:
     # One exact topological union per owner. Old captures are normalised when
     # read: touching/overlapping loops become a single Polygon, gaps stay a
     # MultiPolygon. No buffer or proximity rule is applied.
-    statement = select(
+    statement = (
+        select(
             CapturedArea.owner_device_id,
             func.min(CapturedArea.run_id.cast(String)).label("run_id"),
             func.ST_AsGeoJSON(
@@ -40,7 +41,11 @@ def list_captured_areas(
                     )
                 )
             ).label("geometry"),
-        ).group_by(CapturedArea.owner_device_id)
+        )
+        .join(Run, Run.id == CapturedArea.run_id)
+        .where(Run.status == "applied")
+        .group_by(CapturedArea.owner_device_id)
+    )
     if linked_only:
         statement = statement.join(DeviceLink, DeviceLink.device_id == CapturedArea.owner_device_id)
     rows = session.execute(statement).all()

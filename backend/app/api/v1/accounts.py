@@ -128,9 +128,8 @@ def update_account(
 def sign_out(
     device_id: uuid.UUID = Depends(device_id_header), session: Session = Depends(get_session)
 ) -> None:
-    link = session.get(DeviceLink, device_id)
-    if link is not None:
-        session.delete(link)
+    # Logout revokes a session through /auth/logout; ledger ownership is permanent.
+    return None
 
 
 @router.post("/deletion-request", status_code=202)
@@ -149,6 +148,8 @@ def developer_login(
     device_id: uuid.UUID = Depends(device_id_header),
     session: Session = Depends(get_session),
 ) -> AccountSummary:
+    if settings.authenticated_accounts_enabled:
+        raise HTTPException(410, "Use your developer username and password")
     pins = [pin.strip() for pin in settings.developer_mode_pins.split(",") if pin.strip()]
     slot = next(
         (
@@ -225,7 +226,7 @@ def developer_login(
 
 
 def require_local_accounts() -> None:
-    if not settings.local_accounts_enabled:
+    if settings.authenticated_accounts_enabled or not settings.local_accounts_enabled:
         raise HTTPException(status_code=404, detail="Local accounts are disabled")
 
 

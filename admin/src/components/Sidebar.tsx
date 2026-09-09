@@ -1,54 +1,73 @@
-import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Map as MapIcon, Users, Activity, FileText, LogOut } from 'lucide-react';
-import { clearToken } from '../lib/api';
-
+import { NavLink } from "react-router-dom";
+import {
+  LayoutDashboard,
+  Map,
+  Users,
+  Activity,
+  FileText,
+  LogOut,
+  SlidersHorizontal,
+  Gamepad2,
+  NotebookPen,
+  Bot,
+  UserRoundCog,
+} from "lucide-react";
+import { api, clearToken } from "../lib/api";
+const links = [
+  ["/", LayoutDashboard, "Overview"],
+  ["/map", Map, "World map"],
+  ["/simulation", Gamepad2, "Run simulator"],
+  ["/players", Users, "Runners"],
+  ["/runs", Activity, "Activity"],
+  ["/audit", FileText, "Audit trail"],
+  ["/notes", NotebookPen, "Field notes"],
+  ["/assistant", Bot, "Ask Scout"],
+  ["/team", UserRoundCog, "Team & profile"],
+  ["/system", SlidersHorizontal, "System"],
+] as const;
 export default function Sidebar({ onLogout }: { onLogout: () => void }) {
-  const handleLogout = () => {
-    clearToken();
-    onLogout();
-  };
-
-  const navItems = [
-    { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
-    { to: '/map', icon: MapIcon, label: 'Territory Map' },
-    { to: '/players', icon: Users, label: 'Players' },
-    { to: '/runs', icon: Activity, label: 'Runs' },
-    { to: '/audit', icon: FileText, label: 'Audit Log' },
-  ];
-
   return (
-    <aside className="w-64 border-r border-border bg-card flex flex-col">
-      <div className="p-6 border-b border-border">
-        <h1 className="text-xl font-bold text-primary flex items-center gap-2">
-          <Activity className="w-6 h-6" />
-          Run Admin
-        </h1>
+    <aside className="sidebar">
+      <div className="wordmark">
+        ◈ TERRARUN<span>CONTROL CENTER</span>
       </div>
-      <nav className="flex-1 p-4 space-y-1">
-        {navItems.map((item) => (
+      <div className="workspace-label">
+        <span className="status-dot" />
+        Live environment<small>Bengaluru, India</small>
+      </div>
+      <nav>
+        {links.map(([to, Icon, label]) => (
           <NavLink
-            key={item.to}
-            to={item.to}
-            className={({ isActive }) =>
-              `flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${
-                isActive
-                  ? 'bg-primary/10 text-primary font-medium'
-                  : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-              }`
-            }
+            key={to}
+            to={to}
+            end={to === "/"}
+            className={({ isActive }) => (isActive ? "active" : "")}
           >
-            <item.icon className="w-5 h-5" />
-            {item.label}
+            <Icon size={18} />
+            <span>{label}</span>
           </NavLink>
         ))}
       </nav>
-      <div className="p-4 border-t border-border">
+      <div className="sidebar-bottom">
+        <p>Your city. In motion.</p>
+        <small>
+          Authoritative server data
+          <br />
+          Refreshes while this tab is active
+        </small>
         <button
-          onClick={handleLogout}
-          className="flex items-center gap-3 px-3 py-2 w-full text-left text-muted-foreground hover:text-destructive transition-colors rounded-md hover:bg-muted"
+          onClick={() => {
+            void api
+              .logout()
+              .catch(() => undefined)
+              .finally(() => {
+                clearToken();
+                onLogout();
+              });
+          }}
         >
-          <LogOut className="w-5 h-5" />
-          Clear Token & Exit
+          <LogOut size={16} />
+          End session
         </button>
       </div>
     </aside>

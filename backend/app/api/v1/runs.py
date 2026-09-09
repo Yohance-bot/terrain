@@ -1,6 +1,6 @@
 import uuid
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.api.deps import device_id_header, resolve_device
@@ -28,5 +28,12 @@ def submit_run(
 
 
 @router.get("/{run_id}", response_model=RunResult)
-def get_run(run_id: uuid.UUID, session: Session = Depends(get_session)) -> RunResult:
-    return build_result(session, get_run_or_404(session, run_id))
+def get_run(
+    run_id: uuid.UUID,
+    device_id: uuid.UUID = Depends(device_id_header),
+    session: Session = Depends(get_session),
+) -> RunResult:
+    run = get_run_or_404(session, run_id)
+    if run.device_id != device_id:
+        raise HTTPException(404, "Run not found")
+    return build_result(session, run)

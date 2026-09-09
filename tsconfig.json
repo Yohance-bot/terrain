@@ -5,7 +5,9 @@
     "noUncheckedIndexedAccess": true,
     "noFallthroughCasesInSwitch": true,
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": [
+        "./src/*"
+      ]
     }
   },
   "include": [
@@ -14,5 +16,10 @@
     ".expo/types/**/*.ts",
     "expo-env.d.ts"
   ],
-  "exclude": ["node_modules", "dist", ".expo"]
+  "exclude": [
+    "node_modules",
+    "dist",
+    ".expo",
+    "admin"
+  ]
 }

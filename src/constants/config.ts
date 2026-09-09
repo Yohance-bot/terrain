@@ -22,9 +22,8 @@ export const DEFAULT_BEARING = -18;
 export const TERRITORY_DATA_VERSION = '16a6f8f18813';
 
 /**
- * A phone cannot reach the development machine on `localhost`, so in development
- * we reuse the host Metro is already being served from. Override with
- * EXPO_PUBLIC_API_URL when pointing at a deployed backend.
+ * Cloud is the default in both development and standalone builds. Set
+ * EXPO_PUBLIC_API_URL explicitly only when testing another backend.
  */
 function resolveApiBaseUrl(): string {
   const explicit =
@@ -37,9 +36,7 @@ function resolveApiBaseUrl(): string {
     return explicit.replace(/\/$/, '');
   }
 
-  const hostUri = Constants.expoConfig?.hostUri ?? Constants.expoGoConfig?.debuggerHost;
-  const host = hostUri?.split(':')[0];
-  return host ? `http://${host}:8000` : 'http://localhost:8000';
+  return 'https://run-backend-ngyo.onrender.com';
 }
 
 export const API_BASE_URL = resolveApiBaseUrl();

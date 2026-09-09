@@ -1,66 +1,248 @@
-import { router, useFocusEffect } from 'expo-router';
-import { useCallback, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-
-import { API_BASE_URL } from '@/constants/config';
-import { createLocalAccount, developerLogin, fetchLocalAccounts, signInLocalAccount } from '@/services/api/client';
-import { DEV_RUNNERS, setDevRunnerId } from '@/lib/device';
-import type { AccountSummary } from '@/services/api/types';
-import { colors, fontSize, fontWeight, radius, spacing } from '@/theme';
-
+import { router } from "expo-router";
+import { useState } from "react";
+import {
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Feather } from "@expo/vector-icons";
+import { passwordLogin } from "@/services/api/client";
+import { startGoogleSignIn } from "@/lib/auth/google";
+import { accountErrorMessage } from "@/services/api/errors";
 export default function SignInScreen() {
-  const [accounts, setAccounts] = useState<AccountSummary[]>([]);
-  const [name, setName] = useState('');
-  const [pin, setPin] = useState('');
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
+  const [create, setCreate] = useState(false);
   const [busy, setBusy] = useState(false);
-
-  const load = useCallback(() => {
-    void fetchLocalAccounts().then(setAccounts).catch((e: any) => {
-      console.log("[AUTH DEBUG] (on load)");
-      console.log("API URL:", API_BASE_URL + (e.path || ''));
-      console.log("STATUS:", e.status || 'Network Error / Unknown');
-      console.log("RESPONSE BODY:", e.bodyText || e.message || '');
-      setAccounts([]);
-    });
-  }, []);
-  useFocusEffect(load);
-
-  const create = async () => {
-    if (name.trim().length < 2) return;
+  const [error, setError] = useState("");
+  async function submit(google = false) {
+    if (busy) return;
     setBusy(true);
-    try { await createLocalAccount(name.trim()); router.replace('/'); }
-    catch (e: any) { 
-      console.log("[AUTH DEBUG]");
-      console.log("API URL:", API_BASE_URL + (e.path || ''));
-      console.log("REQUEST:", e.method || 'POST');
-      console.log("STATUS:", e.status || 'Network Error / Unknown');
-      console.log("RESPONSE BODY:", e.bodyText || e.message || '');
-      console.log("ERROR TYPE:", e.name || typeof e);
-      Alert.alert('Could not create account', 'Make sure the local backend is online.'); 
+    setError("");
+    try {
+      if (google) {
+        if (await startGoogleSignIn()) router.replace("/");
+      } else {
+        await passwordLogin(
+          username.trim(),
+          password,
+          create ? name.trim() : undefined,
+        );
+        router.replace("/");
+      }
+    } catch (e) {
+      setError(accountErrorMessage(e));
+    } finally {
+      setBusy(false);
     }
-    finally { setBusy(false); }
-  };
-  const choose = async (account: AccountSummary) => {
-    setBusy(true);
-    try { await signInLocalAccount(account.id); router.replace('/'); }
-    catch { Alert.alert('Could not sign in', 'Please try again.'); }
-    finally { setBusy(false); }
-  };
-  const developer = async () => {
-    setBusy(true);
-    try { const account = await developerLogin(pin); const runner = DEV_RUNNERS[(account.developer_slot ?? 1) - 1]; if (runner) setDevRunnerId(runner.id); router.replace('/'); }
-    catch { Alert.alert('Developer sign-in failed', 'Check the local developer PIN.'); }
-    finally { setBusy(false); }
-  };
-
-  return <SafeAreaView style={styles.screen} edges={['top', 'bottom']}><View style={styles.hero}><Text style={styles.mark}>✦</Text><Text style={styles.title}>RUN</Text><Text style={styles.tagline}>Own the streets you move through.</Text></View>
-    <View style={styles.card}><Text style={styles.cardTitle}>Choose your runner</Text>{accounts.map((account) => <Pressable key={account.id} style={styles.account} onPress={() => void choose(account)} disabled={busy}><View style={styles.avatar}><Text style={styles.avatarText}>{account.display_name[0]?.toUpperCase()}</Text></View><Text style={styles.accountName}>{account.display_name}</Text><Text style={styles.chevron}>›</Text></Pressable>)}
-      <TextInput style={styles.input} value={name} onChangeText={setName} maxLength={32} placeholder="New runner name" autoCapitalize="words" />
-      <Pressable style={styles.primary} onPress={() => void create()} disabled={busy}>{busy ? <ActivityIndicator color={colors.surface} /> : <Text style={styles.primaryText}>Create runner</Text>}</Pressable>
-      <View style={styles.divider}><View style={styles.line}/><Text style={styles.or}>LOCAL TOOLS</Text><View style={styles.line}/></View>
-      <TextInput style={styles.input} value={pin} onChangeText={setPin} secureTextEntry placeholder="Developer PIN" />
-      <Pressable style={styles.devButton} onPress={() => void developer()} disabled={busy}><Text style={styles.devText}>Developer sign in</Text></Pressable>
-    </View><Text style={styles.foot}>Local POC accounts · Apple and Google sign-in are added once their provider credentials are connected.</Text></SafeAreaView>;
+  }
+  return (
+    <SafeAreaView style={s.screen}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+      >
+        <ScrollView
+          contentContainerStyle={s.scroll}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={s.hero}>
+            <View style={s.mark}>
+              <Feather name="navigation" size={30} color="#B7F478" />
+            </View>
+            <Text style={s.eyebrow}>TERRARUN</Text>
+            <Text style={s.title}>Your next run.{"\n"}A world to claim.</Text>
+            <Text style={s.subtitle}>Find your rhythm. Leave your mark.</Text>
+          </View>
+          <View style={s.card}>
+            <Text style={s.heading}>
+              {create ? "Meet your runner." : "Welcome back."}
+            </Text>
+            <Pressable
+              accessibilityRole="button"
+              disabled={busy}
+              style={s.google}
+              onPress={() => void submit(true)}
+            >
+              <Feather name="globe" size={20} color="#183C30" />
+              <Text style={s.googleText}>Continue with Google</Text>
+            </Pressable>
+            <Text style={s.divider}>OR USE YOUR USERNAME</Text>
+            {create && (
+              <TextInput
+                accessibilityLabel="Display name"
+                style={s.input}
+                placeholder="Runner name"
+                placeholderTextColor="#79877E"
+                value={name}
+                onChangeText={setName}
+                maxLength={32}
+              />
+            )}
+            <TextInput
+              accessibilityLabel="Username"
+              style={s.input}
+              placeholder="Username"
+              placeholderTextColor="#79877E"
+              value={username}
+              onChangeText={setUsername}
+              autoCapitalize="none"
+              autoCorrect={false}
+              autoComplete="username"
+              maxLength={32}
+            />
+            <TextInput
+              accessibilityLabel="Password"
+              style={s.input}
+              placeholder={create ? "Password · 12+ characters" : "Password"}
+              placeholderTextColor="#79877E"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+              autoComplete={create ? "new-password" : "current-password"}
+              maxLength={128}
+            />
+            {error ? (
+              <Text accessibilityRole="alert" style={s.error}>
+                {error}
+              </Text>
+            ) : null}
+            <Pressable
+              accessibilityRole="button"
+              style={[s.primary, busy && { opacity: 0.6 }]}
+              disabled={
+                busy ||
+                !username ||
+                !password ||
+                (create && name.trim().length < 2)
+              }
+              onPress={() => void submit()}
+            >
+              {busy ? (
+                <ActivityIndicator color="#DAF5C9" />
+              ) : (
+                <>
+                  <Text style={s.primaryText}>
+                    {create ? "Create account" : "Let’s get moving"}
+                  </Text>
+                  <Feather name="arrow-up-right" size={20} color="#DAF5C9" />
+                </>
+              )}
+            </Pressable>
+            <Pressable
+              disabled={busy}
+              onPress={() => {
+                setCreate(!create);
+                setError("");
+              }}
+            >
+              <Text style={s.switch}>
+                {create
+                  ? "Already a runner? Sign in"
+                  : "New here? Create a runner account"}
+              </Text>
+            </Pressable>
+          </View>
+          <Text style={s.foot}>
+            {busy
+              ? "Connecting… The cloud server may take a minute to wake up."
+              : "Developer runners use their assigned username and password."}
+          </Text>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
+  );
 }
-const styles = StyleSheet.create({screen:{flex:1,backgroundColor:'#F5FAF0',padding:spacing.lg},hero:{paddingTop:50,paddingBottom:30},mark:{color:colors.primary,fontSize:32},title:{fontSize:52,letterSpacing:4,fontWeight:fontWeight.bold,color:colors.text},tagline:{fontSize:fontSize.md,color:colors.textMuted,marginTop:4},card:{backgroundColor:colors.surface,borderRadius:24,padding:spacing.lg,shadowColor:'#193424',shadowOpacity:0.1,shadowRadius:18,elevation:3},cardTitle:{fontSize:fontSize.lg,fontWeight:fontWeight.bold,color:colors.text,marginBottom:spacing.md},account:{flexDirection:'row',alignItems:'center',paddingVertical:spacing.sm,borderBottomWidth:1,borderColor:'#E8EEE3'},avatar:{width:38,height:38,borderRadius:19,alignItems:'center',justifyContent:'center',backgroundColor:'#DCF1D1'},avatarText:{color:colors.primary,fontWeight:fontWeight.bold},accountName:{flex:1,color:colors.text,fontSize:fontSize.md,fontWeight:fontWeight.semibold,marginLeft:spacing.sm},chevron:{fontSize:26,color:colors.textMuted},input:{borderWidth:1,borderColor:colors.border,borderRadius:radius.md,padding:spacing.md,marginTop:spacing.md,color:colors.text},primary:{marginTop:spacing.sm,backgroundColor:colors.text,borderRadius:radius.md,padding:spacing.md,alignItems:'center'},primaryText:{color:colors.surface,fontWeight:fontWeight.bold,fontSize:fontSize.md},divider:{flexDirection:'row',alignItems:'center',gap:8,marginVertical:spacing.lg},line:{flex:1,height:1,backgroundColor:colors.border},or:{fontSize:10,color:colors.textMuted,fontWeight:fontWeight.bold,letterSpacing:1},devButton:{borderWidth:1,borderColor:colors.primary,borderRadius:radius.md,padding:spacing.md,alignItems:'center',marginTop:spacing.sm},devText:{color:colors.primary,fontWeight:fontWeight.bold},foot:{textAlign:'center',fontSize:11,color:colors.textMuted,lineHeight:16,marginTop:'auto',paddingTop:spacing.lg}});
+const s = StyleSheet.create({
+  screen: { flex: 1, backgroundColor: "#EDF3E8" },
+  scroll: { padding: 24, paddingBottom: 40 },
+  hero: { paddingTop: 24, paddingBottom: 30 },
+  mark: {
+    width: 60,
+    height: 60,
+    borderRadius: 20,
+    backgroundColor: "#193E32",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 22,
+  },
+  eyebrow: {
+    fontSize: 12,
+    letterSpacing: 3,
+    color: "#386A50",
+    fontWeight: "800",
+  },
+  title: {
+    fontSize: 36,
+    lineHeight: 41,
+    fontWeight: "800",
+    letterSpacing: -1.4,
+    color: "#183C30",
+    marginVertical: 10,
+  },
+  subtitle: { fontSize: 15, color: "#6B7B70" },
+  card: { padding: 22, borderRadius: 28, backgroundColor: "#FFF", gap: 12 },
+  heading: {
+    fontSize: 22,
+    fontWeight: "700",
+    color: "#183C30",
+    marginBottom: 8,
+  },
+  google: {
+    flexDirection: "row",
+    gap: 12,
+    borderWidth: 1,
+    borderColor: "#DCE5D7",
+    borderRadius: 16,
+    padding: 17,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  googleText: { fontSize: 15, fontWeight: "600", color: "#183C30" },
+  divider: {
+    fontSize: 10,
+    letterSpacing: 1.5,
+    textAlign: "center",
+    color: "#809080",
+    marginVertical: 7,
+  },
+  input: {
+    borderRadius: 14,
+    backgroundColor: "#F4F7F1",
+    padding: 16,
+    fontSize: 16,
+    color: "#183C30",
+  },
+  primary: {
+    backgroundColor: "#183C30",
+    borderRadius: 16,
+    padding: 18,
+    flexDirection: "row",
+    gap: 12,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  primaryText: { color: "#DAF5C9", fontSize: 16, fontWeight: "700" },
+  switch: {
+    textAlign: "center",
+    color: "#386A50",
+    fontSize: 13,
+    paddingTop: 10,
+  },
+  foot: {
+    fontSize: 12,
+    lineHeight: 18,
+    color: "#6B7B70",
+    textAlign: "center",
+    marginTop: 24,
+  },
+  error: { color: "#AD352C", fontSize: 13, lineHeight: 19 },
+});

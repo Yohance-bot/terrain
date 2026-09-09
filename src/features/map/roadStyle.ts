@@ -1,6 +1,6 @@
 import type { ExpressionSpecification } from '@maplibre/maplibre-gl-style-spec';
 import widths from '../../../assets/map/road-widths.json';
-import type { lightingPalette } from '@/features/hud/lighting';
+import type { lightingPalette } from '../hud/lighting';
 
 export function roadCategory(id: string): keyof typeof widths {
   if (/path|pedestrian|footway|cycleway/.test(id)) return 'path';

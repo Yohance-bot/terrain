@@ -1,4 +1,5 @@
 import * as Crypto from 'expo-crypto';
+import { readAuth } from '@/lib/auth/storage';
 
 import { getMeta, setMeta } from '@/lib/db';
 
@@ -50,6 +51,8 @@ export function setDevRunnerId(id: string | null) {
 }
 
 export async function getDeviceId(): Promise<string> {
+  const authenticated = await readAuth("device");
+  if (authenticated) return authenticated;
   if (devRunnerId) return devRunnerId;
   const savedDeveloperRunner = await getMeta(DEV_RUNNER_KEY);
   if (savedDeveloperRunner && DEV_RUNNERS.some((runner) => runner.id === savedDeveloperRunner)) {

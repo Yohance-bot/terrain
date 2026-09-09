@@ -1,91 +1,213 @@
-import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { api } from '../lib/api';
-import { format } from 'date-fns';
-
+import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { X } from "lucide-react";
+import { api } from "../lib/api";
+import WorldMap from "../components/WorldMap";
 export default function Runs() {
-  const [page, setPage] = useState(0);
-  const limit = 50;
-  
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['runs', page],
-    queryFn: () => api.getRuns(page * limit, limit),
-  });
-
-  if (error) return <div className="p-8 text-destructive">Error: {(error as Error).message}</div>;
-
+  const [page, setPage] = useState(0),
+    [params, setParams] = useSearchParams(),
+    [reason, setReason] = useState(""),
+    [busy, setBusy] = useState(false),
+    [notice, setNotice] = useState("");
+  const id = params.get("run") ?? "",
+    query = useQueryClient();
+  const runs = useQuery({
+      queryKey: ["runs", page],
+      queryFn: () => api.getRuns(page * 50, 50),
+      refetchInterval: 15000,
+    }),
+    detail = useQuery({
+      queryKey: ["run", id],
+      queryFn: () => api.getRunDetails(id),
+      enabled: !!id,
+    });
+  async function reverse() {
+    if (!reason.trim() || busy) return;
+    setBusy(true);
+    setNotice("");
+    try {
+      await api.reverseRun(id, "admin-console", reason.trim());
+      await query.invalidateQueries();
+      setNotice("Run reversed. Its evidence remains in the audit trail.");
+      setReason("");
+    } catch (e) {
+      setNotice((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  }
+  const route: GeoJSON.FeatureCollection<GeoJSON.LineString> = {
+    type: "FeatureCollection",
+    features:
+      detail.data?.geometry?.type === "LineString"
+        ? [{ type: "Feature", properties: {}, geometry: detail.data.geometry }]
+        : [],
+  };
   return (
-    <div className="p-8 max-w-7xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-foreground">Runs</h1>
-        <p className="text-muted-foreground mt-2">All recorded GPS traces</p>
-      </div>
-
-      <div className="bg-card border border-border rounded-lg overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-muted border-b border-border text-muted-foreground text-sm uppercase tracking-wider">
-                <th className="p-4 font-medium">Status</th>
-                <th className="p-4 font-medium">Device / Player</th>
-                <th className="p-4 font-medium">Distance (m)</th>
-                <th className="p-4 font-medium">Started At</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {isLoading ? (
-                <tr>
-                  <td colSpan={4} className="p-8 text-center text-muted-foreground">Loading...</td>
-                </tr>
-              ) : data?.items.map((run: any) => (
-                <tr key={run.run_id} className="hover:bg-muted/50 transition-colors cursor-pointer">
-                  <td className="p-4">
-                    <span className={`inline-flex px-2 py-1 text-xs rounded-full ${
-                      run.status === 'applied' ? 'bg-primary/20 text-primary' : 
-                      run.status === 'reversed' ? 'bg-destructive/20 text-destructive' :
-                      'bg-orange-500/20 text-orange-400'
-                    }`}>
-                      {run.status}
-                    </span>
-                  </td>
-                  <td className="p-4">
-                    <div className="font-medium text-foreground">{run.display_name || 'Unknown'}</div>
-                    <div className="text-xs text-muted-foreground font-mono mt-1">{run.device_id}</div>
-                  </td>
-                  <td className="p-4 text-foreground font-mono">{run.distance_m.toFixed(1)}</td>
-                  <td className="p-4 text-muted-foreground text-sm">
-                    {format(new Date(run.started_at), 'MMM d, yyyy HH:mm:ss')}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+    <div className="page">
+      <header className="page-title">
+        <div>
+          <span className="eyebrow">RUN LEDGER</span>
+          <h1>Every run has a story.</h1>
+          <p>Inspect routes, verify outcomes and reverse invalid activity.</p>
         </div>
-        
-        {data && (
-          <div className="p-4 border-t border-border flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">
-              Showing {page * limit + 1} to Math.min((page + 1) * limit, data.total) of {data.total}
-            </span>
-            <div className="space-x-2">
-              <button 
-                disabled={page === 0}
-                onClick={() => setPage(p => Math.max(0, p - 1))}
-                className="px-3 py-1 bg-muted text-foreground rounded disabled:opacity-50 hover:bg-border transition-colors"
-              >
-                Previous
-              </button>
-              <button 
-                disabled={(page + 1) * limit >= data.total}
-                onClick={() => setPage(p => p + 1)}
-                className="px-3 py-1 bg-muted text-foreground rounded disabled:opacity-50 hover:bg-border transition-colors"
-              >
-                Next
-              </button>
-            </div>
-          </div>
-        )}
+        <span className="count-chip">{runs.data?.total ?? "—"} runs</span>
+      </header>
+      {runs.error && <p className="error">{runs.error.message}</p>}
+      <div className="panel table-panel">
+        <table>
+          <thead>
+            <tr>
+              <th>Runner</th>
+              <th>Status</th>
+              <th>Distance</th>
+              <th>Started</th>
+              <th />
+            </tr>
+          </thead>
+          <tbody>
+            {runs.isPending ? (
+              <tr>
+                <td colSpan={5}>Loading runs…</td>
+              </tr>
+            ) : !runs.data?.items.length ? (
+              <tr>
+                <td colSpan={5}>No runs yet.</td>
+              </tr>
+            ) : (
+              runs.data.items.map((run: any) => (
+                <tr key={run.run_id}>
+                  <td>
+                    <strong>{run.display_name ?? "Unlinked runner"}</strong>
+                    <small className="mono">{run.run_id}</small>
+                  </td>
+                  <td>
+                    <span className={`badge ${run.status}`}>{run.status}</span>
+                  </td>
+                  <td>{(run.distance_m / 1000).toFixed(2)} km</td>
+                  <td>{new Date(run.started_at).toLocaleString()}</td>
+                  <td>
+                    <button
+                      className="text-btn"
+                      onClick={() => {
+                        setParams({ run: run.run_id });
+                        setNotice("");
+                      }}
+                    >
+                      Inspect ↗
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+        <div className="pagination">
+          <span>
+            {runs.data?.total
+              ? `${page * 50 + 1}–${Math.min((page + 1) * 50, runs.data.total)} of ${runs.data.total}`
+              : "0 runs"}
+          </span>
+          <button disabled={!page} onClick={() => setPage(page - 1)}>
+            Previous
+          </button>
+          <button
+            disabled={(page + 1) * 50 >= (runs.data?.total ?? 0)}
+            onClick={() => setPage(page + 1)}
+          >
+            Next
+          </button>
+        </div>
       </div>
+      {id && (
+        <div className="drawer-backdrop">
+          <section className="run-drawer">
+            <button
+              className="close"
+              onClick={() => setParams({})}
+              aria-label="Close run"
+            >
+              <X />
+            </button>
+            <span className="eyebrow">ACTIVITY INSPECTOR</span>
+            <h2>
+              {detail.data?.simulation ? "Developer simulation" : "Run detail"}
+            </h2>
+            <p className="mono">{id}</p>
+            {detail.isPending ? (
+              <p>Loading run…</p>
+            ) : detail.error ? (
+              <p className="error">{detail.error.message}</p>
+            ) : (
+              <>
+                <div className="run-map">
+                  <WorldMap
+                    route={route}
+                    position={
+                      route.features[0]?.geometry.coordinates[0] as
+                        [number, number] | undefined
+                    }
+                  />
+                </div>
+                <div className="run-facts">
+                  <span>
+                    <b>{detail.data.result.distance_m.toFixed(0)} m</b>Distance
+                  </span>
+                  <span>
+                    <b>{detail.data.result.duration_s}s</b>Duration
+                  </span>
+                  <span>
+                    <b>{detail.data.result.status}</b>Status
+                  </span>
+                </div>
+                {detail.data.route_reduced && (
+                  <p>
+                    Route precision has been reduced by the retention policy.
+                  </p>
+                )}
+                <h3>Territory contributions</h3>
+                {detail.data.result.segments.map((s: any) => (
+                  <div className="activity-row" key={s.territory_id}>
+                    <strong>{s.name}</strong>
+                    <span>
+                      {s.distance_m.toFixed(0)} m
+                      {s.capture_method ? " · Loop claim" : ""}
+                    </span>
+                  </div>
+                ))}
+                {["applied", "provisional", "challenged"].includes(
+                  detail.data.result.status,
+                ) && (
+                  <div className="reversal">
+                    <h3>Reverse this run</h3>
+                    <p>
+                      Removes its influence and rebuilds standings. The run and
+                      its evidence remain recorded.
+                    </p>
+                    <label>
+                      Audit reason
+                      <textarea
+                        value={reason}
+                        onChange={(e) => setReason(e.target.value)}
+                        maxLength={512}
+                      />
+                    </label>
+                    <button
+                      className="danger-btn"
+                      disabled={busy || !reason.trim()}
+                      onClick={() => void reverse()}
+                    >
+                      {busy ? "Reversing…" : "Confirm reversal"}
+                    </button>
+                  </div>
+                )}
+                {notice && <p role="status">{notice}</p>}
+              </>
+            )}
+          </section>
+        </div>
+      )}
     </div>
   );
 }

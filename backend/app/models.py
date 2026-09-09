@@ -15,6 +15,7 @@ from sqlalchemy import (
     Integer,
     Numeric,
     String,
+    Text,
     UniqueConstraint,
     func,
 )
@@ -97,9 +98,7 @@ class Account(Base):
 
     __tablename__ = "accounts"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     display_name: Mapped[str] = mapped_column(String(32), nullable=False)
     avatar_url: Mapped[str | None] = mapped_column(String(1024), nullable=True)
     role: Mapped[str] = mapped_column(String(16), nullable=False, default="player")
@@ -111,9 +110,7 @@ class AccountAuthMethod(Base):
 
     __tablename__ = "account_auth_methods"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     account_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("accounts.id"), nullable=False, index=True
     )
@@ -145,9 +142,7 @@ class AccountDeletionRequest(Base):
 
     __tablename__ = "account_deletion_requests"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     account_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("accounts.id"), nullable=False, index=True
     )
@@ -201,9 +196,7 @@ class Run(Base):
     processed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
-    __table_args__ = (
-        Index("ix_runs_review_queue", "device_id", "status", "created_at"),
-    )
+    __table_args__ = (Index("ix_runs_review_queue", "device_id", "status", "created_at"),)
 
 
 class RunLifecycleEvent(Base):
@@ -245,9 +238,7 @@ class ConfigurationRevision(Base):
 
     __tablename__ = "configuration_revisions"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     namespace: Mapped[str] = mapped_column(String(64), nullable=False)
     version: Mapped[int] = mapped_column(Integer, nullable=False)
     payload: Mapped[dict] = mapped_column(JSONB, nullable=False)
@@ -310,9 +301,7 @@ class RunTerritorySegment(Base):
     seconds_in: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     # Whether this run is what took the territory. Recorded at the moment it happens
     # so the post-run reveal can be replayed later without re-deriving history.
-    caused_ownership_change: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False
-    )
+    caused_ownership_change: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     # `loop` means this territory was included by a server-validated enclosed
     # area, rather than only by a route segment clipping through its boundary.
     capture_method: Mapped[str | None] = mapped_column(String(16), nullable=True)
@@ -412,3 +401,49 @@ class CapturedArea(Base):
         Geography(geometry_type="POLYGON", srid=4326, spatial_index=False), nullable=False
     )
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class ConsoleUser(Base):
+    __tablename__ = "console_users"
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    display_name: Mapped[str] = mapped_column(String(64), nullable=False)
+    role: Mapped[str] = mapped_column(String(16), nullable=False, default="admin")
+    active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class LoginCredential(Base):
+    __tablename__ = "login_credentials"
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    scope: Mapped[str] = mapped_column(String(16), nullable=False)
+    principal_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
+    username: Mapped[str] = mapped_column(String(32), nullable=False)
+    password_hash: Mapped[str] = mapped_column(String(512), nullable=False)
+    __table_args__ = (
+        UniqueConstraint("scope", "username"),
+        UniqueConstraint("scope", "principal_id"),
+    )
+
+
+class AuthSession(Base):
+    __tablename__ = "auth_sessions"
+    token_hash: Mapped[str] = mapped_column(String(64), primary_key=True)
+    scope: Mapped[str] = mapped_column(String(16), nullable=False)
+    principal_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False, index=True)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class ConsoleNote(Base):
+    __tablename__ = "console_notes"
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    author_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("console_users.id"), nullable=False
+    )
+    title: Mapped[str] = mapped_column(String(120), nullable=False)
+    body: Mapped[str] = mapped_column(Text, nullable=False)
+    status: Mapped[str] = mapped_column(String(16), nullable=False, default="open")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )

@@ -158,6 +158,8 @@ function toLocalRun(row: LocalRunRow): LocalRun {
 
 export async function createLocalRun(runId: string, startedAt: Date): Promise<void> {
   const db = await getDb();
+  const owner = await getMeta("auth.device");
+  if (owner) await setMeta(`run.owner.${runId}`, owner);
   await db.runAsync('INSERT OR IGNORE INTO runs (id, started_at) VALUES (?, ?)', [
     runId,
     startedAt.toISOString(),

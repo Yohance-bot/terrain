@@ -1,155 +1,127 @@
-// @ts-nocheck
-import { useMemo, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import ReactMap, { Source, Layer, FillLayer, LineLayer } from 'react-map-gl/maplibre';
-import * as maplibregl from 'maplibre-gl';
-import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
-import { api } from '../lib/api';
-import 'maplibre-gl/dist/maplibre-gl.css';
-
-maplibregl.setWorkerUrl(workerUrl);
-
-// For MVP without an explicit key, we can use a free basemap or a simple generic style.
-// Since we don't have a key provided in the prompt, let's use a standard OSM Carto or CartoDB Dark Matter.
-
-const CARTO_DARK = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json';
-
-const territoryFill: FillLayer = {
-  id: 'territory-fill',
-  type: 'fill',
-  paint: {
-    'fill-color': [
-      'case',
-      ['boolean', ['feature-state', 'hover'], false],
-      '#39FF14', // Neon green on hover
-      ['!=', ['get', 'owner_device_id'], null],
-      '#00F0FF', // Owned (Neon blue)
-      '#2a2a2a'  // Unowned (Dark gray)
-    ],
-    'fill-opacity': 0.4
-  }
-};
-
-const territoryLine: LineLayer = {
-  id: 'territory-line',
-  type: 'line',
-  paint: {
-    'line-color': '#39FF14',
-    'line-width': 1.5,
-    'line-opacity': 0.8
-  }
-};
-
+import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link } from "react-router-dom";
+import { Gamepad2, Moon, Sun, X } from "lucide-react";
+import WorldMap from "../components/WorldMap";
+import { useWorldData } from "../features/useWorldData";
+import { api } from "../lib/api";
 export default function TerritoryMap() {
-  const [hoverInfo, setHoverInfo] = useState<any>(null);
-
-  const {
-    data: territories,
-    isLoading: territoriesLoading,
-    isError: territoriesError,
-    error: territoriesErr,
-  } = useQuery({
-    queryKey: ['territories'],
-    queryFn: api.getTerritories,
+  const world = useWorldData(),
+    query = useQueryClient();
+  const [night, setNight] = useState(false),
+    [selected, setSelected] = useState<GeoJSON.Feature | null>(null),
+    [notice, setNotice] = useState("");
+  const id = String(selected?.properties?.territory_id ?? "");
+  const details = useQuery({
+    queryKey: ["territory", id],
+    queryFn: () => api.getTerritoryDetails(id),
+    enabled: !!id,
+    refetchInterval: 15000,
   });
-
-  const {
-    data: states,
-    isLoading: statesLoading,
-    isError: statesError,
-    error: statesErr,
-  } = useQuery({
-    queryKey: ['territory_states'],
-    queryFn: api.getTerritoryState,
-    refetchInterval: 10000,
-  });
-
-  const isLoading = territoriesLoading || statesLoading;
-  const isError = territoriesError || statesError;
-  const errorMessage =
-    (territoriesErr as Error)?.message || (statesErr as Error)?.message || 'Failed to load territory data';
-
-  // Merge state into geojson properties
-  const geojsonData = useMemo(() => {
-    if (!territories || !states) return null;
-    const stateMap = new globalThis.Map(states.map((s: any) => [s.territory_id, s]));
-    
-    return {
-      ...territories,
-      features: territories.features.map((f: any) => ({
-        ...f,
-        properties: {
-          ...f.properties,
-          owner_device_id: stateMap.get(f.properties.territory_id)?.owner_device_id || null,
-        }
-      }))
-    };
-  }, [territories, states]);
-
+  async function rebuild() {
+    const reason = window.prompt(
+      "Reason for rebuilding this territory from its run ledger:",
+    );
+    if (!reason?.trim()) return;
+    setNotice("Rebuilding…");
+    try {
+      await api.rebuildTerritory(id, "admin-console", reason.trim());
+      await query.invalidateQueries();
+      setNotice("Standings rebuilt from authoritative runs.");
+    } catch (e) {
+      setNotice((e as Error).message);
+    }
+  }
   return (
-    <div className="h-full w-full relative flex flex-col flex-1 min-h-0 overflow-hidden">
-      <div className="absolute top-4 left-4 z-10 bg-card/90 backdrop-blur border border-border p-4 rounded-lg shadow-lg w-80 pointer-events-auto">
-        <h2 className="text-xl font-bold text-foreground">Bengaluru MVP</h2>
-        {isLoading ? (
-          <p className="text-sm text-yellow-400 mt-1 animate-pulse">Loading territories…</p>
-        ) : isError ? (
-          <p className="text-sm text-red-400 mt-1">Error: {errorMessage}</p>
-        ) : (
-          <p className="text-sm text-muted-foreground mt-1">
-            {territories?.features?.length || 0} Territories Loaded
-          </p>
-        )}
-        
-        {hoverInfo && (
-          <div className="mt-4 pt-4 border-t border-border space-y-2">
-            <div>
-              <span className="text-xs text-muted-foreground uppercase">Name</span>
-              <p className="font-medium text-foreground">{hoverInfo.properties.name}</p>
-            </div>
-            <div>
-              <span className="text-xs text-muted-foreground uppercase">ID</span>
-              <p className="font-mono text-xs text-muted-foreground truncate">{hoverInfo.properties.territory_id}</p>
-            </div>
-            <div>
-              <span className="text-xs text-muted-foreground uppercase">Owner</span>
-              <p className="font-mono text-xs text-primary truncate">
-                {hoverInfo.properties.owner_device_id || 'Unowned'}
-              </p>
-            </div>
-            <div>
-              <span className="text-xs text-muted-foreground uppercase">Version</span>
-              <p className="font-medium text-foreground">v{hoverInfo.properties.version}</p>
-            </div>
-          </div>
-        )}
+    <div className="map-page">
+      <WorldMap
+        territories={world.territories}
+        captures={world.captures}
+        night={night}
+        onSelect={setSelected}
+      />
+      <div className="map-heading glass">
+        <span className="eyebrow">LIVE WORLD</span>
+        <h1>Bengaluru</h1>
+        <p>
+          {world.loading
+            ? "Loading the city…"
+            : `${world.territories?.features.length ?? 0} territories · synced ${world.updatedAt ? new Date(world.updatedAt).toLocaleTimeString() : "—"}`}
+        </p>
+        {world.error && <p className="error">{world.error.message}</p>}
       </div>
-
-      <ReactMap
-        mapLib={maplibregl}
-        style={{ width: '100%', height: '100%' }}
-        initialViewState={{
-          longitude: 77.5946,
-          latitude: 12.9716,
-          zoom: 11
-        }}
-        mapStyle={CARTO_DARK}
-        interactiveLayerIds={['territory-fill']}
-        onMouseMove={(e: any) => {
-          if (e.features && e.features.length > 0) {
-            setHoverInfo(e.features[0]);
-          } else {
-            setHoverInfo(null);
-          }
-        }}
-        onMouseLeave={() => setHoverInfo(null)}
-      >
-        {geojsonData && (
-          <Source id="territories" type="geojson" data={geojsonData}>
-            <Layer {...territoryFill} />
-            <Layer {...territoryLine} />
-          </Source>
-        )}
-      </ReactMap>
+      <div className="map-actions">
+        <button onClick={() => setNight(!night)}>
+          {night ? <Sun size={18} /> : <Moon size={18} />}{" "}
+          {night ? "Day" : "Night"}
+        </button>
+        <Link to="/simulation">
+          <Gamepad2 size={18} />
+          Simulate a run
+        </Link>
+      </div>
+      <div className="map-legend glass">
+        <span>
+          <i style={{ background: "#22C55E" }} />
+          Developer 1
+        </span>
+        <span>
+          <i style={{ background: "#A855F7" }} />
+          Developer 2
+        </span>
+        <span>
+          <i style={{ background: "#F97316" }} />
+          Developer 3
+        </span>
+        <span>
+          <i style={{ background: "#6B9584" }} />
+          Unclaimed
+        </span>
+      </div>
+      {selected && (
+        <aside className="inspector glass">
+          <button
+            className="close"
+            onClick={() => setSelected(null)}
+            aria-label="Close territory"
+          >
+            <X size={18} />
+          </button>
+          <span className="eyebrow">TERRITORY INSPECTOR</span>
+          <h2>{selected.properties?.name}</h2>
+          <p className="mono">{id}</p>
+          {details.isPending ? (
+            <p>Loading standings…</p>
+          ) : details.error ? (
+            <p className="error">{details.error.message}</p>
+          ) : (
+            <>
+              <label>Current leader</label>
+              <p className="mono">
+                {details.data?.owner_device_id ?? "Unclaimed"}
+              </p>
+              <label>Standings</label>
+              <div className="standing-list">
+                {(details.data?.standings ?? []).map((s: any) => (
+                  <div key={s.device_id}>
+                    <strong>{s.display_name ?? s.device_id.slice(0, 8)}</strong>
+                    <span>
+                      {Number(s.total_distance_m ?? s.distance_m ?? 0).toFixed(
+                        0,
+                      )}{" "}
+                      m
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+          <button className="secondary-btn" onClick={() => void rebuild()}>
+            Rebuild standings
+          </button>
+          {notice && <p role="status">{notice}</p>}
+        </aside>
+      )}
     </div>
   );
 }

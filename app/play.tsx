@@ -1,3 +1,4 @@
+import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
@@ -67,7 +68,7 @@ export default function PlayScreen() {
         {/* Hero */}
         <View style={styles.hero}>
           <View style={styles.heroIconWrap}>
-            <Text style={styles.heroIcon}>✦</Text>
+            <Feather name="navigation" size={32} color="#89DDAD"/>
           </View>
           <Text style={styles.heroTitle}>Ready to run?</Text>
           <Text style={styles.heroSub}>
@@ -93,7 +94,7 @@ export default function PlayScreen() {
               <View style={styles.runnerPicker}>
                 <Text style={styles.runnerPickerLabel}>SELECT RUNNER</Text>
                 <View style={styles.runnerChoices}>
-                  {DEV_RUNNERS.map((runner) => (
+                  {DEV_RUNNERS.filter((_, index) => index === (account?.developer_slot ?? 1) - 1).map((runner) => (
                     <Pressable
                       key={runner.id}
                       onPress={() => {

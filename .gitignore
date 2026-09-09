@@ -86,3 +86,6 @@ client_secret.json
 ngrok.yml
 ngrok.json
 
+
+# Generated read-only assistant index
+backend/codebase-context.json

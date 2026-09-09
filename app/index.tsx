@@ -1,3 +1,4 @@
+import { Feather } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useShallow } from 'zustand/react/shallow';
 import { TelemetryPill } from '@/features/hud/TelemetryPill';
@@ -710,8 +711,8 @@ export default function MapScreen() {
               </View>
             </View>
           </Pressable>
-          <Pressable style={styles.notifBtn}>
-            <Text style={styles.notifIcon}>●</Text>
+          <Pressable accessibilityLabel="Settings" style={styles.notifBtn} onPress={() => router.push('/settings')}>
+            <Feather name="sliders" size={21} color="#DBF6DE"/>
           </Pressable>
         </View>
       )}
@@ -719,15 +720,15 @@ export default function MapScreen() {
       {/* ── Right Side Buttons ────────────────────────────── */}
       {!recording && !busy && (
         <View style={[styles.sideButtons, { top: insets.top + 72 }]}>
-          <Pressable style={styles.sideBtn}>
-            <Text style={styles.sideBtnIcon}>⊕</Text>
+          <Pressable accessibilityLabel="Explore play modes" style={styles.sideBtn} onPress={() => router.push('/play')}>
+            <Feather name="compass" size={22} color="#315C49"/><Text style={styles.sideBtnLabel}>Explore</Text>
           </Pressable>
           <Pressable style={[styles.sideBtn, layersPanelOpen && styles.sideBtnActive]} onPress={() => setLayersPanelOpen((v) => !v)}>
-            <Text style={styles.sideBtnIcon}>◇</Text>
+            <Feather name="layers" size={22} color="#315C49"/>
             <Text style={styles.sideBtnLabel}>Layers</Text>
           </Pressable>
           <Pressable style={styles.sideBtn} onPress={() => void refresh(true)}>
-            <Text style={styles.sideBtnIcon}>◎</Text>
+            <Feather name="refresh-cw" size={21} color="#315C49"/><Text style={styles.sideBtnLabel}>Refresh</Text>
           </Pressable>
         </View>
       )}
@@ -764,16 +765,16 @@ export default function MapScreen() {
       {!recording && !busy && (
         <View style={[styles.tabBar, { paddingBottom: insets.bottom }]}>
           <Pressable style={styles.tab}>
-            <Text style={[styles.tabIcon, styles.tabIconActive]}>▣</Text>
+            <Feather name="map" size={23} color="#A5EDBF"/>
             <Text style={[styles.tabLabel, styles.tabLabelActive]}>Map</Text>
           </Pressable>
           <Pressable style={styles.tab} onPress={() => router.push('/play')}>
-            <Text style={styles.tabIcon}>✦</Text>
+            <View style={{backgroundColor:"#BBF37E",borderRadius:22,paddingHorizontal:22,paddingVertical:10,marginTop:-18,marginBottom:4}}><Feather name="navigation" size={24} color="#1B4434"/></View>
             <Text style={styles.tabLabel}>Play</Text>
           </Pressable>
           <Pressable style={styles.tab} onPress={() => router.push('/profile')}>
-            <Text style={styles.tabIcon}>⊕⊕</Text>
-            <Text style={styles.tabLabel}>Social</Text>
+            <Feather name="user" size={23} color="#94AD9F"/>
+            <Text style={styles.tabLabel}>Profile</Text>
           </Pressable>
         </View>
       )}

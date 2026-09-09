@@ -3,9 +3,10 @@ services:
     name: run-backend
     runtime: python
     plan: free
-    rootDir: backend
-    buildCommand: "pip install uv && uv sync --frozen --no-dev"
-    startCommand: "uv run uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+    rootDir: .
+    healthCheckPath: /health
+    buildCommand: "python backend/scripts/build_codebase_context.py && pip install uv && cd backend && uv sync --frozen --no-dev"
+    startCommand: "cd backend && uv run --no-sync uvicorn app.main:app --host 0.0.0.0 --port $PORT"
     envVars:
       - key: DATABASE_URL
         sync: false
@@ -30,14 +31,18 @@ services:
       - key: DEVELOPER_MODE_ENABLED
         value: "true"
       - key: LOCAL_ACCOUNTS_ENABLED
+        value: "false"
+      - key: AUTHENTICATED_ACCOUNTS_ENABLED
         value: "true"
+      - key: GROQ_API_KEY
+        sync: false
 
   - type: web
     name: run-admin
     runtime: static
-    rootDir: admin
-    buildCommand: "npm ci && npm run build"
-    staticPublishPath: "./dist"
+    rootDir: .
+    buildCommand: "npm --prefix admin ci && npm --prefix admin run build"
+    staticPublishPath: "admin/dist"
     routes:
       - type: rewrite
         source: "/*"

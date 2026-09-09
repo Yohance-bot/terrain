@@ -1,4 +1,4 @@
-import type { GeoCoord } from '@/lib/gpsClean';
+type GeoCoord = [number, number];
 export const RUN_TRAIL_COLOR = '#11D9F1';
 const interpolate = (a: GeoCoord, b: GeoCoord, t: number): GeoCoord => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
 const metres = (a: GeoCoord, b: GeoCoord) => Math.hypot((a[0] - b[0]) * Math.cos((a[1] + b[1]) * Math.PI / 360), a[1] - b[1]) * 111320;
