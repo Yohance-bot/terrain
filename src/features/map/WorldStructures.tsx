@@ -2,7 +2,7 @@ import { GeoJSONSource, Layer } from '@maplibre/maplibre-react-native';
 import { memo } from 'react';
 import type { lightingPalette } from '@/features/hud/lighting';
 import type { ExpressionSpecification } from '@maplibre/maplibre-gl-style-spec';
-import { BUILDING_HEIGHT } from './worldGeometry';
+import { BUILDING_HEIGHT, ROOF_DECK } from './worldGeometry';
 
 export const WorldStructures = memo(function WorldStructures({ details, palette, facadeTint }: { details: GeoJSON.FeatureCollection<GeoJSON.Polygon>; facadeTint: ExpressionSpecification | string; palette: ReturnType<typeof lightingPalette> }) {
   return <>
@@ -10,10 +10,10 @@ export const WorldStructures = memo(function WorldStructures({ details, palette,
     <Layer id="world-buildings" source="openmaptiles" source-layer="building" type="fill-extrusion" beforeId="hud-base-anchor" minzoom={16}
       paint={{ 'fill-extrusion-color': facadeTint, 'fill-extrusion-height': BUILDING_HEIGHT, 'fill-extrusion-base': 0, 'fill-extrusion-opacity': 0.96, 'fill-extrusion-vertical-gradient': true }} />
     <Layer id="world-roof-rims" source="openmaptiles" source-layer="building" type="fill-extrusion" beforeId="hud-base-anchor" minzoom={16}
-      paint={{ 'fill-extrusion-color': palette.roof, 'fill-extrusion-base': BUILDING_HEIGHT, 'fill-extrusion-height': ['+', BUILDING_HEIGHT, 0.6], 'fill-extrusion-opacity': 1 }} />
+      paint={{ 'fill-extrusion-color': palette.roof, 'fill-extrusion-base': BUILDING_HEIGHT, 'fill-extrusion-height': ['+', BUILDING_HEIGHT, ROOF_DECK], 'fill-extrusion-opacity': 1 }} />
     <GeoJSONSource id="world-roof-details" data={details}>
       <Layer id="world-roof-sculptures" type="fill-extrusion" beforeId="hud-base-anchor" minzoom={16}
-        paint={{ 'fill-extrusion-base': ['get', 'base'], 'fill-extrusion-height': ['get', 'height'], 'fill-extrusion-color': ['coalesce', ['get', 'color'], ['match', ['get', 'tone'], 'aqua', palette.roofAccent, 'garden', palette.park, 'clay', '#D6A68B', 'slate', palette.casing, palette.roof]], 'fill-extrusion-opacity': 1, 'fill-extrusion-vertical-gradient': true }} />
+        paint={{ 'fill-extrusion-base': ['get', 'base'], 'fill-extrusion-height': ['get', 'height'], 'fill-extrusion-color': ['coalesce', ['get', 'color'], ['match', ['get', 'tone'], 'accent', palette.roofAccent, 'aqua', palette.roofAccent, 'garden', palette.park, 'panel', palette.panel, 'door', palette.doorway, 'clay', '#E4D3C4', 'slate', palette.structure, palette.roof]], 'fill-extrusion-opacity': 1, 'fill-extrusion-vertical-gradient': true }} />
     </GeoJSONSource>
   </>;
 });

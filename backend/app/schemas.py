@@ -253,6 +253,7 @@ class DeviceDeletionSummary(BaseModel):
 class AccountSummary(BaseModel):
     id: uuid.UUID
     display_name: str
+    handle: str | None = None
     avatar_url: str | None
     role: Literal["player", "developer"]
     created_at: datetime
@@ -278,3 +279,257 @@ class LocalAccountCreate(BaseModel):
 class DeveloperTerritoryConfirmation(BaseModel):
     confirmed: bool = False
     reason: str = Field(min_length=3, max_length=256)
+
+
+# --- Social layer -----------------------------------------------------------
+
+RelationshipStatus = Literal[
+    "none", "friends", "request_sent", "request_received", "blocked"
+]
+
+
+class PublicAccount(BaseModel):
+    """What one player may see of another before they are friends."""
+
+    id: uuid.UUID
+    display_name: str
+    handle: str
+    avatar_url: str | None = None
+    relationship: RelationshipStatus = "none"
+
+
+class HandleUpdate(BaseModel):
+    handle: str = Field(min_length=3, max_length=24)
+
+
+class FriendRequestCreate(BaseModel):
+    """Either identifier works, matching the two ways a player can be found."""
+
+    handle: str | None = Field(default=None, max_length=25)
+    account_id: uuid.UUID | None = None
+
+
+class FriendRequest(BaseModel):
+    id: uuid.UUID
+    account: PublicAccount
+    direction: Literal["incoming", "outgoing"]
+    created_at: datetime
+
+
+class Friend(BaseModel):
+    account: PublicAccount
+    friends_since: datetime
+
+
+class FriendList(BaseModel):
+    friends: list[Friend]
+    incoming: list[FriendRequest]
+    outgoing: list[FriendRequest]
+    blocked: list[PublicAccount]
+
+
+class SharingUpdate(BaseModel):
+    """Both toggles are independent; omitting one leaves it unchanged."""
+
+    share_location: bool | None = None
+    notify_on_run_start: bool | None = None
+
+
+class SharingEntry(BaseModel):
+    account: PublicAccount
+    share_location: bool
+    notify_on_run_start: bool
+    # Set only while a race or other temporary grant is running.
+    location_expires_at: datetime | None = None
+
+
+class SharingOverview(BaseModel):
+    """Deliberately symmetrical: what you share out, and who can see you."""
+
+    sharing_with: list[SharingEntry]
+    visible_to_me: list[PublicAccount]
+
+
+class PositionUpdate(BaseModel):
+    lat: float = Field(ge=-90, le=90)
+    lon: float = Field(ge=-180, le=180)
+    accuracy_m: float | None = Field(default=None, ge=0)
+    heading: float | None = None
+    speed_mps: float | None = Field(default=None, ge=0)
+    is_running: bool = False
+    run_id: uuid.UUID | None = None
+
+
+class FriendPosition(BaseModel):
+    account: PublicAccount
+    lat: float
+    lon: float
+    accuracy_m: float | None = None
+    heading: float | None = None
+    speed_mps: float | None = None
+    is_running: bool
+    updated_at: datetime
+
+
+class LiveView(BaseModel):
+    friends: list[FriendPosition]
+    # Populated after RaceRecord is defined; races share this single poll.
+    races: list["RaceRecord"] = []
+
+
+class SocialEventRecord(BaseModel):
+    id: int
+    kind: str
+    body: str
+    actor: PublicAccount | None = None
+    subject_id: uuid.UUID | None = None
+    created_at: datetime
+    read_at: datetime | None = None
+
+
+ChallengeMetric = Literal["distance", "runs", "moving_time", "captured_area", "territories"]
+ChallengeComparison = Literal["most", "fastest_to"]
+ChallengeStatus = Literal[
+    "pending", "accepted", "declined", "cancelled", "expired", "resolved"
+]
+ChallengeOutcome = Literal["challenger", "opponent", "draw", "nobody"]
+
+
+class ChallengeStakeInput(BaseModel):
+    """Only loop closures can be staked; fixed territory ownership is derived."""
+
+    staked_area_id: uuid.UUID | None = None
+    require_opponent_area_m2: float | None = Field(default=None, ge=0)
+
+
+class ChallengeStakeSummary(BaseModel):
+    staked_area_id: uuid.UUID | None = None
+    staked_area_m2: float | None = None
+    require_opponent_area_m2: float | None = None
+    transferred_at: datetime | None = None
+
+
+class ChallengeCreate(BaseModel):
+    opponent_id: uuid.UUID
+    metric: ChallengeMetric
+    comparison: ChallengeComparison = "most"
+    # Required for 'fastest_to': the value both players race to reach.
+    target_value: float | None = Field(default=None, gt=0)
+    window_days: int = Field(default=3, ge=1, le=30)
+    goal_text: str = Field(min_length=3, max_length=240)
+    stake: ChallengeStakeInput | None = None
+
+
+class ChallengeRecord(BaseModel):
+    id: uuid.UUID
+    challenger: PublicAccount
+    opponent: PublicAccount
+    role: Literal["challenger", "opponent"]
+    metric: ChallengeMetric
+    comparison: ChallengeComparison
+    target_value: float | None
+    window_start: datetime
+    window_end: datetime
+    goal_text: str
+    status: ChallengeStatus
+    accept_deadline: datetime
+    outcome: ChallengeOutcome | None = None
+    winner_id: uuid.UUID | None = None
+    # Live totals while a challenge is running; final ones once it is resolved.
+    challenger_value: float | None = None
+    opponent_value: float | None = None
+    stake: ChallengeStakeSummary | None = None
+    resolved_at: datetime | None = None
+    created_at: datetime
+
+
+RaceStatus = Literal["pending", "running", "finished", "declined", "cancelled", "expired"]
+
+
+class RaceCreate(BaseModel):
+    opponent_id: uuid.UUID
+    pin_lat: float = Field(ge=-90, le=90)
+    pin_lon: float = Field(ge=-180, le=180)
+    pin_label: str | None = Field(default=None, max_length=80)
+    # Close enough counts; the client should not ask for pinpoint accuracy.
+    radius_m: float = Field(default=25, ge=10, le=100)
+
+
+class RaceRecord(BaseModel):
+    id: uuid.UUID
+    challenger: PublicAccount
+    opponent: PublicAccount
+    role: Literal["challenger", "opponent"]
+    pin_lat: float
+    pin_lon: float
+    pin_label: str | None = None
+    radius_m: float
+    status: RaceStatus
+    accept_deadline: datetime
+    started_at: datetime | None = None
+    expires_at: datetime | None = None
+    winner_id: uuid.UUID | None = None
+    finished_at: datetime | None = None
+    created_at: datetime
+
+
+LiveView.model_rebuild()
+
+
+class GhostCreate(BaseModel):
+    run_id: uuid.UUID
+    name: str = Field(min_length=2, max_length=80)
+    # Broadcasting the recorded route. Live location is a separate choice below.
+    is_public: bool = False
+
+
+class GhostUpdate(BaseModel):
+    name: str | None = Field(default=None, min_length=2, max_length=80)
+    is_public: bool | None = None
+    # Only meaningful alongside is_public, and never implied by it.
+    share_live_location: bool | None = None
+
+
+class GhostSummary(BaseModel):
+    id: uuid.UUID
+    name: str
+    owner: PublicAccount
+    distance_m: float
+    duration_s: int
+    start_lat: float
+    start_lon: float
+    is_public: bool
+    share_live_location: bool
+    is_yours: bool
+    best_elapsed_s: int | None = None
+    created_at: datetime
+
+
+class GhostDetail(GhostSummary):
+    """`path` is [[lon, lat, ms_from_start], ...], trimmed for anyone but the owner."""
+
+    path: list[list[float]]
+
+
+class GhostAttemptRecord(BaseModel):
+    id: uuid.UUID
+    ghost_id: uuid.UUID
+    started_at: datetime
+    finished_at: datetime | None = None
+    elapsed_s: int | None = None
+    beat_ghost: bool | None = None
+    ghost_duration_s: int
+
+
+class GhostAttemptFinish(BaseModel):
+    elapsed_s: int = Field(gt=0)
+    run_id: uuid.UUID | None = None
+
+
+class StakeableArea(BaseModel):
+    """One loop closure a player owns, individually addressable so it can be staked."""
+
+    id: uuid.UUID
+    area_m2: float
+    run_id: uuid.UUID
+    created_at: datetime

@@ -27,9 +27,11 @@ export function lightingPalette(now: Date, weather: WeatherReading | null) {
   const blend = (night: string, light: string) => mixColor(mixColor(night, light, day), kind === 'Snow' ? '#B9D1DF' : kind === 'Storm' ? '#655C87' : rain ? '#526D84' : '#8A9EA6', haze);
   return {
     background: blend('#153447', '#D9EEDC'), land: blend('#244A54', '#BEDCCB'), park: blend('#23635D', '#80C89B'),
-    water: blend('#174F71', '#70C8D9'), road: blend('#88ADB0', '#FFF2D4'), casing: blend('#416F7C', '#5C948B'),
-    avenue: blend('#A7B8AB', '#FFE3A1'), path: blend('#6DAFA0', '#C9F2E1'), roadMarking: blend('#CEE1D0', '#D5B980'),
-    building: blend('#56768B', '#DBE9E7'), roof: blend('#95B2C2', '#E4F0ED'), roofAccent: blend('#67AFB8', '#7EBCBD'),
+    water: blend('#174F71', '#8FCBD9'), road: blend('#88ADB0', '#F7F4EC'), casing: blend('#416F7C', '#B4C3B6'),
+    avenue: blend('#A7B8AB', '#F1E9D5'), path: blend('#6DAFA0', '#DCEBDD'), roadMarking: blend('#CEE1D0', '#CFC6B2'),
+    building: blend('#56768B', '#F0EDE5'), roof: blend('#95B2C2', '#F5F2EA'), roofAccent: blend('#67AFB8', '#DDBB92'),
+    // Rooftop objects: light utility volumes and dark solar arrays.
+    structure: blend('#3E5568', '#D5DAD3'), panel: blend('#1B2740', '#44567E'), doorway: blend('#241C16', '#9C7A5C'),
     label: blend('#D5E4EA', '#334D44'), halo: blend('#102238', '#EBF2DE'),
     name: `${day < 0.25 ? 'Night' : day < 0.8 ? 'Twilight' : 'Day'}${weather ? ` · ${kind}` : ' · Time only'}`,
   };

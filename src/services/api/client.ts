@@ -7,6 +7,21 @@ import { ApiRequestError } from './errors';
 import type {
   HomeTerritoryUpdate,
   AccountSummary,
+  ChallengeDraft,
+  ChallengeRecord,
+  Friend,
+  FriendList,
+  FriendRequest,
+  GhostAttempt,
+  GhostDetail,
+  GhostSummary,
+  LiveView,
+  PositionUpdate,
+  PublicAccount,
+  RaceRecord,
+  SharingOverview,
+  SocialEvent,
+  StakeableArea,
   ProfileSummary,
   RunResult,
   RunSubmission,
@@ -274,4 +289,219 @@ export async function googleLogin(access_token:string) {
 export function fetchCredentials() {return request<{username:string|null;has_password:boolean}>('/v1/auth/profile');}
 export function updateCredentials(username:string,current_password:string,new_password:string) {
   return request('/v1/auth/profile',{method:'PUT',body:JSON.stringify({username,current_password,...(new_password?{new_password}:{})})});
+}
+
+
+// --- Social ----------------------------------------------------------------
+// Friendship gates location sharing, challenges and races, so every one of
+// these calls is account-scoped and requires a signed-in session.
+
+/** Find a player by handle prefix, display-name prefix, or exact account ID. */
+export function searchAccounts(query: string): Promise<PublicAccount[]> {
+  return request<PublicAccount[]>(`/v1/social/search?q=${encodeURIComponent(query)}`);
+}
+
+export function fetchFriends(): Promise<FriendList> {
+  return request<FriendList>('/v1/social/friends');
+}
+
+/** Accepts a handle (with or without '@') or a raw account ID. */
+export function sendFriendRequest(identifier: string): Promise<FriendRequest> {
+  const value = identifier.trim().replace(/^@/, '');
+  const isAccountId = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
+  return request<FriendRequest>('/v1/social/friends/requests', {
+    method: 'POST',
+    body: JSON.stringify(isAccountId ? { account_id: value } : { handle: value }),
+  });
+}
+
+export function acceptFriendRequest(requestId: string): Promise<Friend> {
+  return request<Friend>(`/v1/social/friends/requests/${requestId}/accept`, { method: 'POST' });
+}
+
+export async function declineFriendRequest(requestId: string): Promise<void> {
+  await requestResponse(`/v1/social/friends/requests/${requestId}/decline`, { method: 'POST' });
+}
+
+export async function removeFriend(accountId: string): Promise<void> {
+  await requestResponse(`/v1/social/friends/${accountId}`, { method: 'DELETE' });
+}
+
+export async function blockAccount(accountId: string): Promise<void> {
+  await requestResponse(`/v1/social/block/${accountId}`, { method: 'POST' });
+}
+
+export async function unblockAccount(accountId: string): Promise<void> {
+  await requestResponse(`/v1/social/block/${accountId}`, { method: 'DELETE' });
+}
+
+export async function updateHandle(handle: string): Promise<PublicAccount> {
+  const updated = await request<PublicAccount>('/v1/social/handle', {
+    method: 'PUT',
+    body: JSON.stringify({ handle }),
+  });
+  if (memoryCachedAccount) memoryCachedAccount = { ...memoryCachedAccount, handle: updated.handle };
+  return updated;
+}
+
+// --- Sharing and presence ---------------------------------------------------
+// Position reporting is a single round trip: it posts where you are and returns
+// what you are allowed to see, because the client polls this while recording.
+
+export function fetchSharing(): Promise<SharingOverview> {
+  return request<SharingOverview>('/v1/social/sharing');
+}
+
+export function updateSharing(
+  accountId: string,
+  update: { share_location?: boolean; notify_on_run_start?: boolean }
+): Promise<SharingOverview['sharing_with'][number]> {
+  return request(`/v1/social/sharing/${accountId}`, {
+    method: 'PUT',
+    body: JSON.stringify(update),
+  });
+}
+
+export function reportPosition(update: PositionUpdate): Promise<LiveView> {
+  return request<LiveView>('/v1/social/position', {
+    method: 'POST',
+    body: JSON.stringify(update),
+    // A missed position is not worth stalling a recording screen for.
+    timeoutMs: 6_000,
+  });
+}
+
+export async function clearPosition(): Promise<void> {
+  await requestResponse('/v1/social/position', { method: 'DELETE' });
+}
+
+export function fetchLive(): Promise<LiveView> {
+  return request<LiveView>('/v1/social/live');
+}
+
+/** Tells only the friends who opted in to run-start alerts. */
+export async function announceRunStart(runId: string): Promise<void> {
+  await requestResponse(`/v1/social/runs/${runId}/started`, { method: 'POST' });
+}
+
+export function fetchSocialEvents(unreadOnly = false): Promise<SocialEvent[]> {
+  return request<SocialEvent[]>(`/v1/social/events${unreadOnly ? '?unread_only=true' : ''}`);
+}
+
+export async function markEventsRead(): Promise<void> {
+  await requestResponse('/v1/social/events/read', { method: 'POST' });
+}
+
+// --- Challenges -------------------------------------------------------------
+
+export function fetchChallenges(): Promise<ChallengeRecord[]> {
+  return request<ChallengeRecord[]>('/v1/social/challenges');
+}
+
+/** Individual loop closures you own, which is what a stake transfers. */
+export function fetchStakeableAreas(): Promise<StakeableArea[]> {
+  return request<StakeableArea[]>('/v1/social/challenges/stakeable');
+}
+
+export function createChallenge(draft: ChallengeDraft): Promise<ChallengeRecord> {
+  return request<ChallengeRecord>('/v1/social/challenges', {
+    method: 'POST',
+    body: JSON.stringify(draft),
+  });
+}
+
+export function answerChallenge(
+  challengeId: string,
+  answer: 'accept' | 'decline' | 'cancel'
+): Promise<ChallengeRecord> {
+  return request<ChallengeRecord>(`/v1/social/challenges/${challengeId}/${answer}`, {
+    method: 'POST',
+  });
+}
+
+// --- Races ------------------------------------------------------------------
+
+export function fetchRaces(): Promise<RaceRecord[]> {
+  return request<RaceRecord[]>('/v1/social/races');
+}
+
+export function createRace(race: {
+  opponent_id: string;
+  pin_lat: number;
+  pin_lon: number;
+  pin_label?: string | null;
+  radius_m?: number;
+}): Promise<RaceRecord> {
+  return request<RaceRecord>('/v1/social/races', {
+    method: 'POST',
+    body: JSON.stringify(race),
+  });
+}
+
+export function answerRace(
+  raceId: string,
+  answer: 'accept' | 'decline' | 'withdraw'
+): Promise<RaceRecord> {
+  return request<RaceRecord>(`/v1/social/races/${raceId}/${answer}`, { method: 'POST' });
+}
+
+// --- Ghosts -----------------------------------------------------------------
+
+export function fetchMyGhosts(): Promise<GhostSummary[]> {
+  return request<GhostSummary[]>('/v1/social/ghosts/mine');
+}
+
+/** Public ghosts near a point. The map keeps these behind a layer toggle. */
+export function fetchNearbyGhosts(
+  lat: number,
+  lon: number,
+  radiusM = 2000
+): Promise<GhostSummary[]> {
+  return request<GhostSummary[]>(
+    `/v1/social/ghosts/nearby?lat=${lat}&lon=${lon}&radius_m=${radiusM}`
+  );
+}
+
+export function createGhost(
+  runId: string,
+  name: string,
+  isPublic = false
+): Promise<GhostSummary> {
+  return request<GhostSummary>('/v1/social/ghosts', {
+    method: 'POST',
+    body: JSON.stringify({ run_id: runId, name, is_public: isPublic }),
+  });
+}
+
+export function fetchGhost(ghostId: string): Promise<GhostDetail> {
+  return request<GhostDetail>(`/v1/social/ghosts/${ghostId}`);
+}
+
+export function updateGhost(
+  ghostId: string,
+  update: { name?: string; is_public?: boolean; share_live_location?: boolean }
+): Promise<GhostSummary> {
+  return request<GhostSummary>(`/v1/social/ghosts/${ghostId}`, {
+    method: 'PUT',
+    body: JSON.stringify(update),
+  });
+}
+
+export async function deleteGhost(ghostId: string): Promise<void> {
+  await requestResponse(`/v1/social/ghosts/${ghostId}`, { method: 'DELETE' });
+}
+
+export function startGhostAttempt(ghostId: string): Promise<GhostAttempt> {
+  return request<GhostAttempt>(`/v1/social/ghosts/${ghostId}/attempts`, { method: 'POST' });
+}
+
+export function finishGhostAttempt(
+  attemptId: string,
+  elapsedS: number,
+  runId?: string
+): Promise<GhostAttempt> {
+  return request<GhostAttempt>(`/v1/social/ghosts/attempts/${attemptId}/finish`, {
+    method: 'POST',
+    body: JSON.stringify({ elapsed_s: elapsedS, ...(runId ? { run_id: runId } : {}) }),
+  });
 }

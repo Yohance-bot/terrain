@@ -23,6 +23,7 @@ from app.models import (
     TerritoryStanding,
 )
 from app.schemas import AccountSummary, AccountUpdate, DeveloperLogin, LocalAccountCreate
+from app.services.social import handle_for
 
 router = APIRouter(prefix="/account", tags=["account"])
 
@@ -92,6 +93,7 @@ def summary(session: Session, account: Account) -> AccountSummary:
     return AccountSummary(
         id=account.id,
         display_name=account.display_name,
+        handle=handle_for(session, account),
         avatar_url=account.avatar_url,
         role=account.role,
         created_at=account.created_at,

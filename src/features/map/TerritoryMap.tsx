@@ -28,6 +28,8 @@ import { useWorldFeatures } from './useWorldFeatures';
 import { illuminateStreets } from './streetMatching';
 import { StreetTrailLayers } from './StreetTrailLayers';
 import { TrailLayers } from '@/features/hud/TrailLayers';
+import { SocialMapLayers } from '@/features/social/SocialMapLayers';
+import type { GhostSummary } from '@/services/api/types';
 import { CueMapLayers } from '@/features/hud/CueMapLayers';
 import { ContestedBorders } from '@/features/hud/ContestedBorders';
 import { mockAdjacentBorders, sharedBorders, selectBorders } from '@/features/hud/borders';
@@ -91,6 +93,10 @@ type Props = {
   captureColorIndex?: number;
   /** Controls which overlay layers are visible: territories, captures, or both. */
   visibleLayers?: 'all' | 'territories' | 'captures';
+  /** Public ghosts to draw. Only passed when the player turns that layer on. */
+  nearbyGhosts?: GhostSummary[];
+  /** Long-pressing the map drops a race pin, when the screen offers that. */
+  onDropRacePin?: (coordinate: [number, number]) => void;
 };
 
 const DEVELOPER_COLORS: Record<string, string> = {
@@ -112,9 +118,9 @@ function withOwnerColors(collection: GeoJSON.FeatureCollection | null | undefine
       properties: {
         ...feature.properties,
         owner_color: colourForOwner(feature.properties?.owner_device_id),
-        owner_fill: withAlpha(colourForOwner(feature.properties?.owner_device_id), 0.25),
-        owner_fill_mid: withAlpha(colourForOwner(feature.properties?.owner_device_id), 0.40),
-        owner_fill_far: withAlpha(colourForOwner(feature.properties?.owner_device_id), 0.58),
+        owner_fill: withAlpha(colourForOwner(feature.properties?.owner_device_id), 0.16),
+        owner_fill_mid: withAlpha(colourForOwner(feature.properties?.owner_device_id), 0.26),
+        owner_fill_far: withAlpha(colourForOwner(feature.properties?.owner_device_id), 0.40),
       },
     })),
   } as GeoJSON.FeatureCollection;
@@ -145,6 +151,8 @@ export const TerritoryMap = memo(function TerritoryMap({
   activationColor = colors.route,
   captureColorIndex = DEFAULT_CAPTURE_COLOR_INDEX,
   visibleLayers = 'all',
+  nearbyGhosts,
+  onDropRacePin,
   fix = null, presentationActive = true, reducedMotion = false, economy = false, simulation = false, bottomInset = 8, contestedBorders,
 }: Props) {
   const showTerritories = visibleLayers === 'all' || visibleLayers === 'territories';
@@ -213,9 +221,9 @@ export const TerritoryMap = memo(function TerritoryMap({
             // Keep transparency in the color itself. MapLibre React Native's
             // fill-opacity bridge can dereference a released style value on
             // iOS when these layers are updated during a style swap.
-            terrain_fill: withAlpha(zoneColor, 0.22),
-            terrain_fill_mid: withAlpha(zoneColor, 0.35),
-            terrain_fill_far: withAlpha(zoneColor, 0.52),
+            terrain_fill: withAlpha(zoneColor, 0.14),
+            terrain_fill_mid: withAlpha(zoneColor, 0.22),
+            terrain_fill_far: withAlpha(zoneColor, 0.34),
             fill_color: zoneColor,
             outline_color: zoneColor,
           },
@@ -281,6 +289,11 @@ export const TerritoryMap = memo(function TerritoryMap({
           if (!onSimulationMove) return;
           const [lon, lat] = event.nativeEvent.lngLat;
           onSimulationMove([lon, lat]);
+        }}
+        onLongPress={(event) => {
+          if (!onDropRacePin) return;
+          const [lon, lat] = event.nativeEvent.lngLat;
+          onDropRacePin([lon, lat]);
         }}
       >
         <ThemeLayers palette={palette} reducedMotion={reducedMotion} />
@@ -607,6 +620,7 @@ export const TerritoryMap = memo(function TerritoryMap({
           </GeoJSONSource>
         )}
 
+        <SocialMapLayers nearbyGhosts={nearbyGhosts} />
       </Map>
 
       {recording && <Pressable accessibilityRole="button" accessibilityLabel={`Trail display: ${routeDisplay === 'streets' ? 'light up streets' : 'GPS trail'}. Tap to switch.`} onPress={() => useHudPreferences.getState().setRouteDisplay(routeDisplay === 'streets' ? 'gps' : 'streets')} style={[styles.trailMode, simulation && { left: undefined, right: 66 }, { bottom: bottomInset + 44 }]}>

@@ -13,6 +13,7 @@ import System from "./pages/System";
 import Notes from "./pages/Notes";
 import Team from "./pages/Team";
 import Assistant from "./pages/Assistant";
+import Social from "./pages/Social";
 import { getToken } from "./lib/api";
 
 const queryClient = new QueryClient({
@@ -60,6 +61,7 @@ export default function App() {
                 <Route path="/system" element={<System />} />
                 <Route path="/players" element={<Players />} />
                 <Route path="/runs" element={<Runs />} />
+                <Route path="/social" element={<Social />} />
                 <Route path="/audit" element={<AuditLog />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>

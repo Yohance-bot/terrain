@@ -30,8 +30,8 @@ import { findActiveTerritoryId, findLoopCandidateTerritoryIds } from '@/lib/poin
 import { detectLoopCandidate } from '@/lib/runCapture';
 import { runEventCopy, type RunEvent } from '@/lib/runEvents';
 import { ApiRequestError, logApiRequestErrorInDev, queuedRunNotice } from '@/services/api/errors';
-import { fetchAccount, fetchCapturedAreas, fetchOwnedTerritoryAreas, fetchRun, fetchTerritoryDetails, getCachedAccount, resetDeveloperTerritory, submitRun } from '@/services/api/client';
-import type { AccountSummary, RunResult, TerritoryDetails } from '@/services/api/types';
+import { createRace, fetchAccount, fetchCapturedAreas, fetchFriends, fetchNearbyGhosts, fetchOwnedTerritoryAreas, fetchRun, fetchTerritoryDetails, getCachedAccount, resetDeveloperTerritory, submitRun } from '@/services/api/client';
+import type { AccountSummary, GhostSummary, RunResult, TerritoryDetails } from '@/services/api/types';
 import { loadOwnership, loadTerritories } from '@/services/territories';
 import {
   getLocalRun,
@@ -46,6 +46,10 @@ import {
 } from '@/lib/db';
 import { colors, fontSize, fontWeight, radius, spacing } from '@/theme';
 import { getCaptureColorIndex } from '@/lib/preferences';
+import { usePresence } from '@/features/social/usePresence';
+import { startEventPolling, stopEventPolling, useSocial } from '@/features/social/useSocial';
+import { useGhostRace } from '@/features/social/useGhostRace';
+import { formatLead, leadMetres } from '@/features/social/ghostPlayback';
 
 // Bundled territories used for point-in-polygon during a live run.
 // Same source as TerritoryMap — always available offline.
@@ -82,6 +86,10 @@ export default function MapScreen() {
   const [accountChecked, setAccountChecked] = useState(() => Boolean(getCachedAccount()));
   const [layerMode, setLayerMode] = useState<'all' | 'territories' | 'captures'>('all');
   const [layersPanelOpen, setLayersPanelOpen] = useState(false);
+  // Broadcast ghosts stay off the map until this is switched on: the map's job
+  // is the world and your own run, not a directory of other people's routes.
+  const [ghostLayerOn, setGhostLayerOn] = useState(false);
+  const [nearbyGhosts, setNearbyGhosts] = useState<GhostSummary[]>([]);
   const [captureColorIndex, setCaptureColorIndex] = useState(0);
 
   const { status, error, isSimulation, start, startSimulation, addSimulatedPoint, stop } =
@@ -99,6 +107,63 @@ export default function MapScreen() {
   const activationColor = account?.developer_slot
     ? DEVELOPER_ACTIVATION_COLORS[account.developer_slot - 1] ?? colors.route
     : colors.route;
+
+  // --- Social ---------------------------------------------------------------
+  usePresence();
+  const unreadCount = useSocial((state) => state.unreadCount);
+  const liveRaces = useSocial((state) => state.races);
+  const ghostRun = useGhostRace((state) => state.ghost);
+  const ghostState = useGhostRace((state) => state.ghostState);
+  const liveDistanceM = useRecorder((state) => state.liveDistanceM);
+  const runningRace = liveRaces.find((race) => race.status === 'running') ?? null;
+
+  useEffect(() => {
+    startEventPolling();
+    return stopEventPolling;
+  }, []);
+
+  // The ghost layer is polled only while it is on, and only around the player.
+  useEffect(() => {
+    if (!ghostLayerOn) {
+      setNearbyGhosts([]);
+      return;
+    }
+    const coordinate = fix?.coordinate ?? JAYANAGAR_CENTER;
+    void fetchNearbyGhosts(coordinate[1], coordinate[0])
+      .then(setNearbyGhosts)
+      .catch(() => setNearbyGhosts([]));
+  }, [ghostLayerOn, fix?.coordinate]);
+
+  const dropRacePin = useCallback(
+    async (coordinate: [number, number]) => {
+      // A race needs someone to race, so the pin is only useful with friends.
+      const list = await fetchFriends().catch(() => null);
+      if (!list || list.friends.length === 0) {
+        setNotice('Add a friend before dropping a race pin.');
+        return;
+      }
+      Alert.alert(
+        'Race to this spot?',
+        'Both of you can see each other until someone arrives. Getting within about 25 m counts — keep your eyes on the road.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          ...list.friends.slice(0, 3).map((friend) => ({
+            text: friend.account.display_name,
+            onPress: () => {
+              void createRace({
+                opponent_id: friend.account.id,
+                pin_lat: coordinate[1],
+                pin_lon: coordinate[0],
+              })
+                .then(() => setNotice('Race sent.'))
+                .catch(() => setNotice('Could not send that race.'));
+            },
+          })),
+        ]
+      );
+    },
+    []
+  );
 
   const celebrateClaim = useCallback(async (result: RunResult): Promise<boolean> => {
     if (!presentationActive.current || AppState.currentState !== 'active' || useRecorder.getState().status !== 'idle') return false;
@@ -486,6 +551,9 @@ export default function MapScreen() {
       return;
     }
     await start();
+    // Only friends who asked for run-start alerts hear about this.
+    const startedRunId = useRecorder.getState().runId;
+    if (startedRunId) void useSocial.getState().announceRun(startedRunId);
   }, [busy, developerMode, onStartSimulation, start]);
 
   useEffect(() => {
@@ -529,6 +597,15 @@ export default function MapScreen() {
   const onStop = async () => {
     const finished = await stop();
     if (!finished) return;
+
+    // A ghost race ends with the run it was raced during, and the comparison is
+    // told first — it is the thing the runner is waiting to hear.
+    if (useGhostRace.getState().ghost) {
+      const outcome = await useGhostRace.getState().end({ runId: finished.runId });
+      if (outcome) {
+        setNotice(outcome.beatGhost ? 'You beat the ghost.' : 'The ghost stayed ahead.');
+      }
+    }
 
     setBusy(true);
     try {
@@ -600,6 +677,8 @@ export default function MapScreen() {
         activationColor={activationColor}
         visibleLayers={layerMode}
         captureColorIndex={captureColorIndex}
+        nearbyGhosts={ghostLayerOn ? nearbyGhosts : undefined}
+        onDropRacePin={recording ? undefined : dropRacePin}
       />
 
       <View pointerEvents="none" style={{ position: 'absolute', top: 0, left: 0, right: 0, height: insets.top, backgroundColor: '#081D354D' }} />
@@ -723,6 +802,17 @@ export default function MapScreen() {
           <Pressable accessibilityLabel="Explore play modes" style={styles.sideBtn} onPress={() => router.push('/play')}>
             <Feather name="compass" size={22} color="#315C49"/><Text style={styles.sideBtnLabel}>Explore</Text>
           </Pressable>
+          <Pressable accessibilityLabel="Friends" style={styles.sideBtn} onPress={() => router.push('/friends')}>
+            <Feather name="users" size={22} color="#315C49"/><Text style={styles.sideBtnLabel}>Friends</Text>
+          </Pressable>
+          <Pressable accessibilityLabel="Challenges" style={styles.sideBtn} onPress={() => { void useSocial.getState().markRead(); router.push('/challenges'); }}>
+            <Feather name="flag" size={22} color="#315C49"/>
+            <Text style={styles.sideBtnLabel}>Duels</Text>
+            {unreadCount > 0 && <View style={styles.badge}><Text style={styles.badgeText}>{unreadCount > 9 ? '9+' : unreadCount}</Text></View>}
+          </Pressable>
+          <Pressable accessibilityLabel="Ghost runs" style={styles.sideBtn} onPress={() => router.push('/ghosts')}>
+            <Feather name="clock" size={22} color="#315C49"/><Text style={styles.sideBtnLabel}>Ghosts</Text>
+          </Pressable>
           <Pressable style={[styles.sideBtn, layersPanelOpen && styles.sideBtnActive]} onPress={() => setLayersPanelOpen((v) => !v)}>
             <Feather name="layers" size={22} color="#315C49"/>
             <Text style={styles.sideBtnLabel}>Layers</Text>
@@ -748,6 +838,26 @@ export default function MapScreen() {
             <View style={[styles.layerDot, { backgroundColor: colors.startGreen }]} />
             <Text style={[styles.layerText, layerMode === 'captures' && styles.layerTextActive]}>Captures only</Text>
           </Pressable>
+          <Pressable style={[styles.layerOption, ghostLayerOn && styles.layerOptionActive]} onPress={() => setGhostLayerOn((on) => !on)}>
+            <View style={[styles.layerDot, { backgroundColor: '#A5B4FC' }]} />
+            <Text style={[styles.layerText, ghostLayerOn && styles.layerTextActive]}>Ghosts nearby</Text>
+          </Pressable>
+        </View>
+      )}
+
+      {/* Racing a ghost: a single number, readable at a glance, no interaction. */}
+      {ghostRun && (
+        <View style={[styles.socialStrip, { bottom: insets.bottom + (recording ? 132 : 92) }]}>
+          <Text style={styles.socialStripTitle}>{ghostRun.name}</Text>
+          <Text style={styles.socialStripValue}>{formatLead(leadMetres(liveDistanceM, ghostState))}</Text>
+        </View>
+      )}
+      {runningRace && (
+        <View style={[styles.socialStrip, { bottom: insets.bottom + (recording ? 176 : 136) }]}>
+          <Text style={styles.socialStripTitle}>
+            Racing {runningRace.role === 'challenger' ? runningRace.opponent.display_name : runningRace.challenger.display_name}
+          </Text>
+          <Text style={styles.socialStripValue}>Get within {Math.round(runningRace.radius_m)} m of the pin</Text>
         </View>
       )}
 
@@ -783,6 +893,11 @@ export default function MapScreen() {
 }
 
 const styles = StyleSheet.create({
+  socialStrip: { position: 'absolute', left: 16, right: 16, backgroundColor: '#0A1929EF', borderRadius: 14, paddingHorizontal: 14, paddingVertical: 8 },
+  socialStripTitle: { color: '#8FB3A6', fontSize: 10, fontWeight: '700', letterSpacing: 0.6, textTransform: 'uppercase' },
+  socialStripValue: { color: '#DBFFF3', fontSize: 16, fontWeight: '700' },
+  badge: { position: 'absolute', top: 2, right: 6, minWidth: 16, height: 16, borderRadius: 8, backgroundColor: '#FF4081', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 3 },
+  badgeText: { color: '#FFFFFF', fontSize: 9, fontWeight: '700' },
   savingText: { color: '#DBFFF3', textAlign: 'center', paddingTop: 10 },
   economy: { position: 'absolute', left: 16, padding: 12, backgroundColor: '#0A1929EF', borderRadius: 18 },
   economyText: { color: '#B6E9D9', fontSize: 10, fontWeight: '700', letterSpacing: 0.6 },

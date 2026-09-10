@@ -21,6 +21,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.schema import FetchedValue
 
 from app.core.config import settings
 from app.core.db import Base
@@ -100,6 +101,12 @@ class Account(Base):
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     display_name: Mapped[str] = mapped_column(String(32), nullable=False)
+    # The typeable, unique identity used to find a player. Assigned by a database
+    # trigger on insert (migration 0013), so no sign-up path sets it; reading it
+    # back after a flush needs a refresh, which `social.handle_for` handles.
+    handle: Mapped[str] = mapped_column(
+        String(24), nullable=False, unique=True, server_default=FetchedValue()
+    )
     avatar_url: Mapped[str | None] = mapped_column(String(1024), nullable=True)
     role: Mapped[str] = mapped_column(String(16), nullable=False, default="player")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
@@ -401,6 +408,15 @@ class CapturedArea(Base):
         Geography(geometry_type="POLYGON", srid=4326, spatial_index=False), nullable=False
     )
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    # Set when a lost challenge stake moved this area to another player. The run
+    # linkage is never rewritten, so the effort that created it stays attributed.
+    transferred_from_device_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("devices.id"), nullable=True
+    )
+    transferred_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    transferred_by_challenge_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("challenges.id"), nullable=True
+    )
 
 
 class ConsoleUser(Base):
@@ -447,3 +463,232 @@ class ConsoleNote(Base):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
+
+
+# --- Social layer -----------------------------------------------------------
+# Friendship is the gate for every feature below it: location sharing, run-start
+# notifications, challenges, stakes and races all require an accepted row here.
+
+
+class Friendship(Base):
+    """One row per pair of accounts, for the lifetime of that pair.
+
+    `requester_id`/`addressee_id` record who opened the relationship and never
+    change, so a re-request after a decline reuses the row rather than opening a
+    second one. A unique index on the ordered pair (migration 0013) enforces it.
+    """
+
+    __tablename__ = "friendships"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    requester_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("accounts.id", ondelete="CASCADE"), nullable=False
+    )
+    addressee_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("accounts.id", ondelete="CASCADE"), nullable=False
+    )
+    status: Mapped[str] = mapped_column(String(16), nullable=False, default="pending")
+    blocked_by: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("accounts.id", ondelete="CASCADE"), nullable=True
+    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+
+class FriendShareSettings(Base):
+    """One direction of one friendship: what `owner` lets `viewer` see.
+
+    Both capabilities default to off. A friendship never implies either of them.
+    """
+
+    __tablename__ = "friend_share_settings"
+
+    owner_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("accounts.id", ondelete="CASCADE"), primary_key=True
+    )
+    viewer_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("accounts.id", ondelete="CASCADE"), primary_key=True
+    )
+    share_location: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    notify_on_run_start: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    # NULL is "until turned off"; a timestamp is a temporary grant, used by races.
+    location_expires_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+
+class LivePosition(Base):
+    """Presence, not history: one row per account, overwritten in place."""
+
+    __tablename__ = "live_positions"
+
+    account_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("accounts.id", ondelete="CASCADE"), primary_key=True
+    )
+    lat: Mapped[float] = mapped_column(Float, nullable=False)
+    lon: Mapped[float] = mapped_column(Float, nullable=False)
+    accuracy_m: Mapped[float | None] = mapped_column(Float, nullable=True)
+    heading: Mapped[float | None] = mapped_column(Float, nullable=True)
+    speed_mps: Mapped[float | None] = mapped_column(Float, nullable=True)
+    is_running: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    run_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), nullable=True)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+
+class SocialEvent(Base):
+    """In-app delivery for everything social. Push would sit on top of this."""
+
+    __tablename__ = "social_events"
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    account_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("accounts.id", ondelete="CASCADE"), nullable=False
+    )
+    kind: Mapped[str] = mapped_column(String(32), nullable=False)
+    actor_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("accounts.id", ondelete="CASCADE"), nullable=True
+    )
+    subject_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), nullable=True)
+    body: Mapped[str] = mapped_column(String(240), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    read_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+class Challenge(Base):
+    """A head-to-head bet on a metric the run pipeline already measures.
+
+    Resolution is automatic: at `window_end` the server compares both players'
+    values and writes the outcome. Nothing about a challenge depends on either
+    player opening the app.
+    """
+
+    __tablename__ = "challenges"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    challenger_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("accounts.id", ondelete="CASCADE"), nullable=False
+    )
+    opponent_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("accounts.id", ondelete="CASCADE"), nullable=False
+    )
+    metric: Mapped[str] = mapped_column(String(24), nullable=False)
+    comparison: Mapped[str] = mapped_column(String(16), nullable=False, default="most")
+    target_value: Mapped[float | None] = mapped_column(Float, nullable=True)
+    window_start: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    window_end: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    goal_text: Mapped[str] = mapped_column(String(240), nullable=False)
+    status: Mapped[str] = mapped_column(String(16), nullable=False, default="pending")
+    accept_deadline: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    outcome: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    winner_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("accounts.id", ondelete="SET NULL"), nullable=True
+    )
+    challenger_value: Mapped[float | None] = mapped_column(Float, nullable=True)
+    opponent_value: Mapped[float | None] = mapped_column(Float, nullable=True)
+    resolved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+
+class ChallengeStake(Base):
+    """What the challenger put up, and what the opponent must hold to accept."""
+
+    __tablename__ = "challenge_stakes"
+
+    challenge_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("challenges.id", ondelete="CASCADE"), primary_key=True
+    )
+    staked_area_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("captured_areas.id", ondelete="SET NULL"), nullable=True
+    )
+    require_opponent_area_m2: Mapped[float | None] = mapped_column(Float, nullable=True)
+    transferred_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+class Race(Base):
+    """A pin on the map and two people trying to reach it first."""
+
+    __tablename__ = "races"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    challenger_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("accounts.id", ondelete="CASCADE"), nullable=False
+    )
+    opponent_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("accounts.id", ondelete="CASCADE"), nullable=False
+    )
+    pin_lat: Mapped[float] = mapped_column(Float, nullable=False)
+    pin_lon: Mapped[float] = mapped_column(Float, nullable=False)
+    pin_label: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    radius_m: Mapped[float] = mapped_column(Float, nullable=False, default=25)
+    status: Mapped[str] = mapped_column(String(16), nullable=False, default="pending")
+    accept_deadline: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    winner_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("accounts.id", ondelete="SET NULL"), nullable=True
+    )
+    finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+
+class GhostRun(Base):
+    """A saved route and pacing that anyone allowed to see it can race.
+
+    The path is copied rather than referenced: run traces are erased on a
+    retention schedule, and a benchmark has to outlive that.
+    """
+
+    __tablename__ = "ghost_runs"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    account_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("accounts.id", ondelete="CASCADE"), nullable=False
+    )
+    run_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("runs.id", ondelete="CASCADE"), nullable=False, unique=True
+    )
+    name: Mapped[str] = mapped_column(String(80), nullable=False)
+    path: Mapped[list] = mapped_column(JSONB, nullable=False)
+    distance_m: Mapped[float] = mapped_column(Float, nullable=False)
+    duration_s: Mapped[int] = mapped_column(Integer, nullable=False)
+    start_lat: Mapped[float] = mapped_column(Float, nullable=False)
+    start_lon: Mapped[float] = mapped_column(Float, nullable=False)
+    is_public: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    # Deliberately separate from `is_public`: broadcasting a recorded route says
+    # nothing about where its runner is now.
+    share_live_location: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class GhostAttempt(Base):
+    """One person's run against one ghost. A ghost can be raced any number of times."""
+
+    __tablename__ = "ghost_attempts"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    ghost_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("ghost_runs.id", ondelete="CASCADE"), nullable=False
+    )
+    account_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("accounts.id", ondelete="CASCADE"), nullable=False
+    )
+    run_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("runs.id", ondelete="SET NULL"), nullable=True
+    )
+    started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    elapsed_s: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    beat_ghost: Mapped[bool | None] = mapped_column(Boolean, nullable=True)

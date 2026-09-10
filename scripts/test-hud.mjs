@@ -190,12 +190,21 @@ const { buildRoofDetails, buildingHeight, BUILDING_HEIGHT } = load('src/features
 const footprint = { type: 'Feature', properties: { render_height: 20 }, geometry: { type: 'Polygon', coordinates: [[[77, 13], [77.0002, 13], [77.0002, 13.0002], [77, 13.0002], [77, 13]]] } };
 const roofs = buildRoofDetails([footprint, footprint], [77, 13]);
 assert.deepEqual(buildRoofDetails([{ ...footprint, geometry: { type: 'MultiPolygon', coordinates: [footprint.geometry.coordinates] } }], [77, 13]), roofs, 'native tiles group buildings in MultiPolygons');
-assert.ok(roofs.features.length >= 3 && roofs.features.length <= 6);
+// Roof massing sits above the building; windows and a door sit on the wall below it.
+const roofOnly = roofs.features.filter(f => f.properties.base >= buildingHeight(footprint.properties));
+const openings = roofs.features.filter(f => f.properties.base < buildingHeight(footprint.properties));
+assert.ok(roofOnly.length >= 3 && roofOnly.length <= 6);
+assert.ok(openings.length > 0 && openings.some(f => f.properties.tone === 'door'), 'the nearest buildings get a door');
+assert.equal(buildRoofDetails([footprint], [78, 13]).features.filter(f => f.properties.base < buildingHeight(footprint.properties)).length, 0, 'distant buildings keep a clean facade');
 assert.deepEqual(roofs, buildRoofDetails([footprint], [77, 13]), 'roof shape is deterministic and duplicate tiles are ignored');
+// An opening stands proud of the wall: a flush pane by ~0.1 m, a projecting box
+// by ~0.3 m. 3e-6 degrees is ~0.33 m, so it admits the box and nothing larger —
+// a pane that escapes onto the wrong wall overshoots by a whole metre.
+const PROUD = 3e-6;
 for (const f of roofs.features) {
-  assert.ok(f.properties.height > f.properties.base && f.properties.base >= buildingHeight(footprint.properties));
+  assert.ok(f.properties.height > f.properties.base);
   assert.deepEqual(f.geometry.coordinates[0][0], f.geometry.coordinates[0].at(-1));
-  for (const p of f.geometry.coordinates[0]) assert.ok(p[0] >= 77 && p[0] <= 77.0002 && p[1] >= 13 && p[1] <= 13.0002, 'roof must stay inside its actual footprint');
+  for (const p of f.geometry.coordinates[0]) assert.ok(p[0] >= 77 - PROUD && p[0] <= 77.0002 + PROUD && p[1] >= 13 - PROUD && p[1] <= 13.0002 + PROUD, 'roof must stay inside its actual footprint');
 }
 assert.equal(buildRoofDetails([{ ...footprint, geometry: { ...footprint.geometry, coordinates: [...footprint.geometry.coordinates, footprint.geometry.coordinates[0]] } }], [77, 13]).features.length, 0, 'do not cover courtyards');
 assert.equal(buildRoofDetails([footprint], [77, 13], true).features.length, 1);
@@ -226,6 +235,16 @@ assert.deepEqual(sharp.features[0].geometry.coordinates[1], [77.001,13], 'smooth
 const manyBuildings = Array.from({length:180}, (_,i) => ({...footprint, geometry: {...footprint.geometry, coordinates: [footprint.geometry.coordinates[0].map(([x,y])=>[x + (i%15)*.0003,y+Math.floor(i/15)*.0003])]}}));
 const coverageStart = performance.now();
 const coverage = buildRoofDetails(manyBuildings,[77,13]);
+// Windows are one small pane or box on some buildings, never a grid on all of
+// them: a street has to read as varied rather than as a repeating pattern.
+const panesPerBuilding = new Map();
+for (const f of coverage.features) {
+  if (f.properties.tone !== 'panel' || f.properties.base >= 4) continue;
+  panesPerBuilding.set(f.properties.buildingKey, (panesPerBuilding.get(f.properties.buildingKey) ?? 0) + 1);
+}
+assert.ok(panesPerBuilding.size > 0, 'some buildings carry a glass pane');
+assert.ok(panesPerBuilding.size < 180, 'and some carry none');
+assert.deepEqual([...new Set(panesPerBuilding.values())], [1], 'a building never gets more than one');
 assert.equal(new Set(coverage.features.map(f=>f.properties.buildingKey)).size,180,'every footprint gets an ornament beyond the old 90-building limit');
 assert.equal(new Set(buildRoofDetails(manyBuildings,[77,13],true).features.map(f=>f.properties.buildingKey)).size,180,'economy reduces roof complexity, not building coverage');
 const concave = {...footprint,geometry:{type:'Polygon',coordinates:[[[77,13],[77.0004,13],[77.0004,13.0001],[77.0001,13.0001],[77.0001,13.0004],[77,13.0004],[77,13]]]}};
@@ -247,16 +266,34 @@ assert.equal(colorAt([77.0005,13.0005]), undefined, 'territory holes must not ti
 assert.equal(colorAt([76,12]), undefined);
 assert.equal(territoryColorAt([{...zone,geometry:{type:'MultiPolygon',coordinates:[zone.geometry.coordinates]}}])([77.0001,13.0001]), '#A855F7');
 const coloredRoofs = buildRoofDetails([footprint],[77,13],false,undefined,[zone]);
-assert.ok(coloredRoofs.features.every(f=>f.properties.territoryColor === '#A855F7' && /^#[0-9a-f]{6}$/i.test(f.properties.color)));
+const tintedRoofs = coloredRoofs.features.filter(f=>f.properties.territoryColor);
+assert.ok(tintedRoofs.length > 0 && tintedRoofs.every(f=>f.properties.territoryColor === '#A855F7' && /^#[0-9a-f]{6}$/i.test(f.properties.color)));
+assert.ok(coloredRoofs.features.some(f=>['panel','door','garden'].includes(f.properties.tone) && !f.properties.color),'glass, doors and planting stay real materials rather than taking the territory hue');
 const recoloredRoofs = buildRoofDetails([footprint],[77,13],false,undefined,[captureZone]);
 assert.deepEqual(coloredRoofs.features.map(f=>f.geometry),recoloredRoofs.features.map(f=>f.geometry),'ownership changes recolor buildings without changing architecture');
-assert.equal(new Set(coverage.features.map(f=>f.properties.variant)).size,12,'all twelve architectural families are represented');
+// Massing now follows the footprint, so variety has to come from two places:
+// the shape decides the architectural family, the stable seed varies the composition within it.
+const families = [
+  {a:0.00006,h:6},   // small house
+  {a:0.00012,h:8},   // dense residential
+  {a:0.00035,h:10},  // apartment block
+  {a:0.0006,h:12},   // commercial
+  {a:0.0012,h:14},   // institutional
+  {a:0.0004,h:46},   // office tower
+];
+const shapes = families.map(({a,h},i) => ({ type:'Feature', properties:{ render_height:h }, geometry:{ type:'Polygon', coordinates:[[[77+i*0.01,13],[77+i*0.01+a,13],[77+i*0.01+a,13+a],[77+i*0.01,13+a],[77+i*0.01,13]]] } }));
+const familyRoofs = buildRoofDetails(shapes,[77,13]);
+assert.ok(new Set(familyRoofs.features.map(f=>f.properties.variant)).size >= 4,'footprint size and height select different architectural families');
+const signatures = new Set(coverage.features.filter(f=>f.properties.buildingKey).map(f=>`${f.properties.buildingKey}:${f.properties.base.toFixed(2)}:${f.properties.height.toFixed(2)}`));
+const perBuilding = new Set(coverage.features.map(f=>`${f.properties.base.toFixed(2)}:${f.properties.height.toFixed(2)}`));
+assert.ok(perBuilding.size >= 6,'identical footprints still vary their massing and storey heights');
+assert.ok(signatures.size > 0);
 const allRoofs = buildRoofDetails(manyBuildings,[77,13],false,undefined,[zone]);
 for(const roof of allRoofs.features) {
  const owner = manyBuildings.find(b => buildRoofDetails([b],[77,13],true).features[0]?.properties.buildingKey===roof.properties.buildingKey);
  assert.ok(owner);
  const ring=owner.geometry.coordinates[0];const xs=ring.map(p=>p[0]),ys=ring.map(p=>p[1]);
- for(const p of roof.geometry.coordinates[0]) assert.ok(p[0]>=Math.min(...xs)&&p[0]<=Math.max(...xs)&&p[1]>=Math.min(...ys)&&p[1]<=Math.max(...ys),'offset towers stay inside footprints');
+ for(const p of roof.geometry.coordinates[0]) assert.ok(p[0]>=Math.min(...xs)-PROUD&&p[0]<=Math.max(...xs)+PROUD&&p[1]>=Math.min(...ys)-PROUD&&p[1]<=Math.max(...ys)+PROUD,'offset towers stay inside footprints, bar a window sill standing proud of the wall');
 }
 const facade = buildingTerritoryPaint([{...footprint,id:42}],[zone],'#C6DEDC');
 assert.ok(Array.isArray(facade));
@@ -265,4 +302,4 @@ assert.deepEqual(validateStyleMin({...nativeStyle,layers:[
  {id:'zoom-fill',source:'test',type:'fill',paint:{'fill-color':territoryFill('terrain_fill')}},
  {id:'facade',source:'test',type:'fill-extrusion',paint:{'fill-extrusion-color':facade}},
 ]}).map(e=>e.message),[]);
-console.log('Twelve roof families, footprint containment, territory recoloring, facade fallback and zoom colour expressions passed.');
+console.log('Architectural families, per-building massing variety, footprint containment, territory recoloring, facade fallback and zoom colour expressions passed.');

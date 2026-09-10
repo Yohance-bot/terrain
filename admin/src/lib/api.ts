@@ -116,6 +116,14 @@ export const api = {
   getAuditEvents: (offset = 0, limit = 50) =>
     request(`/admin/dashboard/audit-events?offset=${offset}&limit=${limit}`),
   getSystem: () => request("/admin/dashboard/system"),
+  // Social layer. None of these return a position: the console can see that
+  // sharing is on, never where anybody is.
+  getSocialOverview: () => request("/admin/social/overview"),
+  getSocialHealth: () => request("/admin/social/health"),
+  getSocialChallenges: (limit = 50) => request(`/admin/social/challenges?limit=${limit}`),
+  getSocialRaces: (limit = 50) => request(`/admin/social/races?limit=${limit}`),
+  getSocialGhosts: (limit = 50) => request(`/admin/social/ghosts?limit=${limit}`),
+  resolveSocial: () => post("/admin/social/resolve", {}),
   simulate: (body: unknown) => post("/admin/dashboard/simulate", body),
   reverseRun: (id: string, operator_ref: string, reason: string) =>
     post(`/admin/review/runs/${id}/reverse`, { operator_ref, reason }),

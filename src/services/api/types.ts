@@ -171,6 +171,8 @@ export type ProfileSummary = {
 export type AccountSummary = {
   id: string;
   display_name: string;
+  /** Unique, typeable identity used to find this player. Server-assigned. */
+  handle: string | null;
   avatar_url: string | null;
   role: 'player' | 'developer';
   created_at: string;
@@ -178,4 +180,190 @@ export type AccountSummary = {
   total_distance_m: number;
   territories_led: number;
   developer_slot: number | null;
+};
+
+/** What one player may see of another before they are friends. */
+export type PublicAccount = {
+  id: string;
+  display_name: string;
+  handle: string;
+  avatar_url: string | null;
+  relationship: 'none' | 'friends' | 'request_sent' | 'request_received' | 'blocked';
+};
+
+export type FriendRequest = {
+  id: string;
+  account: PublicAccount;
+  direction: 'incoming' | 'outgoing';
+  created_at: string;
+};
+
+export type Friend = { account: PublicAccount; friends_since: string };
+
+export type FriendList = {
+  friends: Friend[];
+  incoming: FriendRequest[];
+  outgoing: FriendRequest[];
+  blocked: PublicAccount[];
+};
+
+export type SharingEntry = {
+  account: PublicAccount;
+  share_location: boolean;
+  notify_on_run_start: boolean;
+  /** Set only while a race or other temporary grant is running. */
+  location_expires_at: string | null;
+};
+
+export type SharingOverview = {
+  sharing_with: SharingEntry[];
+  visible_to_me: PublicAccount[];
+};
+
+export type PositionUpdate = {
+  lat: number;
+  lon: number;
+  accuracy_m?: number | null;
+  heading?: number | null;
+  speed_mps?: number | null;
+  is_running?: boolean;
+  run_id?: string | null;
+};
+
+export type FriendPosition = {
+  account: PublicAccount;
+  lat: number;
+  lon: number;
+  accuracy_m: number | null;
+  heading: number | null;
+  speed_mps: number | null;
+  is_running: boolean;
+  updated_at: string;
+};
+
+export type LiveView = { friends: FriendPosition[]; races: RaceRecord[] };
+
+export type SocialEvent = {
+  id: number;
+  kind: string;
+  body: string;
+  actor: PublicAccount | null;
+  subject_id: string | null;
+  created_at: string;
+  read_at: string | null;
+};
+
+export type ChallengeMetric =
+  | 'distance'
+  | 'runs'
+  | 'moving_time'
+  | 'captured_area'
+  | 'territories';
+export type ChallengeComparison = 'most' | 'fastest_to';
+export type ChallengeStatus =
+  | 'pending'
+  | 'accepted'
+  | 'declined'
+  | 'cancelled'
+  | 'expired'
+  | 'resolved';
+
+export type ChallengeStakeSummary = {
+  staked_area_id: string | null;
+  staked_area_m2: number | null;
+  require_opponent_area_m2: number | null;
+  transferred_at: string | null;
+};
+
+export type ChallengeRecord = {
+  id: string;
+  challenger: PublicAccount;
+  opponent: PublicAccount;
+  role: 'challenger' | 'opponent';
+  metric: ChallengeMetric;
+  comparison: ChallengeComparison;
+  target_value: number | null;
+  window_start: string;
+  window_end: string;
+  goal_text: string;
+  status: ChallengeStatus;
+  accept_deadline: string;
+  outcome: 'challenger' | 'opponent' | 'draw' | 'nobody' | null;
+  winner_id: string | null;
+  challenger_value: number | null;
+  opponent_value: number | null;
+  stake: ChallengeStakeSummary | null;
+  resolved_at: string | null;
+  created_at: string;
+};
+
+export type ChallengeDraft = {
+  opponent_id: string;
+  metric: ChallengeMetric;
+  comparison?: ChallengeComparison;
+  target_value?: number | null;
+  window_days?: number;
+  goal_text: string;
+  stake?: { staked_area_id?: string | null; require_opponent_area_m2?: number | null } | null;
+};
+
+export type RaceStatus =
+  | 'pending'
+  | 'running'
+  | 'finished'
+  | 'declined'
+  | 'cancelled'
+  | 'expired';
+
+export type RaceRecord = {
+  id: string;
+  challenger: PublicAccount;
+  opponent: PublicAccount;
+  role: 'challenger' | 'opponent';
+  pin_lat: number;
+  pin_lon: number;
+  pin_label: string | null;
+  radius_m: number;
+  status: RaceStatus;
+  accept_deadline: string;
+  started_at: string | null;
+  expires_at: string | null;
+  winner_id: string | null;
+  finished_at: string | null;
+  created_at: string;
+};
+
+export type GhostSummary = {
+  id: string;
+  name: string;
+  owner: PublicAccount;
+  distance_m: number;
+  duration_s: number;
+  start_lat: number;
+  start_lon: number;
+  is_public: boolean;
+  share_live_location: boolean;
+  is_yours: boolean;
+  best_elapsed_s: number | null;
+  created_at: string;
+};
+
+/** `path` is [lon, lat, msFromStart], trimmed at both ends for anyone but the owner. */
+export type GhostDetail = GhostSummary & { path: [number, number, number][] };
+
+export type GhostAttempt = {
+  id: string;
+  ghost_id: string;
+  started_at: string;
+  finished_at: string | null;
+  elapsed_s: number | null;
+  beat_ghost: boolean | null;
+  ghost_duration_s: number;
+};
+
+export type StakeableArea = {
+  id: string;
+  area_m2: number;
+  run_id: string;
+  created_at: string;
 };

@@ -43,7 +43,9 @@ export function buildingTerritoryPaint(buildings: GeoJSON.Feature[], territories
     const points = ring.slice(0, -1);
     const c: Point = [points.reduce((n,p) => n + p[0]!, 0) / points.length, points.reduce((n,p) => n + p[1]!, 0) / points.length];
     const color = colorAt(c); if (!color) continue;
-    const tint = mixTerritoryColor(color, '#E9EFE8', .52);
+    // Façades are the largest surface on screen, so ownership reads as a wash
+    // over ivory rather than as the territory colour itself.
+    const tint = mixTerritoryColor(color, '#F2EFE7', .82);
     const ids = groups.get(tint) ?? new Set<string>(); ids.add(id); groups.set(tint, ids);
   }
   if (!groups.size) return fallback;

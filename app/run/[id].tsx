@@ -1,6 +1,6 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Animated, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Animated, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { TerritoryMap } from '@/features/map/TerritoryMap';
@@ -9,7 +9,7 @@ import { formatDistance, formatDuration } from '@/lib/geo';
 import { cleanGps, type GeoCoord } from '@/lib/gpsClean';
 import { detectLoopCandidate } from '@/lib/runCapture';
 import { buildTrail } from '@/features/hud/trail';
-import { fetchRun } from '@/services/api/client';
+import { createGhost, fetchRun } from '@/services/api/client';
 import type { RunResult } from '@/services/api/types';
 import { colors, fontSize, fontWeight, radius, spacing } from '@/theme';
 
@@ -28,6 +28,7 @@ export default function RunSummaryScreen() {
   const [result, setResult] = useState<RunResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [completedPath, setCompletedPath] = useState<GeoCoord[]>([]);
+  const [ghostSaved, setGhostSaved] = useState(false);
 
   // Entrance animation
   const heroFade = useRef(new Animated.Value(0)).current;
@@ -220,6 +221,28 @@ export default function RunSummaryScreen() {
           <Text style={styles.footnote}>
             {result.samples_dropped} GPS fixes were too inaccurate to use.
           </Text>
+        )}
+
+        {/* A finished run can become a benchmark to race later. Saving it keeps
+            it private; broadcasting is a separate choice on the Ghosts screen. */}
+        {isApplied && result.distance_m > 0 && (
+          <Pressable
+            style={styles.ghostButton}
+            disabled={ghostSaved}
+            onPress={() => {
+              const name = `${formatDistance(result.distance_m)} · ${new Date().toLocaleDateString()}`;
+              void createGhost(result.run_id, name)
+                .then(() => {
+                  setGhostSaved(true);
+                  Alert.alert('Saved as a ghost', 'Race it any time from the Ghosts screen.');
+                })
+                .catch(() => Alert.alert('Could not save that ghost'));
+            }}
+          >
+            <Text style={styles.ghostButtonText}>
+              {ghostSaved ? 'Saved as a ghost' : 'Save this run as a ghost'}
+            </Text>
+          </Pressable>
         )}
       </ScrollView>
 
@@ -538,6 +561,15 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
 
+  ghostButton: {
+    marginTop: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.revealCardBorder,
+    alignItems: 'center',
+  },
+  ghostButtonText: { color: colors.revealAccent, fontSize: fontSize.sm, fontWeight: fontWeight.medium },
   footnote: {
     marginTop: spacing.lg,
     fontSize: fontSize.xs,
