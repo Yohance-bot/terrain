@@ -14,7 +14,7 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import public_device_id
 from app.core.db import get_session
-from app.models import CapturedArea, DeviceLink, Run
+from app.models import CapturedArea, DeviceLink, Run, SandboxAccount
 
 router = APIRouter(prefix="/captured-areas", tags=["captured-areas"])
 
@@ -43,7 +43,13 @@ def list_captured_areas(
             ).label("geometry"),
         )
         .join(Run, Run.id == CapturedArea.run_id)
-        .where(Run.status == "applied")
+        .where(
+            Run.status == "applied",
+            # Test-lab runners never appear on the shared map. A disposable
+            # account capturing ground would otherwise show up for every real
+            # player and shift real ownership until it was torn down.
+            CapturedArea.owner_device_id.not_in(select(SandboxAccount.device_id)),
+        )
         .group_by(CapturedArea.owner_device_id)
     )
     if linked_only:

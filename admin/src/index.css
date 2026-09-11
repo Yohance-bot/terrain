@@ -1234,3 +1234,280 @@ dd {
     margin-left: 12px;
   }
 }
+
+/* ── Test lab ────────────────────────────────────────────────────────────
+   The lab rail sits opposite the run controls: roster and manual actions at
+   the top, the feature checklist below. Deliberately plain — this is a
+   workbench, and anything decorative here competes with the map. */
+.lab-panel {
+  position: absolute;
+  left: 26px;
+  top: 132px;
+  bottom: 45px;
+  width: 320px;
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.lab-roster,
+.lab-actions,
+.lab-suite {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+.lab-panel h3 {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: hsl(var(--muted-foreground));
+  margin: 6px 0 0;
+}
+.lab-rows {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.lab-rows li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  font-size: 13px;
+  border: 1px solid transparent;
+}
+.lab-rows li.selected {
+  border-color: hsl(var(--border));
+  background: hsl(var(--muted) / 0.6);
+}
+.lab-rows li em {
+  font-style: normal;
+  color: hsl(var(--muted-foreground));
+  font-size: 11px;
+  margin-left: 6px;
+}
+.lab-rows li button.text-btn {
+  text-align: left;
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+.lab-row-buttons {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.lab-add {
+  display: flex;
+  gap: 6px;
+}
+.lab-add input {
+  flex: 1;
+  min-width: 0;
+}
+.lab-note {
+  font-size: 11px;
+  line-height: 1.5;
+  color: hsl(var(--muted-foreground));
+}
+.lab-suite header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 10px;
+}
+.lab-suite h2 {
+  font-size: 15px;
+}
+.lab-suite h2 em {
+  font-style: normal;
+  color: #f87171;
+}
+.lab-checklist {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.lab-check {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  border-radius: 8px;
+  padding: 2px 4px;
+}
+.lab-check.failed {
+  background: rgb(248 113 113 / 0.08);
+}
+.lab-check.passed .lab-check-mark {
+  color: hsl(var(--primary));
+}
+.lab-check.failed .lab-check-mark {
+  color: #f87171;
+}
+.lab-check-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-align: left;
+  padding: 6px 4px;
+  min-width: 0;
+}
+.lab-check-mark {
+  width: 16px;
+  display: flex;
+  justify-content: center;
+  color: hsl(var(--muted-foreground));
+}
+.lab-check-mark i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  border: 1px solid hsl(var(--border));
+}
+.lab-check-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.lab-check-text strong {
+  font-size: 12.5px;
+  font-weight: 500;
+  line-height: 1.35;
+}
+.lab-check-text small,
+.lab-check-ms {
+  font-size: 10.5px;
+  color: hsl(var(--muted-foreground));
+}
+.lab-check-run {
+  font-size: 11px;
+}
+.lab-check-detail {
+  grid-column: 1 / -1;
+  padding: 4px 4px 10px 28px;
+  font-size: 11.5px;
+  line-height: 1.55;
+  color: hsl(var(--muted-foreground));
+}
+.lab-check-detail ol {
+  padding-left: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.map-pin {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid rgb(255 255 255 / 0.85);
+  box-shadow: 0 1px 6px rgb(0 0 0 / 0.5);
+  cursor: pointer;
+}
+
+/* ── Standings ─────────────────────────────────────────────────────────── */
+.standings-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 20px;
+  align-items: start;
+}
+.standings-list {
+  list-style: none;
+  border: 1px solid hsl(var(--border));
+  border-radius: 12px;
+  overflow: hidden;
+}
+.standings-list li + li {
+  border-top: 1px solid hsl(var(--border));
+}
+.standings-list li button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 16px;
+  text-align: left;
+}
+.standings-list li.selected,
+.standings-list li button:hover {
+  background: hsl(var(--muted) / 0.5);
+}
+.standings-empty {
+  padding: 18px 16px;
+  font-size: 13px;
+  color: hsl(var(--muted-foreground));
+}
+.standings-name {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.standings-name small {
+  font-size: 11px;
+  color: hsl(var(--muted-foreground));
+}
+.standings-figures {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex-shrink: 0;
+}
+.standings-figures small {
+  font-size: 10.5px;
+  color: hsl(var(--muted-foreground));
+}
+.standings-detail {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  position: sticky;
+  top: 20px;
+}
+.standings-rank {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.standings-rank li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 7px 9px;
+  border-radius: 8px;
+  font-size: 13px;
+}
+.standings-rank li.owner {
+  background: hsl(var(--muted) / 0.6);
+}
+.standings-assign {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.standings-assign select {
+  flex: 1;
+  min-width: 0;
+}
+@media (max-width: 1050px) {
+  .standings-layout {
+    grid-template-columns: 1fr;
+  }
+  .standings-detail {
+    position: static;
+  }
+  .lab-panel {
+    position: static;
+    width: auto;
+    margin: 15px;
+  }
+}

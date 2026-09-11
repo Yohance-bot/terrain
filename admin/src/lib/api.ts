@@ -64,6 +64,34 @@ export async function request<T = any>(
     clearTimeout(timer);
   }
 }
+
+export type TestRunner = {
+  account_id: string;
+  device_id: string;
+  display_name: string;
+  handle: string;
+  label: string;
+  token: string;
+  created_at: string;
+};
+
+/**
+ * Call a player endpoint as one of the test runners.
+ *
+ * The lab drives the same API the phone drives, with the same two headers, so
+ * what passes here is what will happen on the device. Nothing about the player
+ * API is special-cased for the console.
+ */
+export async function asRunner<T = any>(
+  runner: TestRunner,
+  endpoint: string,
+  options: RequestInit = {},
+): Promise<T> {
+  const headers = new Headers(options.headers);
+  headers.set("X-Device-Id", runner.device_id);
+  return request<T>(endpoint, { ...options, headers }, runner.token);
+}
+
 const post = (path: string, body: unknown) =>
   request(path, { method: "POST", body: JSON.stringify(body) });
 export const api = {
@@ -124,6 +152,26 @@ export const api = {
   getSocialRaces: (limit = 50) => request(`/admin/social/races?limit=${limit}`),
   getSocialGhosts: (limit = 50) => request(`/admin/social/ghosts?limit=${limit}`),
   resolveSocial: () => post("/admin/social/resolve", {}),
+
+  // Test lab. Creating a runner mints a real player session, so every social
+  // feature can be exercised end to end from the console.
+  listRunners: () => request<{ runners: TestRunner[] }>("/admin/sandbox/runners"),
+  addRunner: (label: string) => post("/admin/sandbox/runners", { label }),
+  resetLab: () => request("/admin/sandbox/runners", { method: "DELETE" }),
+  removeRunner: (id: string) =>
+    request(`/admin/sandbox/runners/${id}`, { method: "DELETE" }),
+  addSyntheticRun: (id: string, distance_m: number, duration_s = 1800) =>
+    post(`/admin/sandbox/runners/${id}/runs`, { distance_m, duration_s }),
+  fastForwardChallenge: (id: string) =>
+    post(`/admin/sandbox/challenges/${id}/fast-forward`, {}),
+  fastForwardRace: (id: string) => post(`/admin/sandbox/races/${id}/fast-forward`, {}),
+
+  // Territory standings and operator control of who holds ground.
+  getStandings: (onlyContested = true) =>
+    request(`/admin/territory/standings?only_contested=${onlyContested}`),
+  getAssignable: () => request("/admin/territory/assignable"),
+  assignTerritory: (id: string, account_id: string | null, reason: string) =>
+    post(`/admin/territory/${id}/assign`, { account_id, reason }),
   simulate: (body: unknown) => post("/admin/dashboard/simulate", body),
   reverseRun: (id: string, operator_ref: string, reason: string) =>
     post(`/admin/review/runs/${id}/reverse`, { operator_ref, reason }),

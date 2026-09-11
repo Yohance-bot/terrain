@@ -1,10 +1,21 @@
 import { useEffect, useRef, useState, type PointerEvent } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Play, Pause, RotateCcw, Navigation, Upload } from "lucide-react";
+import {
+  Play,
+  Pause,
+  RotateCcw,
+  Navigation,
+  Upload,
+  UserPlus,
+  Trash2,
+} from "lucide-react";
 import WorldMap from "../components/WorldMap";
+import LabActions from "../components/LabActions";
+import ScenarioSuite from "../components/ScenarioSuite";
 import { CENTER } from "../features/world";
 import { useWorldData } from "../features/useWorldData";
-import { api } from "../lib/api";
+import { useLivePosition, useTestLab } from "../features/useTestLab";
+import { api, asRunner } from "../lib/api";
 
 type Sample = {
   ts: number;
@@ -33,7 +44,13 @@ function restore(): Draft | null {
 }
 export default function Simulation() {
   const world = useWorldData(),
-    query = useQueryClient();
+    query = useQueryClient(),
+    lab = useTestLab();
+  // "record" accumulates a run to submit; "move" only streams position, which
+  // is what sharing and race arrival actually need.
+  const [mode, setMode] = useState<"record" | "move">("record");
+  const [newRunner, setNewRunner] = useState("");
+  const [labError, setLabError] = useState("");
   const [draft, setDraft] = useState<Draft | null>(restore),
     [running, setRunning] = useState(false),
     [speed, setSpeed] = useState(3),
@@ -67,6 +84,8 @@ export default function Simulation() {
     if (draft) localStorage.setItem(KEY, JSON.stringify(draft));
     else localStorage.removeItem(KEY);
   }, [draft]);
+  // A test runner is visible to its friends only while it is actually moving.
+  useLivePosition(lab.active, position, running);
   useEffect(() => {
     if (!running) return;
     let previous = performance.now(),
@@ -200,7 +219,8 @@ export default function Simulation() {
     setPosition(CENTER);
   }
   async function submit() {
-    if (!draft || busy || running || !reason.trim() || !operator.trim()) return;
+    if (!draft || busy || running) return;
+    if (!lab.active && (!reason.trim() || !operator.trim())) return;
     setBusy(true);
     setError("");
     try {
@@ -214,12 +234,25 @@ export default function Simulation() {
         samples: draft.samples.map((s) => ({ ...s, ts: s.ts + offset })),
       };
       setDraft(normalized);
-      const value = await api.simulate({
-        slot,
-        run: normalized,
-        reason: reason.trim(),
-        operator_ref: operator.trim(),
-      });
+      // A test runner submits through `/v1/runs`, exactly as the phone does, so
+      // the lab exercises the real ingest path rather than an operator shortcut.
+      const value = lab.active
+        ? await asRunner(lab.active, "/runs", {
+            method: "POST",
+            body: JSON.stringify({
+              run_id: normalized.run_id,
+              started_at: normalized.started_at,
+              ended_at: normalized.ended_at,
+              samples: normalized.samples,
+              source: "tracked",
+            }),
+          })
+        : await api.simulate({
+            slot,
+            run: normalized,
+            reason: reason.trim(),
+            operator_ref: operator.trim(),
+          });
       setResult(value);
       localStorage.removeItem(KEY);
       await query.invalidateQueries();
@@ -258,13 +291,33 @@ export default function Simulation() {
         captures={world.captures}
         route={route}
         position={position}
+        markers={[
+          ...lab.live.map((friend) => ({
+            lon: friend.lon,
+            lat: friend.lat,
+            label: `${friend.account.display_name}${friend.is_running ? " · running" : ""}`,
+            color: friend.is_running ? "#4ADE80" : "#F5A524",
+          })),
+          ...lab.races
+            .filter((race: any) => race.status === "running")
+            .map((race: any) => ({
+              lon: race.pin_lon,
+              lat: race.pin_lat,
+              label: race.pin_label ?? "Race pin",
+              color: "#FF4081",
+            })),
+        ]}
         streetMode={street}
         follow={follow}
       />
       <div className="map-heading glass">
-        <span className="eyebrow">DEVELOPER LAB</span>
-        <h1>Move through your world.</h1>
-        <p>Drag the joystick or use WASD / arrow keys.</p>
+        <span className="eyebrow">TEST LAB</span>
+        <h1>{lab.active ? lab.active.display_name : "Move through your world."}</h1>
+        <p>
+          {lab.active
+            ? `Acting as @${lab.active.handle}. Drag the joystick or use WASD.`
+            : "Add a test runner to try the social features, or drive a developer slot."}
+        </p>
         {world.error && <p className="error">{world.error.message}</p>}
       </div>
       <div className="sim-telemetry glass">
@@ -283,21 +336,51 @@ export default function Simulation() {
       </div>
       <aside className="sim-panel glass">
         <span className="eyebrow">RUN CONTROLS</span>
-        <h2>Developer {slot}</h2>
+        <h2>{lab.active ? lab.active.display_name : `Developer ${slot}`}</h2>
         <label>
-          Runner slot
+          Drive as
           <select
-            value={slot}
+            value={lab.active?.account_id ?? `slot-${slot}`}
             disabled={!!draft || busy}
-            onChange={(e) => setSlot(Number(e.target.value))}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (value.startsWith("slot-")) {
+                lab.setActiveId(null);
+                setSlot(Number(value.slice(5)));
+              } else lab.setActiveId(value);
+            }}
           >
-            {[1, 2, 3].map((n) => (
-              <option key={n} value={n}>
-                Developer {n}
-              </option>
-            ))}
+            <optgroup label="Test runners">
+              {lab.runners.map((runner) => (
+                <option key={runner.account_id} value={runner.account_id}>
+                  {runner.display_name}
+                </option>
+              ))}
+            </optgroup>
+            <optgroup label="Developer slots · runs only">
+              {[1, 2, 3].map((n) => (
+                <option key={n} value={`slot-${n}`}>
+                  Developer {n}
+                </option>
+              ))}
+            </optgroup>
           </select>
         </label>
+        <div className="segmented">
+          <button
+            className={mode === "record" ? "selected" : ""}
+            onClick={() => setMode("record")}
+          >
+            Record a run
+          </button>
+          <button
+            className={mode === "move" ? "selected" : ""}
+            onClick={() => setMode("move")}
+            disabled={!lab.active}
+          >
+            Move only
+          </button>
+        </div>
         <label>
           Speed · {speed} m/s
           <input
@@ -431,6 +514,95 @@ export default function Simulation() {
             <div className="mono">{result.run_id}</div>
           </div>
         )}
+      </aside>
+
+      <aside className="lab-panel glass">
+        <div className="lab-roster">
+          <span className="eyebrow">TEST RUNNERS</span>
+          {lab.error && <p className="error">{lab.error}</p>}
+          {labError && <p className="error">{labError}</p>}
+          <ul className="lab-rows">
+            {lab.runners.map((runner) => (
+              <li
+                key={runner.account_id}
+                className={runner.account_id === lab.active?.account_id ? "selected" : ""}
+              >
+                <button
+                  className="text-btn"
+                  onClick={() => lab.setActiveId(runner.account_id)}
+                >
+                  {runner.display_name}
+                  <em>@{runner.handle}</em>
+                </button>
+                <button
+                  className="text-btn"
+                  aria-label={`Remove ${runner.display_name}`}
+                  onClick={() =>
+                    void lab
+                      .removeRunner(runner.account_id)
+                      .catch((error) => setLabError((error as Error).message))
+                  }
+                >
+                  <Trash2 size={14} />
+                </button>
+              </li>
+            ))}
+          </ul>
+          <div className="lab-add">
+            <input
+              value={newRunner}
+              onChange={(e) => setNewRunner(e.target.value)}
+              placeholder="Name a runner"
+              maxLength={64}
+              onKeyDown={(e) => {
+                if (e.key !== "Enter") return;
+                const label = newRunner.trim() || "Test Runner";
+                setNewRunner("");
+                void lab
+                  .addRunner(label)
+                  .catch((error) => setLabError((error as Error).message));
+              }}
+            />
+            <button
+              className="secondary-btn"
+              onClick={() => {
+                const label = newRunner.trim() || "Test Runner";
+                setNewRunner("");
+                void lab
+                  .addRunner(label)
+                  .catch((error) => setLabError((error as Error).message));
+              }}
+            >
+              <UserPlus size={15} /> Add
+            </button>
+          </div>
+          <button
+            className="text-btn"
+            onClick={() => {
+              if (!window.confirm("Remove every test runner and undo their runs?")) return;
+              void lab
+                .resetLab()
+                .then(() => query.invalidateQueries())
+                .catch((error) => setLabError((error as Error).message));
+            }}
+          >
+            Reset the lab
+          </button>
+          <p className="lab-note">
+            Test runners never appear on the live map, and resetting undoes the
+            influence their runs created.
+          </p>
+        </div>
+
+        {lab.active && (
+          <LabActions
+            active={lab.active}
+            runners={lab.runners}
+            onChanged={() => void query.invalidateQueries()}
+          />
+        )}
+
+        <ScenarioSuite onChanged={() => void lab.refresh()} />
       </aside>
     </div>
   );

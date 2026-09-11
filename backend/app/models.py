@@ -692,3 +692,23 @@ class GhostAttempt(Base):
     finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     elapsed_s: Mapped[int | None] = mapped_column(Integer, nullable=True)
     beat_ghost: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+
+
+class SandboxAccount(Base):
+    """A disposable runner the console's test lab created.
+
+    Membership here is what authorises minting a player session for an account,
+    so nothing outside the lab may ever insert a row.
+    """
+
+    __tablename__ = "sandbox_accounts"
+
+    account_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("accounts.id", ondelete="CASCADE"), primary_key=True
+    )
+    device_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("devices.id", ondelete="CASCADE"), nullable=False
+    )
+    label: Mapped[str] = mapped_column(String(64), nullable=False)
+    created_by: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

@@ -12,6 +12,7 @@ import {
   Bot,
   UserRoundCog,
   Swords,
+  Trophy,
 } from "lucide-react";
 import { api, clearToken } from "../lib/api";
 const links = [
@@ -20,6 +21,7 @@ const links = [
   ["/simulation", Gamepad2, "Run simulator"],
   ["/players", Users, "Runners"],
   ["/runs", Activity, "Activity"],
+  ["/standings", Trophy, "Standings"],
   ["/social", Swords, "Social layer"],
   ["/audit", FileText, "Audit trail"],
   ["/notes", NotebookPen, "Field notes"],

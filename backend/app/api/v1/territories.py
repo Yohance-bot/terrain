@@ -9,7 +9,14 @@ from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.core.db import get_session
-from app.models import Account, DeviceLink, Territory, TerritoryOwnership, TerritoryStanding
+from app.models import (
+    Account,
+    DeviceLink,
+    SandboxAccount,
+    Territory,
+    TerritoryOwnership,
+    TerritoryStanding,
+)
 from app.schemas import (
     FeatureCollection,
     TerritoryDetails,
@@ -147,7 +154,10 @@ def territory_state(
     """
     leader_distance = (
         select(func.max(TerritoryStanding.total_distance_m))
-        .where(TerritoryStanding.territory_id == Territory.id)
+        .where(
+            TerritoryStanding.territory_id == Territory.id,
+            TerritoryStanding.device_id.not_in(select(SandboxAccount.device_id)),
+        )
         .correlate(Territory)
         .scalar_subquery()
     )
@@ -243,6 +253,8 @@ def territory_details(
         .where(
             TerritoryStanding.territory_id == territory_id,
             TerritoryStanding.total_distance_m > 0,
+            # The test lab is invisible in the shared world it tests against.
+            TerritoryStanding.device_id.not_in(select(SandboxAccount.device_id)),
         )
         .order_by(
             TerritoryStanding.active_influence.desc(), TerritoryStanding.total_distance_m.desc()

@@ -6,6 +6,7 @@ from app.api.v1 import (
     admin_dashboard,
     admin_review,
     admin_social,
+    admin_territory,
     authentication,
     captured_areas,
     challenges,
@@ -16,6 +17,7 @@ from app.api.v1 import (
     profile,
     races,
     runs,
+    sandbox,
     social,
     territories,
 )
@@ -56,6 +58,8 @@ app.include_router(privacy.router, prefix="/v1")
 app.include_router(admin_review.router, prefix="/v1")
 app.include_router(admin_dashboard.router, prefix="/v1")
 app.include_router(admin_social.router, prefix="/v1")
+app.include_router(sandbox.router, prefix="/v1")
+app.include_router(admin_territory.router, prefix="/v1")
 configure_observability(app)
 
 

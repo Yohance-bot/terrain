@@ -101,6 +101,12 @@ export default function TerritoryMap() {
                 {details.data?.owner_device_id ?? "Unclaimed"}
               </p>
               <label>Standings</label>
+              {(details.data?.standings ?? []).length === 0 && (
+                <p className="lab-note">
+                  No runs recorded here yet. Most of the city is still untouched —
+                  the Standings page lists the territories that are live.
+                </p>
+              )}
               <div className="standing-list">
                 {(details.data?.standings ?? []).map((s: any) => (
                   <div key={s.device_id}>

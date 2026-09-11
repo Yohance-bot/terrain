@@ -24,6 +24,8 @@ type Props = {
   captures?: GeoJSON.FeatureCollection;
   route?: GeoJSON.FeatureCollection<GeoJSON.LineString>;
   position?: [number, number];
+  /** Other runners and pins the lab is showing alongside the driven runner. */
+  markers?: { lon: number; lat: number; label: string; color: string }[];
   night?: boolean;
   streetMode?: boolean;
   follow?: boolean;
@@ -50,6 +52,9 @@ export default function WorldMap(props: Props) {
     });
     map.current = m;
     const marker = new maplibregl.Marker({ color: RUN_TRAIL_COLOR });
+    // Extra markers are recreated whenever the set changes. There are only ever
+    // a handful in the lab, so pooling them would cost more than it saves.
+    let extras: maplibregl.Marker[] = [];
     m.addControl(new maplibregl.NavigationControl(), "bottom-right");
     let ready = false,
       lastRoofs = 0;
@@ -104,6 +109,23 @@ export default function WorldMap(props: Props) {
         marker.setLngLat(p.position).addTo(m);
         if (p.follow) m.easeTo({ center: p.position, duration: 500 });
       } else marker.remove();
+
+      const wanted = p.markers ?? [];
+      const signature = JSON.stringify(wanted);
+      if (sent.get("markers") !== signature) {
+        sent.set("markers", signature);
+        for (const extra of extras) extra.remove();
+        extras = wanted.map((entry) => {
+          const element = document.createElement("div");
+          element.className = "map-pin";
+          element.style.background = entry.color;
+          element.title = entry.label;
+          return new maplibregl.Marker({ element })
+            .setLngLat([entry.lon, entry.lat])
+            .setPopup(new maplibregl.Popup({ offset: 12 }).setText(entry.label))
+            .addTo(m);
+        });
+      }
     }
     function roofs() {
       if (
