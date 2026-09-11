@@ -679,6 +679,7 @@ export default function MapScreen() {
         captureColorIndex={captureColorIndex}
         nearbyGhosts={ghostLayerOn ? nearbyGhosts : undefined}
         onDropRacePin={recording ? undefined : dropRacePin}
+        showAvatar
       />
 
       <View pointerEvents="none" style={{ position: 'absolute', top: 0, left: 0, right: 0, height: insets.top, backgroundColor: '#081D354D' }} />

@@ -13,9 +13,16 @@ DEVICE="${1:-}"
 BUNDLE_ID="com.runprototype.app"
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
+# devicectl exits non-zero transiently while a tunnel to the phone is active,
+# which `set -o pipefail` would turn into "no device". Retry, and never let the
+# detection itself abort the script.
 if [ -z "$DEVICE" ]; then
-  DEVICE=$(xcrun devicectl list devices 2>/dev/null \
-    | awk 'NR>2 && $0 ~ /available/ {print $3; exit}')
+  for _ in 1 2 3; do
+    DEVICE=$(xcrun devicectl list devices 2>/dev/null \
+      | awk 'NR>2 && $0 ~ /available/ {print $3; exit}' || true)
+    [ -n "$DEVICE" ] && break
+    sleep 2
+  done
 fi
 if [ -z "$DEVICE" ]; then
   echo "No paired iPhone found. Connect it, unlock it, and trust this Mac." >&2

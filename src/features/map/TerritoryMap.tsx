@@ -29,6 +29,7 @@ import { illuminateStreets } from './streetMatching';
 import { StreetTrailLayers } from './StreetTrailLayers';
 import { TrailLayers } from '@/features/hud/TrailLayers';
 import { SocialMapLayers } from '@/features/social/SocialMapLayers';
+import { PlayerAvatar } from '@/features/avatar/PlayerAvatar';
 import type { GhostSummary } from '@/services/api/types';
 import { CueMapLayers } from '@/features/hud/CueMapLayers';
 import { ContestedBorders } from '@/features/hud/ContestedBorders';
@@ -97,7 +98,19 @@ type Props = {
   nearbyGhosts?: GhostSummary[];
   /** Long-pressing the map drops a race pin, when the screen offers that. */
   onDropRacePin?: (coordinate: [number, number]) => void;
+  /** Draw the 3D player avatar above the map. Off for the run summary, which
+   *  shows a finished route rather than a live position. */
+  showAvatar?: boolean;
 };
+
+/** The hologram the avatar stands on. Blue reads as a projection rather than as
+ *  another territory colour, which the map already uses amber and cyan for. */
+const HOLOGRAM = colors.userGlow;
+
+/** Below a walking pace the run cycle reads as skating, so the avatar idles.
+ *  Measured against the cleaned fix, not raw GPS, so a stationary jitter of a
+ *  metre or two does not flip the clip back and forth. */
+const RUNNING_SPEED_MPS = 0.8;
 
 const DEVELOPER_COLORS: Record<string, string> = {
   '10000000-0000-4000-8000-000000000001': '#22C55E',
@@ -153,6 +166,7 @@ export const TerritoryMap = memo(function TerritoryMap({
   visibleLayers = 'all',
   nearbyGhosts,
   onDropRacePin,
+  showAvatar = false,
   fix = null, presentationActive = true, reducedMotion = false, economy = false, simulation = false, bottomInset = 8, contestedBorders,
 }: Props) {
   const showTerritories = visibleLayers === 'all' || visibleLayers === 'territories';
@@ -615,13 +629,39 @@ export const TerritoryMap = memo(function TerritoryMap({
 
         {effectiveFix && presentationActive && (
           <GeoJSONSource id="player-marker" data={{ type: 'Feature', properties: {}, geometry: { type: 'Point', coordinates: effectiveFix.coordinate } }}>
-            <Layer beforeId="hud-player-anchor" id="player-marker-glow" type="circle" paint={{ 'circle-radius': 18, 'circle-color': activationColor, 'circle-opacity': 0.2, 'circle-blur': 0.55 }} />
-            <Layer beforeId="hud-player-anchor" id="player-marker-dot" type="circle" paint={{ 'circle-radius': 7, 'circle-color': activationColor, 'circle-stroke-width': 3, 'circle-stroke-color': colors.surface }} />
+            {/* The hologram is drawn by the map, not by Filament, so it sits on
+                the ground plane: it scales with zoom, tilts with pitch and is
+                occluded by buildings the way a projection on tarmac would be.
+                The avatar floats above it in a second renderer that cannot be
+                depth-tested against the map. */}
+            <Layer beforeId="hud-player-anchor" id="player-hologram-halo" type="circle" paint={{ 'circle-radius': ['interpolate', ['linear'], ['zoom'], 14, 10, 18, 30], 'circle-color': HOLOGRAM, 'circle-opacity': 0.16, 'circle-blur': 0.8 }} />
+            <Layer beforeId="hud-player-anchor" id="player-hologram-disc" type="circle" paint={{ 'circle-radius': ['interpolate', ['linear'], ['zoom'], 14, 6, 18, 18], 'circle-color': HOLOGRAM, 'circle-opacity': 0.26, 'circle-stroke-width': 1.5, 'circle-stroke-color': HOLOGRAM, 'circle-stroke-opacity': 0.7 }} />
+            {/* Without the avatar there is nothing to mark the exact spot, so
+                the disc keeps a bright core in that case only. */}
+            {!showAvatar && (
+              <Layer beforeId="hud-player-anchor" id="player-hologram-core" type="circle" paint={{ 'circle-radius': 6, 'circle-color': activationColor, 'circle-stroke-width': 3, 'circle-stroke-color': colors.surface }} />
+            )}
           </GeoJSONSource>
         )}
 
         <SocialMapLayers nearbyGhosts={nearbyGhosts} />
       </Map>
+
+      {/* Above the map, never inside it: Filament is a separate native view and
+          composites over MapLibre rather than drawing into it. Hidden once the
+          player pans away, because the avatar is pinned to the screen centre
+          the camera tracks — off-centre it would be lying about where they are. */}
+      <PlayerAvatar
+        visible={
+          showAvatar &&
+          Boolean(effectiveFix) &&
+          presentationActive &&
+          follow.following &&
+          !economy &&
+          !reducedMotion
+        }
+        running={recording && (effectiveFix?.speedMps ?? 0) > RUNNING_SPEED_MPS}
+      />
 
       {recording && <Pressable accessibilityRole="button" accessibilityLabel={`Trail display: ${routeDisplay === 'streets' ? 'light up streets' : 'GPS trail'}. Tap to switch.`} onPress={() => useHudPreferences.getState().setRouteDisplay(routeDisplay === 'streets' ? 'gps' : 'streets')} style={[styles.trailMode, simulation && { left: undefined, right: 66 }, { bottom: bottomInset + 44 }]}>
         <Text style={styles.trailModeLabel}>{routeDisplay === 'streets' ? '▰  LIT STREETS' : '⌁  GPS TRAIL'}</Text>
