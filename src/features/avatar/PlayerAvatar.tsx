@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, type LayoutChangeEvent } from 'react-native';
 import {
   Animator,
   Camera,
@@ -10,21 +10,30 @@ import {
   type AnimationItem,
 } from 'react-native-filament';
 
+import {
+  cameraDistance,
+  cameraEye,
+  cameraUp,
+  FAR_PLANE,
+  FOCAL_LENGTH_MM,
+  groundOffset,
+  NEAR_PLANE,
+  type MapPose,
+} from './mapCamera';
+
 /**
- * The player's 3D avatar, drawn above the map.
+ * The player's 3D avatar, standing in the map rather than on top of it.
  *
- * MapLibre cannot render glTF, so this is a second renderer composited over it.
- * That imposes two rules the rest of the design follows:
+ * Filament renders into its own view over MapLibre, so the two share no depth
+ * buffer and the avatar can never be occluded by buildings. What they *can*
+ * share is the camera: `mapCamera` rebuilds MapLibre's view from centre, zoom,
+ * bearing and pitch, and this drives Filament with the result. That is the
+ * difference between an object standing in the world — leaning as it moves off
+ * centre, foreshortening as the map tilts, swinging round as the map turns —
+ * and a sprite sliding across the screen.
  *
- * 1. It always draws in front of the map. There is no shared depth buffer
- *    between the two engines, so it cannot be occluded by buildings. A floating
- *    character is the one case where that reads as intended rather than broken —
- *    which is why the thing that must sit *on* the ground (the hologram) is
- *    drawn by MapLibre instead.
- * 2. Its position is screen-space, so the map has to be asked where the fix
- *    landed. Measured on device that costs ~2ms and stays within a pixel in
- *    normal use; the 43px drift seen in the spike was a camera flying across
- *    the city under script, not a person looking at a map.
+ * The ground contact is left to the map: the hologram is a MapLibre layer, so
+ * it tilts and is occluded correctly, which is exactly what this layer cannot do.
  */
 
 // Metro resolves binary assets through require(); a static import does not
@@ -32,24 +41,29 @@ import {
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const RUNNER = require('../../../assets/avatar/runner.glb');
 
-/** Stage size in points. The Filament camera frames the unit cube to fit, so
- *  this is what actually controls how big the avatar reads on screen. */
-const STAGE_WIDTH = 132;
-const STAGE_HEIGHT = 164;
+/**
+ * How tall the avatar stands, in map pixels — which at the centre of a flat map
+ * is its height in points. Close to the scale a person reads at on a map,
+ * rather than the exaggerated size map avatars are often drawn at.
+ */
+const AVATAR_HEIGHT = 84;
 
 /** Blend between Run and Idle rather than snapping between poses. */
 const TRANSITION_SECONDS = 0.25;
 
 type Props = {
-  /** Where the player's fix currently sits on screen, in points. Null hides the
-   *  avatar: it must never be drawn somewhere the player is not. */
-  anchor: { x: number; y: number } | null;
+  /** The map's current camera. Null hides the avatar: without it there is no
+   *  honest place to put the character. */
+  pose: MapPose | null;
+  /** Where the player is. */
+  coordinate: [number, number] | null;
   /** Drives the clip: true plays Run, false plays Idle. */
   running: boolean;
 };
 
-export function PlayerAvatar({ anchor, running }: Props) {
+export function PlayerAvatar({ pose, coordinate, running }: Props) {
   const [clips, setClips] = useState<{ run: number; idle: number } | null>(null);
+  const [viewport, setViewport] = useState<{ width: number; height: number } | null>(null);
 
   // Clips are matched by name. Indices depend on export order, and silently
   // playing the wrong one is the kind of bug that survives a long time.
@@ -66,29 +80,45 @@ export function PlayerAvatar({ anchor, running }: Props) {
     setClips({ run: run ?? 0, idle: idle ?? 0 });
   }, []);
 
-  if (!anchor) return null;
+  const onLayout = useCallback((event: LayoutChangeEvent) => {
+    const { width, height } = event.nativeEvent.layout;
+    setViewport((current) =>
+      current?.width === width && current?.height === height ? current : { width, height },
+    );
+  }, []);
+
+  const ready = pose !== null && coordinate !== null && viewport !== null && viewport.height > 0;
+  const ground = ready ? groundOffset(pose, coordinate) : null;
+  const distance = ready ? cameraDistance(viewport.height) : 0;
 
   return (
-    <View pointerEvents="none" style={styles.layer}>
-      <View
-        style={[
-          styles.stage,
-          // Bottom-centre of the stage sits on the fix, so the avatar stands on
-          // the hologram rather than being centred over it.
-          { left: anchor.x - STAGE_WIDTH / 2, top: anchor.y - STAGE_HEIGHT },
-        ]}
-      >
+    <View pointerEvents="none" style={StyleSheet.absoluteFill} onLayout={onLayout}>
+      {ready && ground && (
         <FilamentScene>
           <FilamentView style={StyleSheet.absoluteFill} enableTransparentRendering>
-            <Camera />
+            <Camera
+              // Filament takes a focal length rather than an angle; 36mm is
+              // MapLibre's 36.87 degree vertical field of view on a 35mm frame.
+              focalLengthInMillimeters={FOCAL_LENGTH_MM}
+              cameraPosition={cameraEye(pose.pitch, distance)}
+              cameraTarget={[0, 0, 0]}
+              cameraUp={cameraUp(pose.pitch)}
+              // World units are map pixels, so the camera sits over a thousand
+              // of them away. Filament's 0.1/100 defaults would clip everything.
+              near={NEAR_PLANE}
+              far={FAR_PLANE}
+            />
             <DefaultLight />
             <Model
               source={RUNNER}
-              // Sized from the stage rather than guessed in world units, then
-              // lifted so the feet sit on the stage's bottom edge — which the
-              // layout places exactly on the hologram at screen centre.
+              // Sized in map pixels, then lifted by half its height so the feet
+              // rest on the ground plane rather than the model's centre.
               transformToUnitCube
-              translate={[0, 0.5, 0]}
+              scale={[AVATAR_HEIGHT, AVATAR_HEIGHT, AVATAR_HEIGHT]}
+              translate={[ground.x, AVATAR_HEIGHT / 2, ground.z]}
+              // Facing the camera when still, away from it when running, so a
+              // moving player reads as heading into the map.
+              rotate={[0, running ? Math.PI : 0, 0]}
             >
               <Animator
                 animationIndex={clips ? (running ? clips.run : clips.idle) : 0}
@@ -98,16 +128,7 @@ export function PlayerAvatar({ anchor, running }: Props) {
             </Model>
           </FilamentView>
         </FilamentScene>
-      </View>
+      )}
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  layer: StyleSheet.absoluteFillObject,
-  stage: {
-    position: 'absolute',
-    width: STAGE_WIDTH,
-    height: STAGE_HEIGHT,
-  },
-});

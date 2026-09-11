@@ -14,6 +14,7 @@
     "test:run-samples": "node scripts/test-run-sample-timestamps.mjs",
     "test:hud": "node scripts/test-hud.mjs",
     "test:social": "node scripts/test-social.mjs",
+    "test:avatar": "node scripts/test-avatar.mjs",
     "ios:standalone": "expo run:ios --configuration Release --device",
     "ios:device": "bash scripts/ios-device.sh"
   },
