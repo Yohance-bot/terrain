@@ -5,6 +5,7 @@ import {
   Layer,
   Map,
   type MapRef,
+  type ViewState,
   useCurrentPosition,
 } from '@maplibre/maplibre-react-native';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -113,10 +114,6 @@ const HOLOGRAM = colors.userGlow;
  *  metre or two does not flip the clip back and forth. */
 const RUNNING_SPEED_MPS = 0.8;
 
-/** Fast enough that the avatar tracks the map without a visible lag at running
- *  pace, slow enough that the bridge cost stays negligible. */
-const AVATAR_POSE_INTERVAL_MS = 100;
-
 const DEVELOPER_COLORS: Record<string, string> = {
   '10000000-0000-4000-8000-000000000001': '#22C55E',
   '10000000-0000-4000-8000-000000000002': '#A855F7',
@@ -187,6 +184,9 @@ export const TerritoryMap = memo(function TerritoryMap({
   const [zoom, setZoom] = useState(DEFAULT_ZOOM);
   const runId = useRecorder(s => s.runId);
   const routeDisplay = useHudPreferences(s => s.routeDisplay);
+  // Some people want the character, some want the dot they already knew where
+  // to look for. Both are drawn from the same fix, so this only swaps the marks.
+  const wantsAvatar = useHudPreferences(s => s.playerMarker) === 'avatar';
   const palette = useLighting(effectiveFix, presentationActive, simulation);
   const hasOwnedAreaGeometry = Boolean(ownedTerritoryAreas?.features.length);
   const ownerColouredAreas = useMemo(() => withOwnerColors(ownedTerritoryAreas), [ownedTerritoryAreas]);
@@ -289,54 +289,43 @@ export const TerritoryMap = memo(function TerritoryMap({
   /**
    * The map's camera, mirrored so the avatar can be drawn in the same space.
    *
-   * MapLibre exposes no projection matrix, only these four numbers, and only
-   * asynchronously. Polling them costs about 2ms; the avatar is simply not
-   * drawn until the first answer arrives, because a guessed camera would put
-   * the character somewhere the player is not.
+   * These arrive with the map's own movement rather than being polled for.
+   * Polling them ten times a second left the avatar visibly trailing the map
+   * during a pan, which read as the character sliding rather than standing
+   * still: `onRegionIsChanging` carries the full view state and fires in step
+   * with the frames that caused it.
    */
   const [avatarPose, setAvatarPose] = useState<MapPose | null>(null);
-  const avatarCoordinate = showAvatar && presentationActive && !economy
+  const avatarCoordinate = showAvatar && wantsAvatar && presentationActive && !economy
     ? effectiveFix?.coordinate ?? null
     : null;
   const avatarEnabled = Boolean(avatarCoordinate) && mapReady;
+  const trackCamera = useCallback((state: ViewState) => {
+    setAvatarPose({
+      center: [state.center[0], state.center[1]],
+      zoom: state.zoom,
+      bearing: state.bearing,
+      pitch: state.pitch,
+    });
+  }, []);
   useEffect(() => {
     if (!avatarEnabled) {
       setAvatarPose(null);
       return;
     }
+    // One read to place the avatar before the map is touched; every update
+    // after this comes from the region events.
     let cancelled = false;
-    const read = async () => {
-      try {
-        const state = await mapRef.current?.getViewState();
-        if (cancelled || !state) return;
-        setAvatarPose((current) =>
-          current &&
-          current.zoom === state.zoom &&
-          current.bearing === state.bearing &&
-          current.pitch === state.pitch &&
-          current.center[0] === state.center[0] &&
-          current.center[1] === state.center[1]
-            ? current
-            : {
-                center: [state.center[0], state.center[1]],
-                zoom: state.zoom,
-                bearing: state.bearing,
-                pitch: state.pitch,
-              },
-        );
-      } catch {
-        // The map moved or went away; the next tick picks it up. A stale
-        // camera is worse than none, so nothing is drawn until it recovers.
-        if (!cancelled) setAvatarPose(null);
-      }
-    };
-    void read();
-    const timer = setInterval(() => void read(), AVATAR_POSE_INTERVAL_MS);
+    void mapRef.current
+      ?.getViewState()
+      .then((state) => {
+        if (!cancelled && state) trackCamera(state);
+      })
+      .catch(() => undefined);
     return () => {
       cancelled = true;
-      clearInterval(timer);
     };
-  }, [avatarEnabled]);
+  }, [avatarEnabled, trackCamera]);
 
   return (
     <View style={styles.container}>
@@ -352,10 +341,11 @@ export const TerritoryMap = memo(function TerritoryMap({
         logo={false}
         scaleBar={false}
         onDidFinishLoadingMap={() => setMapReady(true)}
-        onRegionWillChange={event => follow.onGesture(event.nativeEvent)}
+        onRegionWillChange={event => { follow.onGesture(event.nativeEvent); if (avatarEnabled) trackCamera(event.nativeEvent); }}
+        onRegionIsChanging={event => { if (avatarEnabled) trackCamera(event.nativeEvent); }}
         onDidFinishRenderingFrame={onRenderedFrame}
         preferredFramesPerSecond={recording ? 30 : 60}
-        onRegionDidChange={event => setZoom(event.nativeEvent.zoom)}
+        onRegionDidChange={event => { setZoom(event.nativeEvent.zoom); if (avatarEnabled) trackCamera(event.nativeEvent); }}
         onPress={(event) => {
           if (!onSimulationMove) return;
           const [lon, lat] = event.nativeEvent.lngLat;
@@ -691,13 +681,16 @@ export const TerritoryMap = memo(function TerritoryMap({
                 occluded by buildings the way a projection on tarmac would be.
                 The avatar floats above it in a second renderer that cannot be
                 depth-tested against the map. */}
-            <Layer beforeId="hud-player-anchor" id="player-hologram-halo" type="circle" paint={{ 'circle-radius': ['interpolate', ['linear'], ['zoom'], 14, 10, 18, 30], 'circle-color': HOLOGRAM, 'circle-opacity': 0.16, 'circle-blur': 0.8 }} />
-            <Layer beforeId="hud-player-anchor" id="player-hologram-disc" type="circle" paint={{ 'circle-radius': ['interpolate', ['linear'], ['zoom'], 14, 6, 18, 18], 'circle-color': HOLOGRAM, 'circle-opacity': 0.26, 'circle-stroke-width': 1.5, 'circle-stroke-color': HOLOGRAM, 'circle-stroke-opacity': 0.7 }} />
-            {/* Whenever the avatar is not actually drawn — no fix projected,
-                economy mode, the summary map — the disc keeps a bright core so
-                the exact spot is never left unmarked. */}
-            {!avatarPose && (
-              <Layer beforeId="hud-player-anchor" id="player-hologram-core" type="circle" paint={{ 'circle-radius': 6, 'circle-color': activationColor, 'circle-stroke-width': 3, 'circle-stroke-color': colors.surface }} />
+            {wantsAvatar && <Layer beforeId="hud-player-anchor" id="player-hologram-halo" type="circle" paint={{ 'circle-radius': ['interpolate', ['linear'], ['zoom'], 14, 7, 18, 18], 'circle-color': HOLOGRAM, 'circle-opacity': 0.16, 'circle-blur': 0.8 }} />}
+            {wantsAvatar && <Layer beforeId="hud-player-anchor" id="player-hologram-disc" type="circle" paint={{ 'circle-radius': ['interpolate', ['linear'], ['zoom'], 14, 4, 18, 10], 'circle-color': HOLOGRAM, 'circle-opacity': 0.26, 'circle-stroke-width': 1.5, 'circle-stroke-color': HOLOGRAM, 'circle-stroke-opacity': 0.7 }} />}
+            {/* Whenever the avatar is not actually drawn — the classic marker,
+                no fix projected, economy mode, the summary map — the plain dot
+                takes over, so the exact spot is never left unmarked. */}
+            {!(wantsAvatar && avatarPose) && (
+              <>
+                <Layer beforeId="hud-player-anchor" id="player-marker-glow" type="circle" paint={{ 'circle-radius': 18, 'circle-color': activationColor, 'circle-opacity': 0.2, 'circle-blur': 0.55 }} />
+                <Layer beforeId="hud-player-anchor" id="player-marker-dot" type="circle" paint={{ 'circle-radius': 7, 'circle-color': activationColor, 'circle-stroke-width': 3, 'circle-stroke-color': colors.surface }} />
+              </>
             )}
           </GeoJSONSource>
         )}
@@ -706,9 +699,9 @@ export const TerritoryMap = memo(function TerritoryMap({
       </Map>
 
       {/* Above the map, never inside it: Filament is a separate native view and
-          composites over MapLibre rather than drawing into it. Hidden once the
-          player pans away, because the avatar is pinned to the screen centre
-          the camera tracks — off-centre it would be lying about where they are. */}
+          composites over MapLibre rather than drawing into it. It shares the
+          map's camera instead, so the character stays on its own patch of
+          ground while the map is panned around it. */}
       <PlayerAvatar
         pose={avatarPose}
         coordinate={avatarCoordinate}

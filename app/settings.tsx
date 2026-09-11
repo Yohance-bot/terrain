@@ -13,6 +13,7 @@ export default function SettingsScreen() {
   const [notice, setNotice] = useState<string | null>(null);
   const economy = useHudPreferences(s => s.economy);
   const routeDisplay = useHudPreferences(s => s.routeDisplay);
+  const playerMarker = useHudPreferences(s => s.playerMarker);
   const weather = useHudPreferences(s => s.weather);
   useFocusEffect(useCallback(() => {
     void Promise.all([getUnits(), getNotificationsEnabled()]).then(([u, n]) => { setUnitsState(u); setNotifications(n); }).catch(() => setNotice('Could not load preferences.'));
@@ -26,6 +27,9 @@ export default function SettingsScreen() {
       <Text style={[styles.label, { marginTop: spacing.xl }]}>RUN TRAIL</Text>
       <View style={styles.segment}>{(['streets', 'gps'] as const).map(mode => <Pressable key={mode} accessibilityRole="radio" accessibilityState={{ checked: routeDisplay === mode }} style={[styles.option, routeDisplay === mode && styles.selected]} onPress={() => useHudPreferences.getState().setRouteDisplay(mode)}><Text style={[styles.optionText, routeDisplay === mode && styles.selectedText]}>{mode === 'streets' ? 'Light up streets' : 'GPS trail'}</Text></Pressable>)}</View>
       <Text style={styles.subtext}>{routeDisplay === 'streets' ? 'Color the part of each street you run along. Off-road or uncertain sections appear as a dotted GPS trail.' : 'Show your recorded path, including parks, shortcuts and off-road sections.'}</Text>
+      <Text style={[styles.label, { marginTop: spacing.xl }]}>YOU ON THE MAP</Text>
+      <View style={styles.segment}>{(['avatar', 'classic'] as const).map(mode => <Pressable key={mode} accessibilityRole="radio" accessibilityState={{ checked: playerMarker === mode }} style={[styles.option, playerMarker === mode && styles.selected]} onPress={() => useHudPreferences.getState().setPlayerMarker(mode)}><Text style={[styles.optionText, playerMarker === mode && styles.selectedText]}>{mode === 'avatar' ? '3D runner' : 'Classic marker'}</Text></Pressable>)}</View>
+      <Text style={styles.subtext}>{playerMarker === 'avatar' ? 'A small 3D character standing on the map, with a hologram at its feet.' : 'The plain dot. Lighter on the battery, and never in front of anything.'}</Text>
       <View style={styles.row}><View style={styles.copy}><Text style={styles.rowText}>Run cues & haptics</Text><Text style={styles.subtext}>Split and territory feedback</Text></View><Switch value={notifications} onValueChange={v => { setNotifications(v); void setNotificationsEnabled(v); useHudPreferences.setState({ haptics: v }); }} /></View>
       <View style={styles.row}><View style={styles.copy}><Text style={styles.rowText}>Battery saver</Text><Text style={styles.subtext}>Less glow, slower map updates, calm camera</Text></View><Switch value={economy} onValueChange={useHudPreferences.getState().setEconomy} /></View>
       <View style={styles.row}><View style={styles.copy}><Text style={styles.rowText}>Weather lighting</Text><Text style={styles.subtext}>Uses approximate location with Open-Meteo every 15 minutes. Time-based lighting works offline.</Text></View><Switch value={weather} onValueChange={useHudPreferences.getState().setWeather} /></View>

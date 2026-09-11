@@ -47,12 +47,12 @@ const RUNNER = require('../../../assets/avatar/runner.glb');
  * is its height in points.
  *
  * Calibrated against the screen rather than derived: `transformToUnitCube` does
- * not normalise to exactly one unit, so this value is about 1.6x smaller than
- * the height it produces. Measured on an 874-point viewport, 54 renders at
- * roughly 85 points, which is close to life-size against the buildings rather
- * than the exaggerated scale map avatars are often given.
+ * not normalise to exactly one unit, so this renders about 1.6x taller than the
+ * number says. 20 puts the character at roughly 32 points, which is the width
+ * of the marker it replaced — small enough to read as something standing on the
+ * map rather than something sitting on top of it.
  */
-const AVATAR_HEIGHT = 54;
+const AVATAR_HEIGHT = 20;
 
 /** Blend between Run and Idle rather than snapping between poses. */
 const TRANSITION_SECONDS = 0.25;
