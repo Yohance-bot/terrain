@@ -16,7 +16,8 @@
     "test:social": "node scripts/test-social.mjs",
     "test:avatar": "node scripts/test-avatar.mjs",
     "ios:standalone": "expo run:ios --configuration Release --device",
-    "ios:device": "bash scripts/ios-device.sh"
+    "ios:device": "bash scripts/ios-device.sh",
+    "ios:simulator": "bash scripts/ios-simulator.sh"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
