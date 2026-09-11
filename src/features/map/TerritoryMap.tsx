@@ -7,7 +7,7 @@ import {
   type MapRef,
   useCurrentPosition,
 } from '@maplibre/maplibre-react-native';
-import { memo, useCallback, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import {
@@ -111,6 +111,10 @@ const HOLOGRAM = colors.userGlow;
  *  Measured against the cleaned fix, not raw GPS, so a stationary jitter of a
  *  metre or two does not flip the clip back and forth. */
 const RUNNING_SPEED_MPS = 0.8;
+
+/** Fast enough that the avatar tracks the map without a visible lag at running
+ *  pace, slow enough that the bridge cost stays negligible. */
+const AVATAR_ANCHOR_INTERVAL_MS = 120;
 
 const DEVELOPER_COLORS: Record<string, string> = {
   '10000000-0000-4000-8000-000000000001': '#22C55E',
@@ -280,6 +284,50 @@ export const TerritoryMap = memo(function TerritoryMap({
     },
     [onTerritoryPress]
   );
+
+  /**
+   * Where the player's fix sits on screen, for the 3D avatar to stand on.
+   *
+   * The map is the only thing that knows: its projection depends on zoom,
+   * pitch and bearing, and it exposes no matrix to reproduce that with. The
+   * call costs about 2ms, so it is polled rather than run every frame, and the
+   * avatar is simply not drawn whenever the answer is unavailable.
+   */
+  const [avatarAnchor, setAvatarAnchor] = useState<{ x: number; y: number } | null>(null);
+  const avatarCoordinate = showAvatar && presentationActive && !economy
+    ? effectiveFix?.coordinate ?? null
+    : null;
+  // The coordinate is a fresh array on every render, so the polling effect keys
+  // off whether it exists and reads the latest value through a ref. Depending
+  // on the array itself would tear down and rebuild the interval continuously.
+  const avatarCoordinateRef = useRef(avatarCoordinate);
+  avatarCoordinateRef.current = avatarCoordinate;
+  const avatarEnabled = Boolean(avatarCoordinate) && mapReady;
+  useEffect(() => {
+    if (!avatarEnabled) {
+      setAvatarAnchor(null);
+      return;
+    }
+    let cancelled = false;
+    const project = async () => {
+      try {
+        const coordinate = avatarCoordinateRef.current;
+        if (!coordinate) return;
+        const point = await mapRef.current?.project(coordinate);
+        if (!cancelled && point) setAvatarAnchor({ x: point[0], y: point[1] });
+      } catch {
+        // A failed projection means the map moved or went away; the next tick
+        // picks it up, and a stale anchor is worse than none.
+        if (!cancelled) setAvatarAnchor(null);
+      }
+    };
+    void project();
+    const timer = setInterval(() => void project(), AVATAR_ANCHOR_INTERVAL_MS);
+    return () => {
+      cancelled = true;
+      clearInterval(timer);
+    };
+  }, [avatarEnabled]);
 
   return (
     <View style={styles.container}>
@@ -636,9 +684,10 @@ export const TerritoryMap = memo(function TerritoryMap({
                 depth-tested against the map. */}
             <Layer beforeId="hud-player-anchor" id="player-hologram-halo" type="circle" paint={{ 'circle-radius': ['interpolate', ['linear'], ['zoom'], 14, 10, 18, 30], 'circle-color': HOLOGRAM, 'circle-opacity': 0.16, 'circle-blur': 0.8 }} />
             <Layer beforeId="hud-player-anchor" id="player-hologram-disc" type="circle" paint={{ 'circle-radius': ['interpolate', ['linear'], ['zoom'], 14, 6, 18, 18], 'circle-color': HOLOGRAM, 'circle-opacity': 0.26, 'circle-stroke-width': 1.5, 'circle-stroke-color': HOLOGRAM, 'circle-stroke-opacity': 0.7 }} />
-            {/* Without the avatar there is nothing to mark the exact spot, so
-                the disc keeps a bright core in that case only. */}
-            {!showAvatar && (
+            {/* Whenever the avatar is not actually drawn — no fix projected,
+                economy mode, the summary map — the disc keeps a bright core so
+                the exact spot is never left unmarked. */}
+            {!avatarAnchor && (
               <Layer beforeId="hud-player-anchor" id="player-hologram-core" type="circle" paint={{ 'circle-radius': 6, 'circle-color': activationColor, 'circle-stroke-width': 3, 'circle-stroke-color': colors.surface }} />
             )}
           </GeoJSONSource>
@@ -652,14 +701,7 @@ export const TerritoryMap = memo(function TerritoryMap({
           player pans away, because the avatar is pinned to the screen centre
           the camera tracks — off-centre it would be lying about where they are. */}
       <PlayerAvatar
-        visible={
-          showAvatar &&
-          Boolean(effectiveFix) &&
-          presentationActive &&
-          follow.following &&
-          !economy &&
-          !reducedMotion
-        }
+        anchor={avatarAnchor}
         running={recording && (effectiveFix?.speedMps ?? 0) > RUNNING_SPEED_MPS}
       />
 

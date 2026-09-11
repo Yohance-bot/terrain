@@ -21,10 +21,10 @@ import {
  *    character is the one case where that reads as intended rather than broken —
  *    which is why the thing that must sit *on* the ground (the hologram) is
  *    drawn by MapLibre instead.
- * 2. Its position is screen-space, not map-space. `useRunCamera` keeps the
- *    camera centred on the player's fix, so centre-of-screen already is the
- *    player. Asking MapLibre where the fix landed would cost an async bridge
- *    hop and, measured on device, drifts up to 43px during a fast pan.
+ * 2. Its position is screen-space, so the map has to be asked where the fix
+ *    landed. Measured on device that costs ~2ms and stays within a pixel in
+ *    normal use; the 43px drift seen in the spike was a camera flying across
+ *    the city under script, not a person looking at a map.
  */
 
 // Metro resolves binary assets through require(); a static import does not
@@ -41,13 +41,14 @@ const STAGE_HEIGHT = 164;
 const TRANSITION_SECONDS = 0.25;
 
 type Props = {
-  /** Hidden when the player has panned away, or on a map that isn't theirs. */
-  visible: boolean;
+  /** Where the player's fix currently sits on screen, in points. Null hides the
+   *  avatar: it must never be drawn somewhere the player is not. */
+  anchor: { x: number; y: number } | null;
   /** Drives the clip: true plays Run, false plays Idle. */
   running: boolean;
 };
 
-export function PlayerAvatar({ visible, running }: Props) {
+export function PlayerAvatar({ anchor, running }: Props) {
   const [clips, setClips] = useState<{ run: number; idle: number } | null>(null);
 
   // Clips are matched by name. Indices depend on export order, and silently
@@ -65,11 +66,18 @@ export function PlayerAvatar({ visible, running }: Props) {
     setClips({ run: run ?? 0, idle: idle ?? 0 });
   }, []);
 
-  if (!visible) return null;
+  if (!anchor) return null;
 
   return (
     <View pointerEvents="none" style={styles.layer}>
-      <View style={styles.stage}>
+      <View
+        style={[
+          styles.stage,
+          // Bottom-centre of the stage sits on the fix, so the avatar stands on
+          // the hologram rather than being centred over it.
+          { left: anchor.x - STAGE_WIDTH / 2, top: anchor.y - STAGE_HEIGHT },
+        ]}
+      >
         <FilamentScene>
           <FilamentView style={StyleSheet.absoluteFill} enableTransparentRendering>
             <Camera />
@@ -96,16 +104,10 @@ export function PlayerAvatar({ visible, running }: Props) {
 }
 
 const styles = StyleSheet.create({
-  layer: {
-    ...StyleSheet.absoluteFillObject,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+  layer: StyleSheet.absoluteFillObject,
   stage: {
+    position: 'absolute',
     width: STAGE_WIDTH,
     height: STAGE_HEIGHT,
-    // Shifts the box up by half its height, putting its bottom edge — and so
-    // the avatar's feet — on the screen centre the camera is tracking.
-    marginBottom: STAGE_HEIGHT,
   },
 });
