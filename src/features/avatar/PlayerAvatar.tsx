@@ -18,6 +18,7 @@ import {
   FOCAL_LENGTH_MM,
   groundOffset,
   NEAR_PLANE,
+  type Float3,
   type MapPose,
 } from './mapCamera';
 
@@ -43,13 +44,30 @@ const RUNNER = require('../../../assets/avatar/runner.glb');
 
 /**
  * How tall the avatar stands, in map pixels — which at the centre of a flat map
- * is its height in points. Close to the scale a person reads at on a map,
- * rather than the exaggerated size map avatars are often drawn at.
+ * is its height in points.
+ *
+ * Calibrated against the screen rather than derived: `transformToUnitCube` does
+ * not normalise to exactly one unit, so this value is about 1.6x smaller than
+ * the height it produces. Measured on an 874-point viewport, 54 renders at
+ * roughly 85 points, which is close to life-size against the buildings rather
+ * than the exaggerated scale map avatars are often given.
  */
-const AVATAR_HEIGHT = 84;
+const AVATAR_HEIGHT = 54;
 
 /** Blend between Run and Idle rather than snapping between poses. */
 const TRANSITION_SECONDS = 0.25;
+
+/**
+ * Stable identities, and that is the whole point of hoisting them.
+ *
+ * Filament re-applies an entity's transforms whenever these props change by
+ * reference, and re-applying `transformToUnitCube` resets the entity to one
+ * unit while the scale and translate are skipped as "unchanged". Array literals
+ * in JSX are new objects on every render, so the model ends up one unit tall —
+ * a dot — and never lifted onto its feet.
+ */
+const AVATAR_SCALE: Float3 = [AVATAR_HEIGHT, AVATAR_HEIGHT, AVATAR_HEIGHT];
+const AVATAR_LIFT: Float3 = [0, AVATAR_HEIGHT / 2, 0];
 
 type Props = {
   /** The map's current camera. Null hides the avatar: without it there is no
@@ -91,6 +109,19 @@ export function PlayerAvatar({ pose, coordinate, running }: Props) {
   const ground = ready ? groundOffset(pose, coordinate) : null;
   const distance = ready ? cameraDistance(viewport.height) : 0;
 
+  /**
+   * The avatar stays at the origin and the camera moves around it.
+   *
+   * This is the same scene shifted, but it is the only safe way to animate it:
+   * Filament's transform props multiply onto the entity's current transform by
+   * default, so a translate that changes every frame compounds and throws the
+   * model out of the world within a second. Camera props go through lookAt,
+   * which is absolute and cannot accumulate.
+   */
+  const target: Float3 = ground ? [-ground.x, 0, -ground.z] : [0, 0, 0];
+  const eye = cameraEye(pose?.pitch ?? 0, distance);
+  const cameraPosition: Float3 = [target[0] + eye[0], target[1] + eye[1], target[2] + eye[2]];
+
   return (
     <View pointerEvents="none" style={StyleSheet.absoluteFill} onLayout={onLayout}>
       {ready && ground && (
@@ -100,8 +131,8 @@ export function PlayerAvatar({ pose, coordinate, running }: Props) {
               // Filament takes a focal length rather than an angle; 36mm is
               // MapLibre's 36.87 degree vertical field of view on a 35mm frame.
               focalLengthInMillimeters={FOCAL_LENGTH_MM}
-              cameraPosition={cameraEye(pose.pitch, distance)}
-              cameraTarget={[0, 0, 0]}
+              cameraPosition={cameraPosition}
+              cameraTarget={target}
               cameraUp={cameraUp(pose.pitch)}
               // World units are map pixels, so the camera sits over a thousand
               // of them away. Filament's 0.1/100 defaults would clip everything.
@@ -113,12 +144,12 @@ export function PlayerAvatar({ pose, coordinate, running }: Props) {
               source={RUNNER}
               // Sized in map pixels, then lifted by half its height so the feet
               // rest on the ground plane rather than the model's centre.
+              // Every one of these is constant, and deliberately so: Filament
+              // multiplies transform props onto the entity's existing transform,
+              // so anything that changes here compounds instead of replacing.
               transformToUnitCube
-              scale={[AVATAR_HEIGHT, AVATAR_HEIGHT, AVATAR_HEIGHT]}
-              translate={[ground.x, AVATAR_HEIGHT / 2, ground.z]}
-              // Facing the camera when still, away from it when running, so a
-              // moving player reads as heading into the map.
-              rotate={[0, running ? Math.PI : 0, 0]}
+              scale={AVATAR_SCALE}
+              translate={AVATAR_LIFT}
             >
               <Animator
                 animationIndex={clips ? (running ? clips.run : clips.idle) : 0}
