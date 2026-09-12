@@ -63,7 +63,7 @@ app.include_router(admin_territory.router, prefix="/v1")
 configure_observability(app)
 
 
-@app.get("/health", tags=["ops"])
+@app.api_route("/health", methods=["GET", "HEAD"], tags=["ops"])
 def health() -> dict[str, str]:
     """Liveness endpoint that does not depend on database availability."""
     return {"status": "ok", "service": "run-backend", "version": app.version}
