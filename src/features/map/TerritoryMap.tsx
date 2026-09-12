@@ -25,6 +25,8 @@ import { useRecorder } from '@/features/recorder/useRecorder';
 import { useHudPreferences } from '@/features/hud/usePresentation';
 import { territoryFill } from './territoryAppearance';
 import { WorldStructures } from './WorldStructures';
+import { GroundBorders } from './GroundBorderLayers';
+import { withAlpha } from '@/features/hud/lighting';
 import { useWorldFeatures } from './useWorldFeatures';
 import { illuminateStreets } from './streetMatching';
 import { StreetTrailLayers } from './StreetTrailLayers';
@@ -46,16 +48,6 @@ import { colors, CAPTURE_COLOR_PALETTE, DEFAULT_CAPTURE_COLOR_INDEX } from '@/th
 // Keep the offline geometry referentially stable. Requiring it during every
 // ownership update used to repeat the costly territory colour calculation.
 const OFFLINE_TERRITORIES = require('@/assets/map/gameplay_territories.json') as GeoJSON.FeatureCollection;
-
-const withAlpha = (hex: string, alpha: number) => {
-  const value = hex.replace('#', '');
-  if (value.length !== 6) return hex;
-  const red = Number.parseInt(value.slice(0, 2), 16);
-  const green = Number.parseInt(value.slice(2, 4), 16);
-  const blue = Number.parseInt(value.slice(4, 6), 16);
-  const clampedAlpha = Math.max(0, Math.min(1, alpha));
-  return `rgba(${red},${green},${blue},${clampedAlpha})`;
-};
 
 type Props = {
   territories: GeoJSON.FeatureCollection | null;
@@ -663,6 +655,7 @@ export const TerritoryMap = memo(function TerritoryMap({
           </GeoJSONSource>
         )}
 
+        <GroundBorders palette={palette} />
         <WorldStructures details={world.details} palette={palette} facadeTint={world.facadeTint} />
         {showTerritories && <ContestedBorders data={borders} active={presentationActive} reducedMotion={reducedMotion} economy={economy} zoom={zoom} />}
         {recording && (streetTrail ? <StreetTrailLayers {...streetTrail} economy={economy} /> : <TrailLayers data={traversedRoads} economy={economy} />)}

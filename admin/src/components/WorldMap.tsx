@@ -13,7 +13,10 @@ import {
   buildRoofDetails,
   CENTER,
   EMPTY,
+  groundBorderLayers,
   RUN_TRAIL_COLOR,
+  STRUCTURE_OPACITY,
+  worldPalette,
   smoothTrail,
   worldStyle,
   illuminateStreets,
@@ -185,11 +188,16 @@ export default function WorldMap(props: Props) {
           paint: {
             "fill-extrusion-color": "#C6DEDC",
             "fill-extrusion-height": BUILDING_HEIGHT as ExpressionSpecification,
-            "fill-extrusion-opacity": 0.96,
+            "fill-extrusion-opacity": STRUCTURE_OPACITY,
           },
         },
         anchor,
       );
+      // Kerbs and building borders, built by the same code as the phone's so the
+      // two maps cannot drift apart.
+      const borders = groundBorderLayers(m.getStyle().layers, worldPalette(latest.current.night));
+      m.addLayer(borders.building, "world-buildings");
+      for (const { layer, beforeId } of borders.kerbs) m.addLayer(layer, beforeId);
       m.addSource("roofs", { type: "geojson", data: EMPTY });
       m.addLayer(
         {

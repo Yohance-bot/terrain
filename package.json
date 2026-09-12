@@ -15,6 +15,7 @@
     "test:hud": "node scripts/test-hud.mjs",
     "test:social": "node scripts/test-social.mjs",
     "test:avatar": "node scripts/test-avatar.mjs",
+    "test:borders": "node scripts/test-ground-borders.mjs",
     "ios:standalone": "expo run:ios --configuration Release --device",
     "ios:device": "bash scripts/ios-device.sh",
     "ios:simulator": "bash scripts/ios-simulator.sh"

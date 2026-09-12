@@ -3,20 +3,9 @@ import { memo } from 'react';
 import type { lightingPalette } from '@/features/hud/lighting';
 import type { ExpressionSpecification } from '@maplibre/maplibre-gl-style-spec';
 import { BUILDING_HEIGHT, ROOF_DECK } from './worldGeometry';
+// Shared with the ground borders, which recede with the buildings they outline.
+import { STRUCTURE_OPACITY } from './groundBorders';
 
-/**
- * How present the massing is.
- *
- * Colours, heights and materials are untouched; this only decides how much the
- * buildings assert themselves against the streets and territory beneath them.
- * One value across all three extrusion layers, because facades and roofs fading
- * by different amounts would separate them instead of receding together.
- *
- * A fixed per-layer opacity is the only kind MapLibre supports here: the paint
- * property is not data-driven, which is why territory tinting is baked into the
- * colour instead.
- */
-const STRUCTURE_OPACITY = 0.62;
 
 export const WorldStructures = memo(function WorldStructures({ details, palette, facadeTint }: { details: GeoJSON.FeatureCollection<GeoJSON.Polygon>; facadeTint: ExpressionSpecification | string; palette: ReturnType<typeof lightingPalette> }) {
   return <>

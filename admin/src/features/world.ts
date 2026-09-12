@@ -22,9 +22,14 @@ export function ownerColor(id: unknown) {
   )?.[1];
   return slot ? ["#22C55E", "#A855F7", "#F97316"][Number(slot) - 1] : "#F59E0B";
 }
+export { groundBorderLayers, STRUCTURE_OPACITY } from "../../../src/features/map/groundBorders";
+/** The console has no clock or weather to follow: midday, or ten at night. */
+export function worldPalette(night = false) {
+  return lightingPalette(new Date(2026, 8, 9, night ? 22 : 12), null);
+}
 export function worldStyle(night = false): StyleSpecification {
   const style = structuredClone(baseStyle) as unknown as StyleSpecification;
-  const palette = lightingPalette(new Date(2026, 8, 9, night ? 22 : 12), null);
+  const palette = worldPalette(night);
   for (const layer of style.layers) {
     if (layer.id.startsWith("hud-")) continue;
     if (layer.type === "background")

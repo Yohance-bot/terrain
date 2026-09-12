@@ -12,6 +12,14 @@ export function mixColor(a: string, b: string, amount: number): string {
   const t = Math.max(0, Math.min(1, amount));
   return '#' + [1, 3, 5].map(i => Math.round(parseInt(a.slice(i, i + 2), 16) * (1 - t) + parseInt(b.slice(i, i + 2), 16) * t).toString(16).padStart(2, '0')).join('');
 }
+/** A palette hex with alpha baked in. Paint opacity properties can crash
+ *  MapLibre's iOS bridge when mutated mid style swap; colour never does. */
+export function withAlpha(hex: string, alpha: number): string {
+  const value = hex.replace('#', '');
+  if (value.length !== 6) return hex;
+  const channel = (at: number) => Number.parseInt(value.slice(at, at + 2), 16);
+  return `rgba(${channel(0)},${channel(2)},${channel(4)},${Math.max(0, Math.min(1, alpha))})`;
+}
 export function weatherKind(code: number, cloud: number): string {
   if (code >= 95) return 'Storm';
   if ((code >= 71 && code <= 77) || code === 85 || code === 86) return 'Snow';
@@ -33,6 +41,13 @@ export function lightingPalette(now: Date, weather: WeatherReading | null) {
     // Rooftop objects: light utility volumes and dark solar arrays.
     structure: blend('#3E5568', '#D5DAD3'), panel: blend('#1B2740', '#44567E'), doorway: blend('#241C16', '#9C7A5C'),
     label: blend('#D5E4EA', '#334D44'), halo: blend('#102238', '#EBF2DE'),
+    // Building borders: a step lighter than the ground by night and a step
+    // darker by day, so the footprint reads without becoming a wall.
+    edge: blend('#5E8E99', '#6E8C7E'),
+    // Kerbs lie on the road casing, not the ground, so they need their own
+    // contrast against it: a lit edge by night, a deep sage by day. Anything
+    // nearer the casing's own tone vanishes into it.
+    kerb: blend('#C8DEDF', '#5F7D70'),
     name: `${day < 0.25 ? 'Night' : day < 0.8 ? 'Twilight' : 'Day'}${weather ? ` · ${kind}` : ' · Time only'}`,
   };
 }

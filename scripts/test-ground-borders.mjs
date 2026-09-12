@@ -1,0 +1,94 @@
+import assert from 'node:assert/strict';
+import { existsSync, readFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
+import { dirname, resolve } from 'node:path';
+import vm from 'node:vm';
+import ts from 'typescript';
+
+// Execute the production TypeScript, the same way the other suites do.
+const require = createRequire(import.meta.url);
+const cache = new Map();
+const tsPath = p => (existsSync(p + '.ts') ? p + '.ts' : resolve(p, 'index.ts'));
+function load(file) {
+  const path = resolve(file);
+  if (cache.has(path)) return cache.get(path).exports;
+  const module = { exports: {} };
+  cache.set(path, module);
+  const source = ts.transpileModule(readFileSync(path, 'utf8'), {
+    compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, esModuleInterop: true },
+  }).outputText;
+  const localRequire = name => {
+    if (name.startsWith('@/')) return load(tsPath(resolve('src', name.slice(2))));
+    if (name.startsWith('.')) return load(tsPath(resolve(dirname(path), name)));
+    return require(name);
+  };
+  vm.runInThisContext(`(function(require,module,exports){${source}\n})`, { filename: path })(
+    localRequire, module, module.exports,
+  );
+  return module.exports;
+}
+
+const { groundBorderLayers, STRUCTURE_OPACITY } = load('src/features/map/groundBorders.ts');
+const { lightingPalette } = load('src/features/hud/lighting.ts');
+const style = JSON.parse(readFileSync('assets/map/liberty-run.json', 'utf8'));
+const ids = style.layers.map(layer => layer.id);
+const byId = new Map(style.layers.map(layer => [layer.id, layer]));
+
+for (const hour of [12, 22]) {
+  const palette = lightingPalette(new Date(2026, 8, 9, hour), null);
+  const { kerbs, building } = groundBorderLayers(style.layers, palette);
+
+  // Every drivable surface gets exactly one kerb, and nothing else does.
+  const edged = kerbs.map(({ layer }) => layer.id.replace('ground-kerb-', ''));
+  assert.equal(new Set(edged).size, edged.length, 'no surface is edged twice');
+  assert.equal(kerbs.length, 14, `expected 14 street and bridge surfaces, got ${kerbs.length}: ${edged.join(', ')}`);
+  for (const id of edged) {
+    assert.match(id, /^(road|bridge)_/, `${id} is not a street or bridge`);
+    assert.doesNotMatch(id, /casing|centerline|rail|hatching|path|pedestrian|tunnel/, `${id} should not be edged`);
+  }
+
+  for (const { layer, beforeId } of kerbs) {
+    const surface = byId.get(layer.id.replace('ground-kerb-', ''));
+    // The whole point: edges sit on the tarmac's own width at every zoom.
+    assert.deepEqual(layer.paint['line-gap-width'], surface.paint['line-width'], `${surface.id} kerb gap must equal its width`);
+    assert.deepEqual(layer.filter, surface.filter, `${surface.id} kerb must select the same roads`);
+    assert.equal(layer['source-layer'], surface['source-layer']);
+
+    // Beneath every surface in its own band, so crossing streets paint over it,
+    // but above that band's casings.
+    const band = surface.id.split('_')[0];
+    const anchor = ids.indexOf(beforeId);
+    assert.ok(anchor >= 0, `${beforeId} must exist in the style`);
+    assert.ok(beforeId.startsWith(band + '_'), `${surface.id} kerb anchored outside its band (${beforeId})`);
+    assert.ok(anchor <= ids.indexOf(surface.id), `${surface.id} kerb must sit below its surface`);
+    for (const id of ids) {
+      if (id.startsWith(band + '_') && /casing/.test(id)) assert.ok(ids.indexOf(id) < anchor, `${id} should stay below the kerbs`);
+    }
+  }
+
+  // Same presence as the buildings: the opacity is baked into both colours.
+  const alphaOf = color => Number(color.match(/,([\d.]+)\)$/)?.[1]);
+  assert.equal(alphaOf(kerbs[0].layer.paint['line-color']), STRUCTURE_OPACITY, 'kerbs recede with the buildings');
+  assert.equal(alphaOf(building.paint['line-color']), STRUCTURE_OPACITY, 'borders recede with the buildings');
+  assert.equal(new Set(kerbs.map(({ layer }) => layer.paint['line-color'])).size, 1, 'every kerb shares one colour');
+  assert.equal(building['source-layer'], 'building');
+
+  // A kerb lies on the road casing, so it has to stand out from the casing —
+  // the first colour tried sat at 1.3:1 and simply vanished on screen.
+  const rgb = hex => [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16));
+  const luminance = c => {
+    const [r, g, b] = c.map(v => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; });
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  };
+  const contrast = (a, b) => { const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x); return (hi + 0.05) / (lo + 0.05); };
+  const casing = rgb(palette.casing);
+  const kerbOnCasing = rgb(palette.kerb).map((v, i) => v * STRUCTURE_OPACITY + casing[i] * (1 - STRUCTURE_OPACITY));
+  assert.ok(contrast(kerbOnCasing, casing) >= 1.6, `kerb must read against the casing at ${hour}:00 (got ${contrast(kerbOnCasing, casing).toFixed(2)}:1)`);
+}
+
+// Day and night must not share an edge colour, or one of them is unreadable.
+const day = groundBorderLayers(style.layers, lightingPalette(new Date(2026, 8, 9, 12), null)).building.paint['line-color'];
+const night = groundBorderLayers(style.layers, lightingPalette(new Date(2026, 8, 9, 22), null)).building.paint['line-color'];
+assert.notEqual(day, night, 'the edge colour follows the lighting');
+
+console.log('Ground borders passed: 14 kerbs on their roads\' own widths, under crossing streets, at building opacity, readable against the casing day and night.');
