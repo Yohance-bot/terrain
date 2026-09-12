@@ -7,6 +7,7 @@ import {
 } from "maplibre-gl";
 import * as maplibregl from "maplibre-gl";
 import workerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
+import { createAvatarLayer, HOLOGRAM_COLOR, type AvatarLayer } from "../features/avatar";
 import {
   BUILDING_HEIGHT,
   buildRoofDetails,
@@ -26,6 +27,10 @@ type Props = {
   position?: [number, number];
   /** Other runners and pins the lab is showing alongside the driven runner. */
   markers?: { lon: number; lat: number; label: string; color: string }[];
+  /** How the driven runner is drawn, mirroring the phone's setting. */
+  playerMarker?: "avatar" | "classic";
+  /** Drives the avatar's clip, the way speed does on the phone. */
+  running?: boolean;
   night?: boolean;
   streetMode?: boolean;
   follow?: boolean;
@@ -58,6 +63,7 @@ export default function WorldMap(props: Props) {
     m.addControl(new maplibregl.NavigationControl(), "bottom-right");
     let ready = false,
       lastRoofs = 0;
+    let avatar: AvatarLayer | undefined;
     const sent = new Map<string, unknown>();
     function update() {
       if (!ready) return;
@@ -105,10 +111,24 @@ export default function WorldMap(props: Props) {
         sent.set("route", p.route);
         sent.set("street", p.streetMode);
       }
-      if (p.position) {
-        marker.setLngLat(p.position).addTo(m);
-        if (p.follow) m.easeTo({ center: p.position, duration: 500 });
-      } else marker.remove();
+      const asAvatar = p.playerMarker !== "classic";
+      if (p.position && !asAvatar) marker.setLngLat(p.position).addTo(m);
+      else marker.remove();
+      if (p.position && p.follow) m.easeTo({ center: p.position, duration: 500 });
+
+      // The hologram is a map layer here too, so it lies on the road, tilts
+      // with the camera and is drawn under the character rather than around it.
+      const feet: GeoJSON.FeatureCollection =
+        p.position && asAvatar
+          ? { type: "FeatureCollection", features: [{ type: "Feature", properties: {}, geometry: { type: "Point", coordinates: p.position } }] }
+          : EMPTY;
+      if (sent.get("feet") !== p.position || sent.get("feet-mode") !== asAvatar) {
+        sent.set("feet", p.position);
+        sent.set("feet-mode", asAvatar);
+        (m.getSource("player") as GeoJSONSource).setData(feet);
+      }
+      avatar?.setPosition(p.position && asAvatar ? p.position : null);
+      avatar?.setRunning(Boolean(p.running));
 
       const wanted = p.markers ?? [];
       const signature = JSON.stringify(wanted);
@@ -253,6 +273,27 @@ export default function WorldMap(props: Props) {
           "line-opacity": 0.55,
         },
       });
+      m.addSource("player", { type: "geojson", data: EMPTY });
+      // Same three rings as the phone: a soft spill, a wide outline and a lit
+      // pad, so the character reads as standing in light rather than on a dot.
+      m.addLayer({
+        id: "player-hologram-glow",
+        type: "circle",
+        source: "player",
+        paint: { "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 9, 18, 22], "circle-color": HOLOGRAM_COLOR, "circle-opacity": 0.18, "circle-blur": 1 },
+      });
+      m.addLayer({
+        id: "player-hologram-ring",
+        type: "circle",
+        source: "player",
+        paint: { "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 8, 18, 19], "circle-color": HOLOGRAM_COLOR, "circle-opacity": 0, "circle-stroke-width": 1.2, "circle-stroke-color": HOLOGRAM_COLOR, "circle-stroke-opacity": 0.32 },
+      });
+      m.addLayer({
+        id: "player-hologram-pad",
+        type: "circle",
+        source: "player",
+        paint: { "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 6, 18, 13], "circle-color": HOLOGRAM_COLOR, "circle-opacity": 0.3, "circle-stroke-width": 1.5, "circle-stroke-color": HOLOGRAM_COLOR, "circle-stroke-opacity": 0.85 },
+      });
       m.addLayer({
         id: "route-line",
         type: "line",
@@ -260,6 +301,8 @@ export default function WorldMap(props: Props) {
         layout: { "line-join": "round", "line-cap": "round" },
         paint: { "line-color": RUN_TRAIL_COLOR, "line-width": 5 },
       });
+      avatar = createAvatarLayer();
+      m.addLayer(avatar);
       ready = true;
       update();
       roofs();

@@ -35,6 +35,8 @@ type Draft = {
   source: "tracked";
 };
 const KEY = "terrarun-admin-simulation-v1";
+/** Mirrors the phone's "You on the map" setting, so both can be checked here. */
+const MARKER_KEY = "terrarun-admin-player-marker-v1";
 function restore(): Draft | null {
   try {
     return JSON.parse(localStorage.getItem(KEY) || "null");
@@ -68,6 +70,13 @@ export default function Simulation() {
       return last ? [last.lon, last.lat] : CENTER;
     }),
     [knob, setKnob] = useState<[number, number]>([0, 0]);
+  const [playerMarker, setPlayerMarker] = useState<"avatar" | "classic">(() =>
+    localStorage.getItem(MARKER_KEY) === "classic" ? "classic" : "avatar",
+  );
+  function chooseMarker(next: "avatar" | "classic") {
+    setPlayerMarker(next);
+    localStorage.setItem(MARKER_KEY, next);
+  }
   const sampleCount = useRef(draft?.samples.length ?? 0);
   useEffect(() => {
     sampleCount.current = draft?.samples.length ?? 0;
@@ -309,6 +318,8 @@ export default function Simulation() {
         ]}
         streetMode={street}
         follow={follow}
+        playerMarker={playerMarker}
+        running={running && Math.hypot(...knob) > 0}
       />
       <div className="map-heading glass">
         <span className="eyebrow">TEST LAB</span>
@@ -415,6 +426,20 @@ export default function Simulation() {
             onClick={() => setStreet(true)}
           >
             Light streets
+          </button>
+        </div>
+        <div className="segmented">
+          <button
+            className={playerMarker === "avatar" ? "selected" : ""}
+            onClick={() => chooseMarker("avatar")}
+          >
+            3D runner
+          </button>
+          <button
+            className={playerMarker === "classic" ? "selected" : ""}
+            onClick={() => chooseMarker("classic")}
+          >
+            Classic marker
           </button>
         </div>
         <button className="text-btn" onClick={() => setFollow(!follow)}>

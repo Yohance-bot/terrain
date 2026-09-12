@@ -31,7 +31,7 @@ import { StreetTrailLayers } from './StreetTrailLayers';
 import { TrailLayers } from '@/features/hud/TrailLayers';
 import { SocialMapLayers } from '@/features/social/SocialMapLayers';
 import { PlayerAvatar } from '@/features/avatar/PlayerAvatar';
-import type { MapPose } from '@/features/avatar/mapCamera';
+import { useAvatarCamera } from '@/features/avatar/useAvatarCamera';
 import type { GhostSummary } from '@/services/api/types';
 import { CueMapLayers } from '@/features/hud/CueMapLayers';
 import { ContestedBorders } from '@/features/hud/ContestedBorders';
@@ -105,9 +105,9 @@ type Props = {
   showAvatar?: boolean;
 };
 
-/** The hologram the avatar stands on. Blue reads as a projection rather than as
- *  another territory colour, which the map already uses amber and cyan for. */
-const HOLOGRAM = colors.userGlow;
+/** The hologram the avatar stands on: cyan rather than the marker's blue, so it
+ *  reads as light cast on the road and not as a second dot under the feet. */
+const HOLOGRAM = colors.route;
 
 /** Below a walking pace the run cycle reads as skating, so the avatar idles.
  *  Measured against the cleaned fix, not raw GPS, so a stationary jitter of a
@@ -289,32 +289,30 @@ export const TerritoryMap = memo(function TerritoryMap({
   /**
    * The map's camera, mirrored so the avatar can be drawn in the same space.
    *
-   * These arrive with the map's own movement rather than being polled for.
-   * Polling them ten times a second left the avatar visibly trailing the map
-   * during a pan, which read as the character sliding rather than standing
-   * still: `onRegionIsChanging` carries the full view state and fires in step
-   * with the frames that caused it.
+   * The pose goes straight into shared values the render thread reads — see
+   * `useAvatarCamera` for why it must not go through component state — and the
+   * events carry the whole view state, so nothing has to be asked for. Only the
+   * very first camera is read back, to place the avatar before the map is
+   * touched.
    */
-  const [avatarPose, setAvatarPose] = useState<MapPose | null>(null);
+  const avatarCamera = useAvatarCamera();
   const avatarCoordinate = showAvatar && wantsAvatar && presentationActive && !economy
     ? effectiveFix?.coordinate ?? null
     : null;
   const avatarEnabled = Boolean(avatarCoordinate) && mapReady;
-  const trackCamera = useCallback((state: ViewState) => {
-    setAvatarPose({
-      center: [state.center[0], state.center[1]],
-      zoom: state.zoom,
-      bearing: state.bearing,
-      pitch: state.pitch,
-    });
-  }, []);
+  // Read through a ref so the map's event handlers never need rebinding as the
+  // player moves: a new fix must not cost a re-render of every layer.
+  const avatarTarget = useRef(avatarCoordinate);
+  avatarTarget.current = avatarCoordinate;
+  const trackCamera = useCallback(
+    (state: ViewState) => avatarCamera.track(state, avatarTarget.current),
+    [avatarCamera],
+  );
   useEffect(() => {
     if (!avatarEnabled) {
-      setAvatarPose(null);
+      avatarCamera.clear();
       return;
     }
-    // One read to place the avatar before the map is touched; every update
-    // after this comes from the region events.
     let cancelled = false;
     void mapRef.current
       ?.getViewState()
@@ -325,10 +323,13 @@ export const TerritoryMap = memo(function TerritoryMap({
     return () => {
       cancelled = true;
     };
+    // avatarCamera is stable apart from `placed`, which must not re-seed.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [avatarEnabled, trackCamera]);
+  const avatarDrawn = avatarEnabled && avatarCamera.placed;
 
   return (
-    <View style={styles.container}>
+    <View style={styles.container} onLayout={avatarCamera.onLayout}>
       <Map
         ref={mapRef}
         style={styles.map}
@@ -679,19 +680,21 @@ export const TerritoryMap = memo(function TerritoryMap({
             {/* The hologram is drawn by the map, not by Filament, so it sits on
                 the ground plane: it scales with zoom, tilts with pitch and is
                 occluded by buildings the way a projection on tarmac would be.
-                The avatar floats above it in a second renderer that cannot be
-                depth-tested against the map. */}
-            {wantsAvatar && <Layer beforeId="hud-player-anchor" id="player-hologram-halo" type="circle" paint={{ 'circle-radius': ['interpolate', ['linear'], ['zoom'], 14, 7, 18, 18], 'circle-color': HOLOGRAM, 'circle-opacity': 0.16, 'circle-blur': 0.8 }} />}
-            {wantsAvatar && <Layer beforeId="hud-player-anchor" id="player-hologram-disc" type="circle" paint={{ 'circle-radius': ['interpolate', ['linear'], ['zoom'], 14, 4, 18, 10], 'circle-color': HOLOGRAM, 'circle-opacity': 0.26, 'circle-stroke-width': 1.5, 'circle-stroke-color': HOLOGRAM, 'circle-stroke-opacity': 0.7 }} />}
+                Three rings rather than one — a soft spill, a filled pad and a
+                wider outline — so it reads as light thrown onto the road under
+                the character's feet instead of a dot it happens to stand on. */}
+            {/* Explicit keys: GeoJSONSource drops falsy children before it
+                clones them, so without one a layer appearing or disappearing
+                shifts the generated keys and MapLibre is asked to rename a
+                live layer, which it refuses. */}
+            {avatarDrawn && <Layer key="player-hologram-glow" beforeId="hud-player-anchor" id="player-hologram-glow" type="circle" paint={{ 'circle-radius': ['interpolate', ['linear'], ['zoom'], 14, 9, 18, 22], 'circle-color': HOLOGRAM, 'circle-opacity': 0.18, 'circle-blur': 1 }} />}
+            {avatarDrawn && <Layer key="player-hologram-ring" beforeId="hud-player-anchor" id="player-hologram-ring" type="circle" paint={{ 'circle-radius': ['interpolate', ['linear'], ['zoom'], 14, 8, 18, 19], 'circle-color': HOLOGRAM, 'circle-opacity': 0, 'circle-stroke-width': 1.2, 'circle-stroke-color': HOLOGRAM, 'circle-stroke-opacity': 0.32 }} />}
+            {avatarDrawn && <Layer key="player-hologram-pad" beforeId="hud-player-anchor" id="player-hologram-pad" type="circle" paint={{ 'circle-radius': ['interpolate', ['linear'], ['zoom'], 14, 6, 18, 13], 'circle-color': HOLOGRAM, 'circle-opacity': 0.3, 'circle-stroke-width': 1.5, 'circle-stroke-color': HOLOGRAM, 'circle-stroke-opacity': 0.85 }} />}
             {/* Whenever the avatar is not actually drawn — the classic marker,
                 no fix projected, economy mode, the summary map — the plain dot
                 takes over, so the exact spot is never left unmarked. */}
-            {!(wantsAvatar && avatarPose) && (
-              <>
-                <Layer beforeId="hud-player-anchor" id="player-marker-glow" type="circle" paint={{ 'circle-radius': 18, 'circle-color': activationColor, 'circle-opacity': 0.2, 'circle-blur': 0.55 }} />
-                <Layer beforeId="hud-player-anchor" id="player-marker-dot" type="circle" paint={{ 'circle-radius': 7, 'circle-color': activationColor, 'circle-stroke-width': 3, 'circle-stroke-color': colors.surface }} />
-              </>
-            )}
+            {!avatarDrawn && <Layer key="player-marker-glow" beforeId="hud-player-anchor" id="player-marker-glow" type="circle" paint={{ 'circle-radius': 18, 'circle-color': activationColor, 'circle-opacity': 0.2, 'circle-blur': 0.55 }} />}
+            {!avatarDrawn && <Layer key="player-marker-dot" beforeId="hud-player-anchor" id="player-marker-dot" type="circle" paint={{ 'circle-radius': 7, 'circle-color': activationColor, 'circle-stroke-width': 3, 'circle-stroke-color': colors.surface }} />}
           </GeoJSONSource>
         )}
 
@@ -703,8 +706,7 @@ export const TerritoryMap = memo(function TerritoryMap({
           map's camera instead, so the character stays on its own patch of
           ground while the map is panned around it. */}
       <PlayerAvatar
-        pose={avatarPose}
-        coordinate={avatarCoordinate}
+        camera={avatarCamera}
         running={recording && (effectiveFix?.speedMps ?? 0) > RUNNING_SPEED_MPS}
       />
 

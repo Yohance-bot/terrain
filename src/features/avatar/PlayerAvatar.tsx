@@ -1,26 +1,19 @@
 import { useCallback, useState } from 'react';
-import { StyleSheet, View, type LayoutChangeEvent } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import {
   Animator,
-  Camera,
   DefaultLight,
   FilamentScene,
   FilamentView,
   Model,
+  RenderCallbackContext,
+  useFilamentContext,
   type AnimationItem,
 } from 'react-native-filament';
+import { useSharedValue } from 'react-native-worklets-core';
 
-import {
-  cameraDistance,
-  cameraEye,
-  cameraUp,
-  FAR_PLANE,
-  FOCAL_LENGTH_MM,
-  groundOffset,
-  NEAR_PLANE,
-  type Float3,
-  type MapPose,
-} from './mapCamera';
+import type { AvatarCamera } from './useAvatarCamera';
+import { FAR_PLANE, FOCAL_LENGTH_MM, NEAR_PLANE, type Float3 } from './mapCamera';
 
 /**
  * The player's 3D avatar, standing in the map rather than on top of it.
@@ -70,18 +63,49 @@ const AVATAR_SCALE: Float3 = [AVATAR_HEIGHT, AVATAR_HEIGHT, AVATAR_HEIGHT];
 const AVATAR_LIFT: Float3 = [0, AVATAR_HEIGHT / 2, 0];
 
 type Props = {
-  /** The map's current camera. Null hides the avatar: without it there is no
-   *  honest place to put the character. */
-  pose: MapPose | null;
-  /** Where the player is. */
-  coordinate: [number, number] | null;
+  /** The map's camera, as shared values the render thread can read. */
+  camera: AvatarCamera;
   /** Drives the clip: true plays Run, false plays Idle. */
   running: boolean;
 };
 
-export function PlayerAvatar({ pose, coordinate, running }: Props) {
+/**
+ * Aims Filament's camera from the shared values, once per rendered frame.
+ *
+ * Deliberately not `<Camera>`: that component takes its numbers as props, so
+ * every pose change re-registers its render callback and the camera can only
+ * move as often as React re-renders. Reading shared values inside the callback
+ * registers once, and then a pan costs no React work at all.
+ */
+function CameraRig({ rig }: { rig: AvatarCamera }) {
+  const { camera, view } = useFilamentContext();
+  const lastAspect = useSharedValue(0);
+  const { eye, target, up } = rig;
+
+  RenderCallbackContext.useRenderCallback(() => {
+    'worklet';
+    const aspect = view.getAspectRatio();
+    if (lastAspect.value !== aspect) {
+      lastAspect.value = aspect;
+      // Filament takes a focal length rather than an angle; 36mm is MapLibre's
+      // 36.87 degree vertical field of view on a 35mm frame. World units are
+      // map pixels, so the camera sits over a thousand of them from its target
+      // and Filament's 0.1/100 planes would clip the scene away entirely.
+      camera.setLensProjection(FOCAL_LENGTH_MM, aspect, NEAR_PLANE, FAR_PLANE);
+    }
+    // Rebuilt element by element: a shared value holding an array arrives on
+    // the render thread as a plain object, which Filament rejects outright.
+    const e = eye.value;
+    const t = target.value;
+    const u = up.value;
+    camera.lookAt([e[0], e[1], e[2]], [t[0], t[1], t[2]], [u[0], u[1], u[2]]);
+  }, [camera, view, lastAspect, eye, target, up]);
+
+  return null;
+}
+
+export function PlayerAvatar({ camera, running }: Props) {
   const [clips, setClips] = useState<{ run: number; idle: number } | null>(null);
-  const [viewport, setViewport] = useState<{ width: number; height: number } | null>(null);
 
   // Clips are matched by name. Indices depend on export order, and silently
   // playing the wrong one is the kind of bug that survives a long time.
@@ -98,68 +122,35 @@ export function PlayerAvatar({ pose, coordinate, running }: Props) {
     setClips({ run: run ?? 0, idle: idle ?? 0 });
   }, []);
 
-  const onLayout = useCallback((event: LayoutChangeEvent) => {
-    const { width, height } = event.nativeEvent.layout;
-    setViewport((current) =>
-      current?.width === width && current?.height === height ? current : { width, height },
-    );
-  }, []);
-
-  const ready = pose !== null && coordinate !== null && viewport !== null && viewport.height > 0;
-  const ground = ready ? groundOffset(pose, coordinate) : null;
-  const distance = ready ? cameraDistance(viewport.height) : 0;
-
-  /**
-   * The avatar stays at the origin and the camera moves around it.
-   *
-   * This is the same scene shifted, but it is the only safe way to animate it:
-   * Filament's transform props multiply onto the entity's current transform by
-   * default, so a translate that changes every frame compounds and throws the
-   * model out of the world within a second. Camera props go through lookAt,
-   * which is absolute and cannot accumulate.
-   */
-  const target: Float3 = ground ? [-ground.x, 0, -ground.z] : [0, 0, 0];
-  const eye = cameraEye(pose?.pitch ?? 0, distance);
-  const cameraPosition: Float3 = [target[0] + eye[0], target[1] + eye[1], target[2] + eye[2]];
+  // Nothing is drawn until a real camera has been read: a guessed one would put
+  // the character somewhere the player is not.
+  if (!camera.placed) return null;
 
   return (
-    <View pointerEvents="none" style={StyleSheet.absoluteFill} onLayout={onLayout}>
-      {ready && ground && (
-        <FilamentScene>
-          <FilamentView style={StyleSheet.absoluteFill} enableTransparentRendering>
-            <Camera
-              // Filament takes a focal length rather than an angle; 36mm is
-              // MapLibre's 36.87 degree vertical field of view on a 35mm frame.
-              focalLengthInMillimeters={FOCAL_LENGTH_MM}
-              cameraPosition={cameraPosition}
-              cameraTarget={target}
-              cameraUp={cameraUp(pose.pitch)}
-              // World units are map pixels, so the camera sits over a thousand
-              // of them away. Filament's 0.1/100 defaults would clip everything.
-              near={NEAR_PLANE}
-              far={FAR_PLANE}
+    <View pointerEvents="none" style={StyleSheet.absoluteFill}>
+      <FilamentScene>
+        <FilamentView style={StyleSheet.absoluteFill} enableTransparentRendering>
+          <CameraRig rig={camera} />
+          <DefaultLight />
+          <Model
+            source={RUNNER}
+            // Sized in map pixels, then lifted by half its height so the feet
+            // rest on the ground plane rather than the model's centre.
+            // Every one of these is constant, and deliberately so: Filament
+            // multiplies transform props onto the entity's existing transform,
+            // so anything that changes here compounds instead of replacing.
+            transformToUnitCube
+            scale={AVATAR_SCALE}
+            translate={AVATAR_LIFT}
+          >
+            <Animator
+              animationIndex={clips ? (running ? clips.run : clips.idle) : 0}
+              transitionDuration={TRANSITION_SECONDS}
+              onAnimationsLoaded={onAnimationsLoaded}
             />
-            <DefaultLight />
-            <Model
-              source={RUNNER}
-              // Sized in map pixels, then lifted by half its height so the feet
-              // rest on the ground plane rather than the model's centre.
-              // Every one of these is constant, and deliberately so: Filament
-              // multiplies transform props onto the entity's existing transform,
-              // so anything that changes here compounds instead of replacing.
-              transformToUnitCube
-              scale={AVATAR_SCALE}
-              translate={AVATAR_LIFT}
-            >
-              <Animator
-                animationIndex={clips ? (running ? clips.run : clips.idle) : 0}
-                transitionDuration={TRANSITION_SECONDS}
-                onAnimationsLoaded={onAnimationsLoaded}
-              />
-            </Model>
-          </FilamentView>
-        </FilamentScene>
-      )}
+          </Model>
+        </FilamentView>
+      </FilamentScene>
     </View>
   );
 }
