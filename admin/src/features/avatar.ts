@@ -41,7 +41,7 @@ export function createAvatarLayer(id = "player-avatar"): AvatarLayer {
   let current: THREE.AnimationAction | undefined;
   let position: [number, number] | null = null;
   let running = false;
-  let clock = new THREE.Clock();
+  let lastFrame = performance.now();
 
   const scene = new THREE.Scene();
   const camera = new THREE.Camera();
@@ -70,7 +70,7 @@ export function createAvatarLayer(id = "player-avatar"): AvatarLayer {
       map = added;
       renderer = new THREE.WebGLRenderer({ canvas: added.getCanvas(), context: gl });
       renderer.autoClear = false;
-      clock = new THREE.Clock();
+      lastFrame = performance.now();
 
       new GLTFLoader().load(runnerUrl, (gltf) => {
         const model = gltf.scene;
@@ -123,7 +123,9 @@ export function createAvatarLayer(id = "player-avatar"): AvatarLayer {
 
     render(_gl, options) {
       if (!renderer || !map || !position) return;
-      mixer?.update(clock.getDelta());
+      const now = performance.now();
+      mixer?.update((now - lastFrame) / 1000);
+      lastFrame = now;
 
       const anchor = MercatorCoordinate.fromLngLat(position, 0);
       const scale = AVATAR_PIXELS * pixelsToMercator(map.getZoom());
