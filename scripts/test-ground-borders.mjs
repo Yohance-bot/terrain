@@ -66,10 +66,10 @@ for (const hour of [12, 22]) {
     }
   }
 
-  // Same presence as the buildings: the opacity is baked into both colours.
+  // Same opacity as the buildings, baked into both colours.
   const alphaOf = color => Number(color.match(/,([\d.]+)\)$/)?.[1]);
-  assert.equal(alphaOf(kerbs[0].layer.paint['line-color']), STRUCTURE_OPACITY, 'kerbs recede with the buildings');
-  assert.equal(alphaOf(building.paint['line-color']), STRUCTURE_OPACITY, 'borders recede with the buildings');
+  assert.equal(alphaOf(kerbs[0].layer.paint['line-color']), STRUCTURE_OPACITY, 'kerbs match the buildings\' opacity');
+  assert.equal(alphaOf(building.paint['line-color']), STRUCTURE_OPACITY, 'borders match the buildings\' opacity');
   assert.equal(new Set(kerbs.map(({ layer }) => layer.paint['line-color'])).size, 1, 'every kerb shares one colour');
   assert.equal(building['source-layer'], 'building');
 

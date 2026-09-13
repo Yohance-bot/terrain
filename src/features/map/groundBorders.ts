@@ -7,20 +7,24 @@ import { withAlpha, type lightingPalette } from '../hud/lighting';
  * How present the massing is — and, since the borders belong to the same
  * built world, how present its edges are.
  *
- * One value for facades, roofs, kerbs and building outlines, so they recede
- * together instead of separating into layers. A fixed per-layer opacity is the
- * only kind MapLibre supports for extrusions (the paint property is not
- * data-driven), which is why territory tinting is baked into the colour.
+ * Solid. Translucent buildings (0.62 was tried) let the streets show through
+ * the facades and read as washed out rather than as a lighter touch. One value
+ * for facades, roofs, kerbs and outlines keeps them a single material. A fixed
+ * per-layer opacity is the only kind MapLibre supports for extrusions (the
+ * paint property is not data-driven), which is why territory tinting is baked
+ * into the colour.
  */
-export const STRUCTURE_OPACITY = 0.62;
+export const STRUCTURE_OPACITY = 1;
 
 type Palette = ReturnType<typeof lightingPalette>;
 
 /** Kerbs only appear once streets are wide enough for two edges to separate. */
 const KERB_MIN_ZOOM = 15;
 
-const KERB_WIDTH: ExpressionSpecification = ['interpolate', ['linear'], ['zoom'], KERB_MIN_ZOOM, 0.5, 18, 1.2, 20, 1.8];
-const BUILDING_BORDER_WIDTH: ExpressionSpecification = ['interpolate', ['linear'], ['zoom'], KERB_MIN_ZOOM, 0.6, 18, 2.2, 20, 3];
+const KERB_WIDTH: ExpressionSpecification = ['interpolate', ['linear'], ['zoom'], KERB_MIN_ZOOM, 1, 18, 2.4, 20, 3.4];
+// Twice what shows: the line is centred on the footprint and the solid
+// building covers its inner half.
+const BUILDING_BORDER_WIDTH: ExpressionSpecification = ['interpolate', ['linear'], ['zoom'], KERB_MIN_ZOOM, 1.4, 18, 4.4, 20, 6];
 
 /**
  * The drivable surfaces. Casings and centrelines are decoration on these, rail
@@ -85,7 +89,7 @@ export function groundBorderLayers(styleLayers: LayerSpecification[], palette: P
       minzoom: KERB_MIN_ZOOM,
       layout: { 'line-join': 'round' },
       // Centred on the footprint, under the extrusion: the outer half is the
-      // border, and the inner half shows faintly through the facade.
+      // border, and the building hides the rest.
       paint: { 'line-color': borderColor, 'line-width': BUILDING_BORDER_WIDTH },
     },
   };

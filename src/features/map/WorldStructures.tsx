@@ -3,7 +3,7 @@ import { memo } from 'react';
 import type { lightingPalette } from '@/features/hud/lighting';
 import type { ExpressionSpecification } from '@maplibre/maplibre-gl-style-spec';
 import { BUILDING_HEIGHT, ROOF_DECK } from './worldGeometry';
-// Shared with the ground borders, which recede with the buildings they outline.
+// Shared with the ground borders, so outlines match the buildings they surround.
 import { STRUCTURE_OPACITY } from './groundBorders';
 
 
