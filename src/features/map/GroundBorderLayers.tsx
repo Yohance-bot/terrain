@@ -10,9 +10,9 @@ const STYLE_LAYERS = MAP_STYLE.layers as LayerSpecification[];
 /** Kerbs along the streets and outlines around the buildings. See `groundBorders`. */
 export const GroundBorders = memo(function GroundBorders({ palette }: { palette: ReturnType<typeof lightingPalette> }) {
   const { kerbs, building } = useMemo(() => groundBorderLayers(STYLE_LAYERS, palette), [palette]);
+  // Every layer here is anchored to a base-style layer, so the stacking is fixed
+  // by the style itself and not by the order these happen to mount in.
   return <>
-    {kerbs.map(({ layer, beforeId }) => <Layer key={layer.id} beforeId={beforeId} {...layer as LayerProps} />)}
-    {/* Mounted ahead of the structures, so it lands beneath them at the anchor. */}
-    <Layer key={building.id} beforeId="hud-base-anchor" {...building as LayerProps} />
+    {[...kerbs, building].map(({ layer, beforeId }) => <Layer key={layer.id} beforeId={beforeId} {...layer as LayerProps} />)}
   </>;
 });

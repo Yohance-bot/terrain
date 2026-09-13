@@ -36,7 +36,20 @@ const byId = new Map(style.layers.map(layer => [layer.id, layer]));
 
 for (const hour of [12, 22]) {
   const palette = lightingPalette(new Date(2026, 8, 9, hour), null);
-  const { kerbs, building } = groundBorderLayers(style.layers, palette);
+  const { kerbs, building: placed } = groundBorderLayers(style.layers, palette);
+  const building = placed.layer;
+
+  // The outline must sit under the buildings whatever order layers mount in, so
+  // it is anchored to a base-style layer: above every street, bridge and tunnel
+  // line, and below the anchor the extrusions are inserted at. On a phone it
+  // once landed above them and drew footprints across the roofs.
+  const outlineAt = ids.indexOf(placed.beforeId);
+  assert.ok(outlineAt >= 0, `outline anchor ${placed.beforeId} must exist in the base style`);
+  assert.doesNotMatch(placed.beforeId, /^hud-|^world-|^ground-/, 'outline must anchor to a base style layer, not a runtime one');
+  assert.ok(outlineAt < ids.indexOf('hud-base-anchor'), 'outline must sit below the building anchor');
+  style.layers.forEach((layer, index) => {
+    if (layer.type === 'line' && /^(road|bridge|tunnel)_/.test(layer.id)) assert.ok(index < outlineAt, `${layer.id} should stay below the outline`);
+  });
 
   // Every drivable surface gets exactly one kerb, and nothing else does.
   const edged = kerbs.map(({ layer }) => layer.id.replace('ground-kerb-', ''));
@@ -87,8 +100,8 @@ for (const hour of [12, 22]) {
 }
 
 // Day and night must not share an edge colour, or one of them is unreadable.
-const day = groundBorderLayers(style.layers, lightingPalette(new Date(2026, 8, 9, 12), null)).building.paint['line-color'];
-const night = groundBorderLayers(style.layers, lightingPalette(new Date(2026, 8, 9, 22), null)).building.paint['line-color'];
+const day = groundBorderLayers(style.layers, lightingPalette(new Date(2026, 8, 9, 12), null)).building.layer.paint['line-color'];
+const night = groundBorderLayers(style.layers, lightingPalette(new Date(2026, 8, 9, 22), null)).building.layer.paint['line-color'];
 assert.notEqual(day, night, 'the edge colour follows the lighting');
 
 console.log('Ground borders passed: 14 kerbs on their roads\' own widths, under crossing streets, at building opacity, readable against the casing day and night.');

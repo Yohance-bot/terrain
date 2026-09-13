@@ -196,7 +196,7 @@ export default function WorldMap(props: Props) {
       // Kerbs and building borders, built by the same code as the phone's so the
       // two maps cannot drift apart.
       const borders = groundBorderLayers(m.getStyle().layers, worldPalette(latest.current.night));
-      m.addLayer(borders.building, "world-buildings");
+      m.addLayer(borders.building.layer, borders.building.beforeId);
       for (const { layer, beforeId } of borders.kerbs) m.addLayer(layer, beforeId);
       m.addSource("roofs", { type: "geojson", data: EMPTY });
       m.addLayer(

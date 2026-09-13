@@ -49,7 +49,7 @@ export type PlacedLayer = { layer: LineLayerSpecification; beforeId: string };
  * surfaces: a crossing street then paints over them, and junctions stay clean
  * instead of being scored through by the edges of the road beneath.
  */
-export function groundBorderLayers(styleLayers: LayerSpecification[], palette: Palette): { kerbs: PlacedLayer[]; building: LineLayerSpecification } {
+export function groundBorderLayers(styleLayers: LayerSpecification[], palette: Palette): { kerbs: PlacedLayer[]; building: PlacedLayer } {
   const kerbColor = withAlpha(palette.kerb, STRUCTURE_OPACITY);
   const borderColor = withAlpha(palette.edge, STRUCTURE_OPACITY);
   const kerbs: PlacedLayer[] = [];
@@ -79,18 +79,33 @@ export function groundBorderLayers(styleLayers: LayerSpecification[], palette: P
       },
     });
   }
+  // The outline is anchored in the base style, directly above the last street,
+  // bridge or tunnel line — never relative to the building layers. Runtime
+  // layers are added in whatever order their native views mount, so "mounted
+  // first, therefore lower" does not hold: on a phone the outline landed above
+  // the extrusions and drew every footprint straight across the roofs. A base
+  // style layer always exists, and everything from here up to the building
+  // anchor is labels, so the solid buildings cover the outline's inner half.
+  let lastStreet = -1;
+  styleLayers.forEach((layer, index) => {
+    if (layer.type === 'line' && /^(road|bridge|tunnel)_/.test(layer.id)) lastStreet = index;
+  });
+  const aboveStreets = styleLayers[lastStreet + 1]!.id;
   return {
     kerbs,
     building: {
-      id: 'ground-building-borders',
-      type: 'line',
-      source: 'openmaptiles',
-      'source-layer': 'building',
-      minzoom: KERB_MIN_ZOOM,
-      layout: { 'line-join': 'round' },
-      // Centred on the footprint, under the extrusion: the outer half is the
-      // border, and the building hides the rest.
-      paint: { 'line-color': borderColor, 'line-width': BUILDING_BORDER_WIDTH },
+      beforeId: aboveStreets,
+      layer: {
+        id: 'ground-building-borders',
+        type: 'line',
+        source: 'openmaptiles',
+        'source-layer': 'building',
+        minzoom: KERB_MIN_ZOOM,
+        layout: { 'line-join': 'round' },
+        // Centred on the footprint, under the extrusion: the outer half is the
+        // border, and the building hides the rest.
+        paint: { 'line-color': borderColor, 'line-width': BUILDING_BORDER_WIDTH },
+      },
     },
   };
 }
