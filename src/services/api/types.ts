@@ -8,7 +8,11 @@ export type GpsSample = {
   speed_mps: number | null;
   provider: string | null;
   is_mock: boolean;
+  altitude_m?: number | null;
+  altitude_accuracy_m?: number | null;
 };
+
+export type RunConditions = { temperature_c: number | null; weather_code: number | null };
 
 export type RunSubmission = {
   run_id: string;
@@ -16,6 +20,7 @@ export type RunSubmission = {
   ended_at: string;
   samples: GpsSample[];
   source?: 'tracked' | 'ambient' | 'imported';
+  conditions?: RunConditions | null;
 };
 
 export type SegmentResult = {
@@ -366,4 +371,87 @@ export type StakeableArea = {
   area_m2: number;
   run_id: string;
   created_at: string;
+};
+
+// --- Athlete profile ----------------------------------------------------------
+// Metres and seconds throughout; `src/lib/format` owns every conversion.
+
+export type AthleteTotals = { runs: number; distance_m: number; moving_s: number; elevation_gain_m: number };
+export type WeekBucket = AthleteTotals & { week_start: string };
+export type MonthBucket = AthleteTotals & { month: string };
+export type StreakSummary = { current_weeks: number; best_weeks: number; current_since: string | null; ran_this_week: boolean };
+export type BestEffortRecord = { distance_m: number; elapsed_s: number; run_id: string; started_at: string };
+export type RunRecord = { run_id: string; started_at: string; distance_m: number; elevation_gain_m: number | null };
+export type GoalMetric = 'distance' | 'time' | 'runs';
+export type GoalProgress = { metric: GoalMetric; target: number; value: number; updated_at: string };
+
+export type AthleteStats = {
+  timezone: string;
+  generated_at: string;
+  this_week: AthleteTotals;
+  this_month: AthleteTotals;
+  year_to_date: AthleteTotals;
+  all_time: AthleteTotals;
+  last_four_weeks: { runs_per_week: number; distance_m_per_week: number; moving_s_per_week: number };
+  week_days_m: number[];
+  weeks: WeekBucket[];
+  months: MonthBucket[];
+  streak: StreakSummary;
+  best_efforts: BestEffortRecord[];
+  longest_run: RunRecord | null;
+  biggest_climb: RunRecord | null;
+  goal: GoalProgress | null;
+  territories_held: number;
+  territories_captured: number;
+};
+
+export type ShoeRef = { id: string; name: string };
+
+export type RunSummary = {
+  run_id: string;
+  started_at: string;
+  ended_at: string;
+  distance_m: number;
+  moving_s: number;
+  elapsed_s: number;
+  elevation_gain_m: number | null;
+  title: string | null;
+  note: string | null;
+  shoe: ShoeRef | null;
+  captures: number;
+  personal_records: number[];
+  temperature_c: number | null;
+  weather_code: number | null;
+};
+
+export type RunPage = { runs: RunSummary[]; next_before: string | null };
+export type RunSplit = { index: number; distance_m: number; moving_s: number; elevation_delta_m: number | null };
+export type RunEffort = { distance_m: number; elapsed_s: number; rank: number | null; personal_record: boolean };
+
+export type RunActivity = {
+  summary: RunSummary;
+  splits: RunSplit[];
+  pace_series: [number, number][];
+  elevation_series: [number, number][];
+  best_efforts: RunEffort[];
+  elevation_loss_m: number | null;
+  calories: number | null;
+};
+
+export type RunAnnotationUpdate = { title?: string | null; note?: string | null; shoe_id?: string | null };
+export type AthleteSettings = { weight_kg: number | null };
+export type ShoeRecord = { id: string; name: string; is_default: boolean; retired: boolean; distance_m: number; runs: number; created_at: string };
+
+export type FriendProfile = {
+  account: PublicAccount;
+  friends_since: string;
+  this_week: AthleteTotals;
+  year_to_date: AthleteTotals;
+  all_time: AthleteTotals;
+  weeks: WeekBucket[];
+  streak: StreakSummary;
+  best_efforts: BestEffortRecord[];
+  longest_run: RunRecord | null;
+  territories_held: number;
+  recent_runs: RunSummary[];
 };

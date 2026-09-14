@@ -1,5 +1,4 @@
-import { Feather } from '@expo/vector-icons';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useShallow } from 'zustand/react/shallow';
 import { TelemetryPill } from '@/features/hud/TelemetryPill';
 import { CueOverlay } from '@/features/hud/CueOverlay';
@@ -23,7 +22,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { TerritoryMap } from '@/features/map/TerritoryMap';
 import { ENABLE_SIMULATION, JAYANAGAR_CENTER } from '@/constants/config';
-import { recoverRecorderOnce, resetRecorderStats, useRecorder } from '@/features/recorder/useRecorder';
+import { recoverRecorderOnce, resetRecorderStats, startConditions, useRecorder } from '@/features/recorder/useRecorder';
 import { getDeviceId, setDevRunnerId } from '@/lib/device';
 import { formatDistance } from '@/lib/geo';
 import { findActiveTerritoryId, findLoopCandidateTerritoryIds } from '@/lib/pointInPolygon';
@@ -44,12 +43,17 @@ import {
   getMeta,
   setMeta,
 } from '@/lib/db';
-import { colors, fontSize, fontWeight, radius, spacing } from '@/theme';
+import { colors, fontSize, fontWeight, fonts, radius, spacing, ui } from '@/theme';
 import { getCaptureColorIndex } from '@/lib/preferences';
 import { usePresence } from '@/features/social/usePresence';
 import { startEventPolling, stopEventPolling, useSocial } from '@/features/social/useSocial';
 import { useGhostRace } from '@/features/social/useGhostRace';
 import { formatLead, leadMetres } from '@/features/social/ghostPlayback';
+import { StatusBar } from 'expo-status-bar';
+import { TabBar } from '@/components/TabBar';
+import { ChevronRightIcon, GhostIcon, LayersIcon, LogIcon, StartIcon } from '@/components/icons';
+import { Toggle } from '@/components/ui';
+import { daylight } from '@/features/hud/lighting';
 
 // Bundled territories used for point-in-polygon during a live run.
 // Same source as TerritoryMap — always available offline.
@@ -282,6 +286,19 @@ export default function MapScreen() {
     }
   }, []);
 
+  // No refresh button: coming back to the map is the moment to refetch. The
+  // first focus is the mount, which already loads.
+  const firstFocus = useRef(true);
+  useFocusEffect(
+    useCallback(() => {
+      if (firstFocus.current) {
+        firstFocus.current = false;
+        return;
+      }
+      void refresh();
+    }, [refresh]),
+  );
+
   const submitQueuedRun = useCallback(async (runId: string): Promise<RunResult | null> => {
     let run = await getLocalRun(runId);
     if (!run?.endedAt) return null;
@@ -353,6 +370,7 @@ export default function MapScreen() {
         started_at: finalRun.startedAt.toISOString(),
         ended_at: finalRun.endedAt.toISOString(),
         samples,
+        conditions: await startConditions(runId),
       });
       await markSynced(runId);
       return result;
@@ -655,6 +673,7 @@ export default function MapScreen() {
 
   return (
     <View style={styles.container}>
+      <StatusBar style={daylight(new Date(), null) > 0.5 ? 'dark' : 'light'} />
       <TerritoryMap
         fix={fix}
         presentationActive={presentation.active}
@@ -787,61 +806,41 @@ export default function MapScreen() {
               <View style={styles.topBarStats}>
                 <Text style={styles.topBarStatText}>{formatDistance(account?.total_distance_m ?? 0)}</Text>
                 <Text style={styles.topBarStatDivider}>·</Text>
-                <Text style={styles.topBarStatText}>{account?.territories_led ?? 0} led</Text>
+                <Text style={styles.topBarStatText}>{account?.territories_led ?? 0} held</Text>
               </View>
             </View>
           </Pressable>
-          <Pressable accessibilityLabel="Settings" style={styles.notifBtn} onPress={() => router.push('/settings')}>
-            <Feather name="sliders" size={21} color="#DBF6DE"/>
+          <Pressable accessibilityRole="button" accessibilityLabel="Map layers" accessibilityState={{ expanded: layersPanelOpen }} style={[styles.layersButton, layersPanelOpen && styles.layersButtonActive]} onPress={() => setLayersPanelOpen((v) => !v)}>
+            <LayersIcon size={22} color={ui.icon} strokeWidth={2} />
           </Pressable>
         </View>
       )}
 
-      {/* ── Right Side Buttons ────────────────────────────── */}
-      {!recording && !busy && (
-        <View style={[styles.sideButtons, { top: insets.top + 72 }]}>
-          <Pressable accessibilityLabel="Explore play modes" style={styles.sideBtn} onPress={() => router.push('/play')}>
-            <Feather name="compass" size={22} color="#315C49"/><Text style={styles.sideBtnLabel}>Explore</Text>
-          </Pressable>
-          <Pressable accessibilityLabel="Friends" style={styles.sideBtn} onPress={() => router.push('/friends')}>
-            <Feather name="users" size={22} color="#315C49"/><Text style={styles.sideBtnLabel}>Friends</Text>
-          </Pressable>
-          <Pressable accessibilityLabel="Challenges" style={styles.sideBtn} onPress={() => { void useSocial.getState().markRead(); router.push('/challenges'); }}>
-            <Feather name="flag" size={22} color="#315C49"/>
-            <Text style={styles.sideBtnLabel}>Duels</Text>
-            {unreadCount > 0 && <View style={styles.badge}><Text style={styles.badgeText}>{unreadCount > 9 ? '9+' : unreadCount}</Text></View>}
-          </Pressable>
-          <Pressable accessibilityLabel="Ghost runs" style={styles.sideBtn} onPress={() => router.push('/ghosts')}>
-            <Feather name="clock" size={22} color="#315C49"/><Text style={styles.sideBtnLabel}>Ghosts</Text>
-          </Pressable>
-          <Pressable style={[styles.sideBtn, layersPanelOpen && styles.sideBtnActive]} onPress={() => setLayersPanelOpen((v) => !v)}>
-            <Feather name="layers" size={22} color="#315C49"/>
-            <Text style={styles.sideBtnLabel}>Layers</Text>
-          </Pressable>
-          <Pressable style={styles.sideBtn} onPress={() => void refresh(true)}>
-            <Feather name="refresh-cw" size={21} color="#315C49"/><Text style={styles.sideBtnLabel}>Refresh</Text>
-          </Pressable>
-        </View>
-      )}
-
-      {/* ── Layers Panel ──────────────────────────────────── */}
+      {/* ── Layers ───────────────────────────────────────── */}
       {!recording && layersPanelOpen && (
-        <View style={[styles.layersPanel, { top: insets.top + 72 }]}>
-          <Pressable style={[styles.layerOption, layerMode === 'all' && styles.layerOptionActive]} onPress={() => { setLayerMode('all'); setLayersPanelOpen(false); }}>
-            <View style={[styles.layerDot, { backgroundColor: colors.tabActive }]} />
-            <Text style={[styles.layerText, layerMode === 'all' && styles.layerTextActive]}>All layers</Text>
-          </Pressable>
-          <Pressable style={[styles.layerOption, layerMode === 'territories' && styles.layerOptionActive]} onPress={() => { setLayerMode('territories'); setLayersPanelOpen(false); }}>
-            <View style={[styles.layerDot, { backgroundColor: colors.ownedByOther }]} />
-            <Text style={[styles.layerText, layerMode === 'territories' && styles.layerTextActive]}>Territories only</Text>
-          </Pressable>
-          <Pressable style={[styles.layerOption, layerMode === 'captures' && styles.layerOptionActive]} onPress={() => { setLayerMode('captures'); setLayersPanelOpen(false); }}>
-            <View style={[styles.layerDot, { backgroundColor: colors.startGreen }]} />
-            <Text style={[styles.layerText, layerMode === 'captures' && styles.layerTextActive]}>Captures only</Text>
-          </Pressable>
-          <Pressable style={[styles.layerOption, ghostLayerOn && styles.layerOptionActive]} onPress={() => setGhostLayerOn((on) => !on)}>
-            <View style={[styles.layerDot, { backgroundColor: '#A5B4FC' }]} />
-            <Text style={[styles.layerText, ghostLayerOn && styles.layerTextActive]}>Ghosts nearby</Text>
+        <View style={[styles.layersPanel, { top: insets.top + 64 }]}>
+          {([['all', 'Everything'], ['territories', 'Territories only'], ['captures', 'My captures only']] as const).map(([mode, label]) => (
+            <Pressable
+              key={mode}
+              accessibilityRole="radio"
+              accessibilityState={{ checked: layerMode === mode }}
+              style={styles.layerOption}
+              onPress={() => { setLayerMode(mode); setLayersPanelOpen(false); }}
+            >
+              <Text style={[styles.layerText, layerMode === mode && styles.layerTextActive]}>{label}</Text>
+              <View style={[styles.radio, layerMode === mode && styles.radioOn]}>{layerMode === mode ? <View style={styles.radioDot} /> : null}</View>
+            </Pressable>
+          ))}
+          <View style={styles.layerDivider} />
+          <View style={styles.layerOption}>
+            <GhostIcon size={20} color={ui.icon} />
+            <Text style={styles.layerText}>Ghosts nearby</Text>
+            <Toggle label="Ghosts nearby" value={ghostLayerOn} onChange={setGhostLayerOn} />
+          </View>
+          <Pressable accessibilityRole="button" style={styles.layerOption} onPress={() => { setLayersPanelOpen(false); router.push('/ghosts'); }}>
+            <LogIcon size={20} color={ui.icon} />
+            <Text style={styles.layerText}>My ghosts</Text>
+            <ChevronRightIcon size={14} color={ui.ink3} />
           </Pressable>
         </View>
       )}
@@ -872,22 +871,24 @@ export default function MapScreen() {
         </View>
       )}
 
-      {/* ── Tab Bar ─────────────────────────────────────── */}
+      {/* ── Start and tabs ───────────────────────────────── */}
       {!recording && !busy && (
-        <View style={[styles.tabBar, { paddingBottom: insets.bottom }]}>
-          <Pressable style={styles.tab}>
-            <Feather name="map" size={23} color="#A5EDBF"/>
-            <Text style={[styles.tabLabel, styles.tabLabelActive]}>Map</Text>
+        <>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Start a run"
+            accessibilityHint={developerMode && ENABLE_SIMULATION ? 'Long press for developer run options' : undefined}
+            onPress={() => void onStart(false)}
+            onLongPress={developerMode && ENABLE_SIMULATION ? () => router.push('/play') : undefined}
+            style={({ pressed }) => [styles.startButton, { bottom: insets.bottom + 72 }, pressed && styles.startPressed]}
+          >
+            <StartIcon size={22} color={ui.startInk} />
+            <Text style={styles.startText}>Start</Text>
           </Pressable>
-          <Pressable style={styles.tab} onPress={() => router.push('/play')}>
-            <View style={{backgroundColor:"#BBF37E",borderRadius:22,paddingHorizontal:22,paddingVertical:10,marginTop:-18,marginBottom:4}}><Feather name="navigation" size={24} color="#1B4434"/></View>
-            <Text style={styles.tabLabel}>Play</Text>
-          </Pressable>
-          <Pressable style={styles.tab} onPress={() => router.push('/profile')}>
-            <Feather name="user" size={23} color="#94AD9F"/>
-            <Text style={styles.tabLabel}>Profile</Text>
-          </Pressable>
-        </View>
+          <View style={styles.tabDock}>
+            <TabBar active="map" badge={unreadCount > 0} />
+          </View>
+        </>
       )}
     </View>
   );
@@ -909,15 +910,16 @@ const styles = StyleSheet.create({
 
   // ── Top Bar ─────────────────────────────────────────
   topBar: { position: 'absolute', left: spacing.md, right: spacing.md, zIndex: 8, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  topBarLeft: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(15, 23, 35, 0.88)', borderRadius: radius.pill, paddingRight: spacing.md, paddingVertical: 6, paddingLeft: 6 },
-  avatarCircle: { width: 38, height: 38, borderRadius: 19, backgroundColor: '#1E293B', borderWidth: 2, borderColor: colors.tabActive, alignItems: 'center', justifyContent: 'center' },
-  avatarText: { color: colors.surface, fontSize: 13, fontWeight: fontWeight.bold },
+  topBarLeft: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.96)', borderRadius: radius.pill, paddingRight: spacing.md, paddingVertical: 5, paddingLeft: 5, shadowColor: '#0E1A13', shadowOpacity: 0.12, shadowRadius: 10, shadowOffset: { width: 0, height: 3 }, elevation: 4 },
+  avatarCircle: { width: 36, height: 36, borderRadius: 18, backgroundColor: ui.accent, alignItems: 'center', justifyContent: 'center' },
+  avatarText: { color: ui.surface, fontSize: 13, fontFamily: fonts.semibold },
   topBarInfo: { marginLeft: spacing.sm },
-  topBarName: { color: colors.surface, fontSize: fontSize.sm, fontWeight: fontWeight.bold },
+  topBarName: { color: ui.ink, fontSize: 15, fontFamily: fonts.semibold },
   topBarStats: { flexDirection: 'row', alignItems: 'center', marginTop: 1 },
-  topBarStatText: { color: colors.tabActive, fontSize: 11 },
-  topBarStatDivider: { color: '#475569', marginHorizontal: 4, fontSize: 11 },
-  notifBtn: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(15, 23, 35, 0.88)', alignItems: 'center', justifyContent: 'center' },
+  topBarStatText: { color: ui.ink2, fontSize: 12, fontFamily: fonts.medium },
+  topBarStatDivider: { color: ui.ink3, marginHorizontal: 4, fontSize: 12 },
+  layersButton: { width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(255,255,255,0.96)', alignItems: 'center', justifyContent: 'center', shadowColor: '#0E1A13', shadowOpacity: 0.12, shadowRadius: 10, shadowOffset: { width: 0, height: 3 }, elevation: 4 },
+  layersButtonActive: { backgroundColor: ui.accentSoft },
   notifIcon: { color: colors.surface, fontSize: 18 },
 
   // ── Right Side Buttons ──────────────────────────────
@@ -928,12 +930,14 @@ const styles = StyleSheet.create({
   sideBtnLabel: { fontSize: 8, fontWeight: fontWeight.bold, color: '#334155', marginTop: 1 },
 
   // ── Layers Panel ────────────────────────────────────
-  layersPanel: { position: 'absolute', right: 68, zIndex: 9, backgroundColor: 'rgba(15, 23, 35, 0.92)', borderRadius: radius.lg, padding: spacing.sm, gap: 2 },
-  layerOption: { flexDirection: 'row', alignItems: 'center', paddingVertical: spacing.sm, paddingHorizontal: spacing.md, borderRadius: radius.md },
-  layerOptionActive: { backgroundColor: 'rgba(45, 212, 191, 0.15)' },
-  layerDot: { width: 10, height: 10, borderRadius: 5, marginRight: spacing.sm },
-  layerText: { color: '#94A3B8', fontSize: fontSize.sm, fontWeight: fontWeight.semibold },
-  layerTextActive: { color: colors.tabActive },
+  layersPanel: { position: 'absolute', right: spacing.md, width: 252, zIndex: 9, backgroundColor: ui.surface, borderRadius: 16, paddingVertical: 6, shadowColor: '#0E1A13', shadowOpacity: 0.16, shadowRadius: 18, shadowOffset: { width: 0, height: 6 }, elevation: 8 },
+  layerOption: { flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 48, paddingHorizontal: 14 },
+  layerDivider: { height: StyleSheet.hairlineWidth, backgroundColor: ui.line, marginVertical: 4 },
+  radio: { width: 20, height: 20, borderRadius: 10, borderWidth: 2, borderColor: ui.line, alignItems: 'center', justifyContent: 'center' },
+  radioOn: { borderColor: ui.accent },
+  radioDot: { width: 10, height: 10, borderRadius: 5, backgroundColor: ui.accent },
+  layerText: { flex: 1, color: ui.ink, fontSize: 15, fontFamily: fonts.medium },
+  layerTextActive: { fontFamily: fonts.semibold },
 
   // ── Legend ──────────────────────────────────────────
   legend: { position: 'absolute', left: spacing.md, zIndex: 6, backgroundColor: 'rgba(15, 23, 35, 0.88)', borderRadius: radius.lg, padding: spacing.md, gap: spacing.sm },
@@ -1017,6 +1021,10 @@ const styles = StyleSheet.create({
   tabIconActive: { color: colors.tabActive },
   tabLabel: { fontSize: 10, fontWeight: fontWeight.semibold, color: '#64748B' },
   tabLabelActive: { color: colors.tabActive },
+  startButton: { position: 'absolute', alignSelf: 'center', zIndex: 6, flexDirection: 'row', alignItems: 'center', gap: 8, height: 52, paddingLeft: 22, paddingRight: 28, borderRadius: 26, backgroundColor: ui.start, shadowColor: '#0E1A13', shadowOpacity: 0.18, shadowRadius: 14, shadowOffset: { width: 0, height: 6 }, elevation: 6 },
+  startPressed: { transform: [{ scale: 0.97 }] },
+  startText: { color: ui.startInk, fontSize: 18, fontFamily: fonts.bold, letterSpacing: 0.2 },
+  tabDock: { position: 'absolute', left: 0, right: 0, bottom: 0, zIndex: 5 },
 
   // ── Joystick ────────────────────────────────────────
   joystickWrap: { position: 'absolute', left: spacing.lg, bottom: 200, zIndex: 9, alignItems: 'center' },

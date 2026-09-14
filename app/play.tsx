@@ -1,14 +1,16 @@
-import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ENABLE_SIMULATION } from '@/constants/config';
 import { DEV_RUNNERS, getActiveDevRunnerId, getSelectedDevRunnerId, setDevRunnerId } from '@/lib/device';
 import { fetchAccount, getCachedAccount } from '@/services/api/client';
 import type { AccountSummary } from '@/services/api/types';
-import { colors, fontSize, fontWeight, radius, spacing } from '@/theme';
+import { fonts, typeScale, ui } from '@/theme';
+import { StartIcon, MapIcon } from '@/components/icons';
+import { Button, Card, EmptyState, IconTile, Loading, NavHeader, Row, Screen, Toggle } from '@/components/ui';
+import { StatusBar } from 'expo-status-bar';
 
 /**
  * Play screen — the run preparation page. Users land here from the Play tab
@@ -24,6 +26,7 @@ export default function PlayScreen() {
   const [devRunnerId, setDevRunnerIdState] = useState<string>(() => getActiveDevRunnerId());
   const [busy, setBusy] = useState(() => !getCachedAccount());
 
+  const [failed, setFailed] = useState(false);
   const developerMode = account?.role === 'developer';
 
   useEffect(() => {
@@ -35,7 +38,7 @@ export default function PlayScreen() {
   useEffect(() => {
     void fetchAccount()
       .then((a) => setAccount(a ?? null))
-      .catch(() => undefined)
+      .catch(() => setFailed(true))
       .finally(() => setBusy(false));
   }, []);
 
@@ -43,126 +46,51 @@ export default function PlayScreen() {
     // Navigate to map and signal it to start recording.
     // We pass query params so the map screen knows to auto-start.
     if (developerMode && simulationSelected) {
-      router.replace({ pathname: '/', params: { autoStart: 'simulation', runnerId: devRunnerId } });
+      router.navigate({ pathname: '/', params: { autoStart: 'simulation', runnerId: devRunnerId } });
     } else {
-      router.replace({ pathname: '/', params: { autoStart: 'real' } });
+      router.navigate({ pathname: '/', params: { autoStart: 'real' } });
     }
   }, [developerMode, simulationSelected, devRunnerId, router]);
 
-  if (busy) {
-    return <View style={styles.centered}><ActivityIndicator color={colors.tabActive} /></View>;
-  }
-
   return (
-    <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Pressable onPress={() => router.back()}>
-          <Text style={styles.backText}>‹ Back</Text>
-        </Pressable>
-        <Text style={styles.title}>Play</Text>
-        <View style={{ width: 50 }} />
-      </View>
-
-      <View style={styles.body}>
-        {/* Hero */}
-        <View style={styles.hero}>
-          <View style={styles.heroIconWrap}>
-            <Feather name="navigation" size={32} color="#89DDAD"/>
+    <Screen>
+      <StatusBar style="dark" />
+      <NavHeader title="Start a run" onBack={() => router.back()} />
+      {busy ? <Loading /> : (
+        <ScrollView contentContainerStyle={styles.body}>
+          <View style={styles.hero}>
+            <IconTile><StartIcon size={28} /></IconTile>
+            <Text style={styles.title}>Make this run yours.</Text>
+            <Text style={styles.subtitle}>Follow your rhythm, light up your streets and see what you claimed when you finish.</Text>
           </View>
-          <Text style={styles.heroTitle}>Ready to run?</Text>
-          <Text style={styles.heroSub}>
-            Track your run and claim territory for your team.
-            {'\n'}Every metre counts towards your influence.
-          </Text>
-        </View>
-
-        {/* Developer controls */}
-        {developerMode && ENABLE_SIMULATION && (
-          <View style={styles.devSection}>
-            <Text style={styles.devLabel}>DEVELOPER TOOLS</Text>
-            <Pressable
-              onPress={() => setSimulationSelected((s) => !s)}
-              style={[styles.simToggle, simulationSelected && styles.simToggleActive]}
-            >
-              <Text style={[styles.simToggleText, simulationSelected && styles.simToggleTextActive]}>
-                {simulationSelected ? 'Virtual joystick: ON' : 'Enable virtual joystick'}
-              </Text>
-            </Pressable>
-
-            {simulationSelected && (
-              <View style={styles.runnerPicker}>
-                <Text style={styles.runnerPickerLabel}>SELECT RUNNER</Text>
-                <View style={styles.runnerChoices}>
-                  {DEV_RUNNERS.filter((_, index) => index === (account?.developer_slot ?? 1) - 1).map((runner) => (
-                    <Pressable
-                      key={runner.id}
-                      onPress={() => {
-                        setDevRunnerId(runner.id);
-                        setDevRunnerIdState(runner.id);
-                      }}
-                      style={[styles.runnerChoice, devRunnerId === runner.id && styles.runnerChoiceActive]}
-                    >
-                      <Text style={[styles.runnerChoiceText, devRunnerId === runner.id && styles.runnerChoiceTextActive]}>
-                        {runner.label}
-                      </Text>
-                    </Pressable>
-                  ))}
-                </View>
-              </View>
-            )}
-          </View>
-        )}
+          <Card>
+            <Row title="Your route, recorded" subtitle="Distance, pace and time as you move" leading={<MapIcon />} />
+            <Row title="Ready when you are" subtitle="Allow location access when prompted. You can finish your run from the map." last />
+          </Card>
+          {failed && <EmptyState title="Account check unavailable" body="You can still record a real run. Reopen this page when connected to access developer controls." />}
+          {developerMode && ENABLE_SIMULATION && (
+            <Card style={styles.developer}>
+              <Row title="Virtual joystick" subtitle="Simulate movement with your developer runner" trailing={<Toggle label="Virtual joystick" value={simulationSelected} onChange={setSimulationSelected} />} last />
+              {simulationSelected && DEV_RUNNERS.filter((_, index) => index === (account?.developer_slot ?? 1) - 1).map((runner) => (
+                <Button key={runner.id} label={runner.label} variant="secondary" onPress={() => { setDevRunnerId(runner.id); setDevRunnerIdState(runner.id); }} style={styles.runner} />
+              ))}
+            </Card>
+          )}
+        </ScrollView>
+      )}
+      <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 16) }]}>
+        <Button label={developerMode && simulationSelected ? 'Start virtual run' : 'Start run'} onPress={onStart} disabled={busy} icon={<StartIcon color={ui.surface} />} />
       </View>
-
-      {/* Start button */}
-      <View style={styles.footer}>
-        <Pressable
-          onPress={onStart}
-          style={({ pressed }) => [styles.startBtn, pressed && styles.startBtnPressed]}
-        >
-          <Text style={styles.startBtnText}>
-            {developerMode && simulationSelected ? 'START VIRTUAL RUN' : 'START RUN'}
-          </Text>
-        </Pressable>
-      </View>
-    </View>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0A0F14' },
-  centered: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#0A0F14' },
-
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: spacing.lg, paddingVertical: spacing.md },
-  backText: { color: colors.tabActive, fontSize: fontSize.md, fontWeight: fontWeight.semibold },
-  title: { color: colors.surface, fontSize: fontSize.lg, fontWeight: fontWeight.bold },
-
-  body: { flex: 1, paddingHorizontal: spacing.lg, justifyContent: 'center' },
-
-  hero: { alignItems: 'center', marginBottom: spacing.xxl },
-  heroIconWrap: { width: 72, height: 72, borderRadius: 36, backgroundColor: 'rgba(45, 212, 191, 0.12)', alignItems: 'center', justifyContent: 'center', marginBottom: spacing.lg },
-  heroIcon: { color: colors.tabActive, fontSize: 32 },
-  heroTitle: { color: colors.surface, fontSize: 28, fontWeight: fontWeight.bold, marginBottom: spacing.sm },
-  heroSub: { color: '#94A3B8', fontSize: fontSize.sm, textAlign: 'center', lineHeight: 20 },
-
-  devSection: { backgroundColor: '#111827', borderRadius: radius.lg, padding: spacing.lg, borderWidth: 1, borderColor: '#1F2937' },
-  devLabel: { color: '#64748B', fontSize: 10, fontWeight: fontWeight.bold, letterSpacing: 1.5, marginBottom: spacing.md },
-  simToggle: { paddingVertical: spacing.md, borderRadius: radius.md, borderWidth: 1, borderColor: '#1F2937', alignItems: 'center' },
-  simToggleActive: { borderColor: colors.route, backgroundColor: 'rgba(0, 229, 255, 0.08)' },
-  simToggleText: { color: '#94A3B8', fontSize: fontSize.sm, fontWeight: fontWeight.semibold },
-  simToggleTextActive: { color: colors.route },
-
-  runnerPicker: { marginTop: spacing.lg },
-  runnerPickerLabel: { color: '#64748B', fontSize: 10, fontWeight: fontWeight.bold, letterSpacing: 1.5, marginBottom: spacing.sm },
-  runnerChoices: { flexDirection: 'row', gap: spacing.sm },
-  runnerChoice: { flex: 1, alignItems: 'center', paddingVertical: spacing.sm, borderRadius: radius.md, borderWidth: 1, borderColor: '#1F2937' },
-  runnerChoiceActive: { backgroundColor: 'rgba(45, 212, 191, 0.12)', borderColor: colors.tabActive },
-  runnerChoiceText: { color: '#94A3B8', fontSize: fontSize.xs, fontWeight: fontWeight.semibold },
-  runnerChoiceTextActive: { color: colors.tabActive },
-
-  footer: { paddingHorizontal: spacing.lg, paddingVertical: spacing.md },
-  startBtn: { backgroundColor: colors.tabActive, paddingVertical: 16, borderRadius: radius.pill, alignItems: 'center' },
-  startBtnPressed: { opacity: 0.7 },
-  startBtnText: { color: '#042F2E', fontSize: 15, fontWeight: fontWeight.bold, letterSpacing: 1.2 },
+  body: { flexGrow: 1, justifyContent: 'center', paddingVertical: 24 },
+  hero: { alignItems: 'center', gap: 16, paddingHorizontal: 28, paddingBottom: 28 },
+  title: { fontFamily: fonts.bold, fontSize: 32, color: ui.ink, textAlign: 'center' },
+  subtitle: { ...typeScale.body, color: ui.ink2, textAlign: 'center', lineHeight: 23 },
+  developer: { marginTop: 20, paddingBottom: 8 },
+  runner: { marginHorizontal: 16, marginBottom: 8 },
+  footer: { paddingHorizontal: 20, paddingTop: 12 },
 });

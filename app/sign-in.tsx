@@ -13,6 +13,10 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
+import { GradientBackground } from "@/components/ui";
+import { MapIcon } from "@/components/icons";
+import { fonts, ui } from "@/theme";
+import { StatusBar } from "expo-status-bar";
 import { passwordLogin } from "@/services/api/client";
 import { startGoogleSignIn } from "@/lib/auth/google";
 import { accountErrorMessage } from "@/services/api/errors";
@@ -46,6 +50,8 @@ export default function SignInScreen() {
   }
   return (
     <SafeAreaView style={s.screen}>
+      <GradientBackground />
+      <StatusBar style="dark" />
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
@@ -56,7 +62,7 @@ export default function SignInScreen() {
         >
           <View style={s.hero}>
             <View style={s.mark}>
-              <Feather name="navigation" size={30} color="#B7F478" />
+              <MapIcon size={30} color={ui.start} />
             </View>
             <Text style={s.eyebrow}>TERRARUN</Text>
             <Text style={s.title}>Your next run.{"\n"}A world to claim.</Text>
@@ -72,7 +78,7 @@ export default function SignInScreen() {
               style={s.google}
               onPress={() => void submit(true)}
             >
-              <Feather name="globe" size={20} color="#183C30" />
+              <Feather name="globe" size={20} color={ui.ink} />
               <Text style={s.googleText}>Continue with Google</Text>
             </Pressable>
             <Text style={s.divider}>OR USE YOUR USERNAME</Text>
@@ -107,6 +113,8 @@ export default function SignInScreen() {
               value={password}
               onChangeText={setPassword}
               secureTextEntry
+              returnKeyType="go"
+              onSubmitEditing={() => { if (username.trim() && password && (!create || name.trim().length >= 2)) void submit(); }}
               autoComplete={create ? "new-password" : "current-password"}
               maxLength={128}
             />
@@ -117,27 +125,28 @@ export default function SignInScreen() {
             ) : null}
             <Pressable
               accessibilityRole="button"
-              style={[s.primary, busy && { opacity: 0.6 }]}
+              style={[s.primary, (busy || !username.trim() || !password || (create && name.trim().length < 2)) && { opacity: 0.45 }]}
               disabled={
                 busy ||
-                !username ||
+                !username.trim() ||
                 !password ||
                 (create && name.trim().length < 2)
               }
               onPress={() => void submit()}
             >
               {busy ? (
-                <ActivityIndicator color="#DAF5C9" />
+                <ActivityIndicator color={ui.surface} />
               ) : (
                 <>
                   <Text style={s.primaryText}>
                     {create ? "Create account" : "Let’s get moving"}
                   </Text>
-                  <Feather name="arrow-up-right" size={20} color="#DAF5C9" />
+                  <Feather name="arrow-up-right" size={20} color={ui.surface} />
                 </>
               )}
             </Pressable>
             <Pressable
+              accessibilityRole="button"
               disabled={busy}
               onPress={() => {
                 setCreate(!create);
@@ -162,14 +171,14 @@ export default function SignInScreen() {
   );
 }
 const s = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: "#EDF3E8" },
+  screen: { flex: 1, backgroundColor: ui.surface },
   scroll: { padding: 24, paddingBottom: 40 },
   hero: { paddingTop: 24, paddingBottom: 30 },
   mark: {
     width: 60,
     height: 60,
     borderRadius: 20,
-    backgroundColor: "#193E32",
+    backgroundColor: ui.accent,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 22,
@@ -177,52 +186,53 @@ const s = StyleSheet.create({
   eyebrow: {
     fontSize: 12,
     letterSpacing: 3,
-    color: "#386A50",
-    fontWeight: "800",
+    color: ui.accent,
+    fontFamily: fonts.bold,
   },
   title: {
     fontSize: 36,
     lineHeight: 41,
-    fontWeight: "800",
+    fontFamily: fonts.bold,
     letterSpacing: -1.4,
-    color: "#183C30",
+    color: ui.ink,
     marginVertical: 10,
   },
-  subtitle: { fontSize: 15, color: "#6B7B70" },
+  subtitle: { fontSize: 15, color: ui.ink2 },
   card: { padding: 22, borderRadius: 28, backgroundColor: "#FFF", gap: 12 },
   heading: {
     fontSize: 22,
-    fontWeight: "700",
-    color: "#183C30",
+    fontFamily: fonts.bold,
+    color: ui.ink,
     marginBottom: 8,
   },
   google: {
     flexDirection: "row",
     gap: 12,
     borderWidth: 1,
-    borderColor: "#DCE5D7",
+    borderColor: ui.line,
     borderRadius: 16,
     padding: 17,
     alignItems: "center",
     justifyContent: "center",
   },
-  googleText: { fontSize: 15, fontWeight: "600", color: "#183C30" },
+  googleText: { fontSize: 15, fontFamily: fonts.semibold, color: ui.ink },
   divider: {
     fontSize: 10,
     letterSpacing: 1.5,
     textAlign: "center",
-    color: "#809080",
+    color: ui.ink3,
     marginVertical: 7,
   },
   input: {
     borderRadius: 14,
-    backgroundColor: "#F4F7F1",
+    backgroundColor: ui.accentSoft,
     padding: 16,
     fontSize: 16,
-    color: "#183C30",
+    fontFamily: fonts.regular,
+    color: ui.ink,
   },
   primary: {
-    backgroundColor: "#183C30",
+    backgroundColor: ui.accent,
     borderRadius: 16,
     padding: 18,
     flexDirection: "row",
@@ -230,19 +240,19 @@ const s = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  primaryText: { color: "#DAF5C9", fontSize: 16, fontWeight: "700" },
+  primaryText: { color: ui.surface, fontSize: 16, fontFamily: fonts.bold },
   switch: {
     textAlign: "center",
-    color: "#386A50",
+    color: ui.accent,
     fontSize: 13,
     paddingTop: 10,
   },
   foot: {
     fontSize: 12,
     lineHeight: 18,
-    color: "#6B7B70",
+    color: ui.ink2,
     textAlign: "center",
     marginTop: 24,
   },
-  error: { color: "#AD352C", fontSize: 13, lineHeight: 19 },
+  error: { color: ui.danger, fontSize: 13, lineHeight: 19 },
 });

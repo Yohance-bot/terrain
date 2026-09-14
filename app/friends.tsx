@@ -1,22 +1,15 @@
-import { router, useFocusEffect } from 'expo-router';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
 import { useCallback, useState } from 'react';
-import {
-  ActivityIndicator,
-  Alert,
-  Pressable,
-  RefreshControl,
-  ScrollView,
-  StyleSheet,
-  Switch,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { ActivityIndicator, Alert, Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
+import { PlusIcon, SearchIcon } from '@/components/icons';
+import { TabBar } from '@/components/TabBar';
+import { Avatar, Card, EmptyState, ErrorState, Loading, Row, RoundButton, Screen, ScreenTitle, SectionLabel, Segmented } from '@/components/ui';
+import { DuelsPanel } from '@/features/social/DuelsPanel';
+import { useSocial } from '@/features/social/useSocial';
 import {
   acceptFriendRequest,
-  blockAccount,
   declineFriendRequest,
   fetchAccount,
   fetchFriends,
@@ -25,180 +18,64 @@ import {
   searchAccounts,
   sendFriendRequest,
   unblockAccount,
-  updateHandle,
-  updateSharing,
 } from '@/services/api/client';
-import type {
-  AccountSummary,
-  FriendList,
-  PublicAccount,
-  SharingEntry,
-  SharingOverview,
-} from '@/services/api/types';
-import { colors, fontSize, fontWeight, radius, spacing } from '@/theme';
+import type { AccountSummary, FriendList, PublicAccount, SharingOverview } from '@/services/api/types';
+import { fonts, typeScale, ui } from '@/theme';
 
 const EMPTY: FriendList = { friends: [], incoming: [], outgoing: [], blocked: [] };
+const NO_SHARING: SharingOverview = { sharing_with: [], visible_to_me: [] };
 
 function message(error: unknown): string {
   if (!(error instanceof Error)) return 'Try again';
-  // ApiRequestError carries the raw JSON body; surface the server's sentence.
   const detail = error.message.match(/"detail":"([^"]+)"/);
   return detail?.[1] ?? error.message;
 }
 
-function Avatar({ account }: { account: PublicAccount }) {
-  return (
-    <View style={styles.avatar}>
-      <Text style={styles.avatarText}>{account.display_name.slice(0, 1).toUpperCase()}</Text>
-    </View>
-  );
-}
-
-function Row({
-  account,
-  children,
-}: {
-  account: PublicAccount;
-  children?: React.ReactNode;
-}) {
-  return (
-    <View style={styles.row}>
-      <Avatar account={account} />
-      <View style={styles.rowText}>
-        <Text style={styles.rowName} numberOfLines={1}>
-          {account.display_name}
-        </Text>
-        <Text style={styles.rowHandle} numberOfLines={1}>
-          @{account.handle}
-        </Text>
-      </View>
-      <View style={styles.rowActions}>{children}</View>
-    </View>
-  );
-}
-
-function Action({
-  label,
-  onPress,
-  tone = 'neutral',
-}: {
-  label: string;
-  onPress: () => void;
-  tone?: 'primary' | 'neutral' | 'danger';
-}) {
+function Pill({ label, onPress, tone = 'neutral' }: { label: string; onPress: () => void; tone?: 'primary' | 'neutral' }) {
   return (
     <Pressable
-      style={[
-        styles.action,
-        tone === 'primary' && styles.actionPrimary,
-        tone === 'danger' && styles.actionDanger,
-      ]}
-      onPress={onPress}>
-      <Text
-        style={[
-          styles.actionText,
-          tone === 'primary' && styles.actionTextPrimary,
-          tone === 'danger' && styles.actionTextDanger,
-        ]}>
-        {label}
-      </Text>
+      accessibilityRole="button"
+      onPress={onPress}
+      style={({ pressed }) => [styles.pill, tone === 'primary' ? styles.pillPrimary : styles.pillNeutral, pressed && { opacity: 0.7 }]}
+    >
+      <Text style={[styles.pillText, tone === 'primary' && { color: ui.surface }]}>{label}</Text>
     </Pressable>
   );
 }
 
-const NO_SHARING: SharingOverview = { sharing_with: [], visible_to_me: [] };
-
-function FriendCard({
-  entry,
-  watching,
-  onToggle,
-  onChallenge,
-  onManage,
-}: {
-  entry: SharingEntry;
-  /** True when this friend is currently visible on your own map. */
-  watching: boolean;
-  onToggle: (update: { share_location?: boolean; notify_on_run_start?: boolean }) => void;
-  onChallenge: () => void;
-  onManage: () => void;
-}) {
-  return (
-    <View style={styles.card}>
-      <Row account={entry.account}>
-        <Action label="Challenge" onPress={onChallenge} />
-        <Action label="•••" onPress={onManage} />
-      </Row>
-      <View style={styles.toggleRow}>
-        <View style={styles.toggleText}>
-          <Text style={styles.toggleLabel}>Share my live location</Text>
-          <Text style={styles.toggleHint}>
-            {entry.location_expires_at
-              ? 'On for a race, ending when the race does'
-              : 'Off by default. Turn it off again any time.'}
-          </Text>
-        </View>
-        <Switch
-          value={entry.share_location}
-          onValueChange={(value) => onToggle({ share_location: value })}
-        />
-      </View>
-      <View style={styles.toggleRow}>
-        <View style={styles.toggleText}>
-          <Text style={styles.toggleLabel}>Tell them when I start a run</Text>
-          <Text style={styles.toggleHint}>Separate from location — one without the other is fine.</Text>
-        </View>
-        <Switch
-          value={entry.notify_on_run_start}
-          onValueChange={(value) => onToggle({ notify_on_run_start: value })}
-        />
-      </View>
-      {watching ? <Text style={styles.watching}>Sharing with you right now</Text> : null}
-    </View>
-  );
-}
-
 export default function FriendsScreen() {
+  const params = useLocalSearchParams<{ tab?: string }>();
+  const [tab, setTab] = useState<'friends' | 'duels'>(params.tab === 'duels' ? 'duels' : 'friends');
+  const unread = useSocial((state) => state.unreadCount);
   const [account, setAccount] = useState<AccountSummary | null>(null);
   const [list, setList] = useState<FriendList>(EMPTY);
+  const [sharing, setSharing] = useState<SharingOverview>(NO_SHARING);
+  const [failed, setFailed] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [busy, setBusy] = useState(true);
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<PublicAccount[] | null>(null);
   const [searching, setSearching] = useState(false);
-  const [handleDraft, setHandleDraft] = useState('');
-  const [editingHandle, setEditingHandle] = useState(false);
-  const [sharing, setSharing] = useState<SharingOverview>(NO_SHARING);
+  const [showSearch, setShowSearch] = useState(false);
 
   const load = useCallback(() => {
-    void fetchFriends()
-      .then(setList)
-      .catch(() => undefined)
-      .finally(() => setBusy(false));
-    void fetchSharing()
-      .then(setSharing)
-      .catch(() => undefined);
-    void fetchAccount()
-      .then((next) => {
-        setAccount(next);
-        setHandleDraft(next?.handle ?? '');
+    return Promise.all([fetchFriends(), fetchSharing(), fetchAccount()])
+      .then(([nextList, nextSharing, nextAccount]) => {
+        setList(nextList); setSharing(nextSharing); setAccount(nextAccount ?? null); setFailed(false);
       })
-      .catch(() => undefined);
+      .catch(() => setFailed(true))
+      .finally(() => { setBusy(false); setRefreshing(false); });
   }, []);
-  useFocusEffect(load);
+  useFocusEffect(useCallback(() => { void load(); }, [load]));
 
-  // The search result rows carry the relationship, so any action that changes
-  // it has to refresh them alongside the lists below.
   const refreshAll = useCallback(async () => {
     setList(await fetchFriends());
     setSharing(await fetchSharing().catch(() => NO_SHARING));
-    if (query.trim().length >= 2) {
-      setResults(await searchAccounts(query.trim()).catch(() => []));
-    }
+    if (query.trim().length >= 2) setResults(await searchAccounts(query.trim()).catch(() => []));
   }, [query]);
 
   const act = (work: () => Promise<unknown>, failure: string) => {
-    void work()
-      .then(refreshAll)
-      .catch((error) => Alert.alert(failure, message(error)));
+    void work().then(refreshAll).catch((error) => Alert.alert(failure, message(error)));
   };
 
   const search = async () => {
@@ -217,330 +94,215 @@ export default function FriendsScreen() {
     }
   };
 
-  const saveHandle = async () => {
-    try {
-      const updated = await updateHandle(handleDraft.trim());
-      setAccount((current) => (current ? { ...current, handle: updated.handle } : current));
-      setHandleDraft(updated.handle);
-      setEditingHandle(false);
-    } catch (error) {
-      Alert.alert('Could not save that handle', message(error));
-    }
+  const switchTab = (next: 'friends' | 'duels') => {
+    setTab(next);
+    if (next === 'duels') void useSocial.getState().markRead();
   };
 
-  const toggleSharing = (
-    friendId: string,
-    update: { share_location?: boolean; notify_on_run_start?: boolean }
-  ) => {
-    // Reflect the switch immediately; sharing controls that lag feel unsafe.
-    setSharing((current) => ({
-      ...current,
-      sharing_with: current.sharing_with.map((entry) =>
-        entry.account.id === friendId
-          ? {
-              ...entry,
-              ...update,
-              location_expires_at:
-                update.share_location === undefined ? entry.location_expires_at : null,
-            }
-          : entry
-      ),
-    }));
-    void updateSharing(friendId, update).catch((error) => {
-      Alert.alert('Could not change sharing', message(error));
-      void fetchSharing().then(setSharing).catch(() => undefined);
-    });
-  };
-
-  const confirmRemove = (target: PublicAccount) =>
-    Alert.alert(`Remove ${target.display_name}?`, 'You can send a new request later.', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Remove',
-        style: 'destructive',
-        onPress: () => act(() => removeFriend(target.id), 'Could not remove'),
-      },
-      {
-        text: 'Block',
-        style: 'destructive',
-        onPress: () =>
-          act(() => blockAccount(target.id), 'Could not block'),
-      },
-    ]);
+  const incoming = list.incoming.length;
 
   return (
-    <SafeAreaView style={styles.screen} edges={['top']}>
-      <View style={styles.header}>
-        <Pressable onPress={() => router.back()}>
-          <Text style={styles.back}>‹ Map</Text>
-        </Pressable>
-        <Text style={styles.title}>Friends</Text>
-        <View style={styles.headerSpacer} />
+    <Screen>
+      <StatusBar style="dark" />
+      <ScreenTitle
+        title="Friends"
+        right={
+          tab === 'friends' ? (
+            <RoundButton label="Add a friend" onPress={() => setShowSearch((open) => !open)}>
+              <PlusIcon size={20} color={ui.icon} />
+            </RoundButton>
+          ) : undefined
+        }
+      />
+      <View style={styles.segment}>
+        <Segmented
+          value={tab}
+          onChange={switchTab}
+          options={[
+            { value: 'friends', label: 'Friends', badge: incoming > 0 ? String(incoming) : undefined },
+            { value: 'duels', label: 'Duels', badge: unread > 0 ? String(unread) : undefined },
+          ]}
+        />
       </View>
 
-      {busy ? (
-        <ActivityIndicator style={styles.loading} color={colors.primary} />
-      ) : (
-        <ScrollView
-          contentContainerStyle={styles.content}
-          keyboardShouldPersistTaps="handled"
-          refreshControl={<RefreshControl refreshing={false} onRefresh={load} />}>
-          <View style={styles.identity}>
-            <Text style={styles.identityLabel}>Your handle</Text>
-            {editingHandle ? (
-              <View style={styles.identityEdit}>
-                <TextInput
-                  value={handleDraft}
-                  onChangeText={setHandleDraft}
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  maxLength={24}
-                  style={[styles.input, styles.identityInput]}
-                  placeholder="handle"
-                  placeholderTextColor={colors.textMuted}
-                />
-                <Action label="Save" tone="primary" onPress={() => void saveHandle()} />
-              </View>
-            ) : (
-              <Pressable style={styles.identityEdit} onPress={() => setEditingHandle(true)}>
-                <Text style={styles.identityHandle}>@{account?.handle ?? '—'}</Text>
-                <Text style={styles.identityChange}>Change</Text>
-              </Pressable>
+      <ScrollView
+        style={styles.fill}
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled"
+        refreshControl={tab === 'friends' ? <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); void load(); }} tintColor={ui.accent} /> : undefined}
+      >
+        {tab === 'duels' ? (
+          <DuelsPanel />
+        ) : failed ? (
+          <ErrorState onRetry={() => { setBusy(true); setFailed(false); void load(); }} />
+        ) : busy ? (
+          <Loading />
+        ) : (
+          <>
+            {(showSearch || list.friends.length === 0) && (
+              <>
+                <View style={styles.search}>
+                  <SearchIcon size={18} color={ui.ink3} />
+                  <TextInput
+                    value={query}
+                    onChangeText={setQuery}
+                    onSubmitEditing={() => void search()}
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    returnKeyType="search"
+                    placeholder="Search by name, @handle or account ID"
+                    placeholderTextColor={ui.ink3}
+                    style={styles.searchInput}
+                    accessibilityLabel="Search for a friend"
+                  />
+                  {searching ? <ActivityIndicator color={ui.accent} /> : null}
+                </View>
+                {results !== null && (
+                  <Card style={styles.results}>
+                    {results.length === 0 ? (
+                      <EmptyState title="No one matches that" body="Try their exact @handle." />
+                    ) : (
+                      results.map((found, index) => (
+                        <Row
+                          key={found.id}
+                          title={found.display_name}
+                          subtitle={`@${found.handle}`}
+                          leading={<Avatar name={found.display_name} />}
+                          last={index === results.length - 1}
+                          trailing={
+                            found.relationship === 'none' ? (
+                              <Pill label="Add" tone="primary" onPress={() => act(() => sendFriendRequest(found.handle), 'Could not send')} />
+                            ) : (
+                              <Text style={styles.state}>
+                                {found.relationship === 'friends' ? 'Friends' : found.relationship === 'request_sent' ? 'Requested' : found.relationship === 'request_received' ? 'Asked you' : 'Blocked'}
+                              </Text>
+                            )
+                          }
+                        />
+                      ))
+                    )}
+                  </Card>
+                )}
+                {account?.handle ? (
+                  <Text style={[typeScale.meta, styles.handle]}>Friends find you as @{account.handle}. Change it in Settings.</Text>
+                ) : null}
+              </>
             )}
-            <Text style={styles.hint}>Friends can find you by this handle.</Text>
-          </View>
 
-          <Text style={styles.sectionTitle}>Add a friend</Text>
-          <View style={styles.searchRow}>
-            <TextInput
-              value={query}
-              onChangeText={setQuery}
-              onSubmitEditing={() => void search()}
-              autoCapitalize="none"
-              autoCorrect={false}
-              returnKeyType="search"
-              style={[styles.input, styles.searchInput]}
-              placeholder="Handle, name or account ID"
-              placeholderTextColor={colors.textMuted}
-            />
-            <Action label="Search" tone="primary" onPress={() => void search()} />
-          </View>
+            {incoming > 0 && (
+              <>
+                <SectionLabel>{`Requests · ${incoming}`}</SectionLabel>
+                <Card>
+                  {list.incoming.map((request, index) => (
+                    <Row
+                      key={request.id}
+                      title={request.account.display_name}
+                      subtitle={`@${request.account.handle}`}
+                      leading={<Avatar name={request.account.display_name} />}
+                      last={index === incoming - 1}
+                      trailing={
+                        <View style={styles.pills}>
+                          <Pill label="Decline" onPress={() => act(() => declineFriendRequest(request.id), 'Could not decline')} />
+                          <Pill label="Accept" tone="primary" onPress={() => act(() => acceptFriendRequest(request.id), 'Could not accept')} />
+                        </View>
+                      }
+                    />
+                  ))}
+                </Card>
+              </>
+            )}
 
-          {searching ? <ActivityIndicator color={colors.primary} /> : null}
-          {results !== null && results.length === 0 && !searching ? (
-            <Text style={styles.hint}>No account matches that name or ID.</Text>
-          ) : null}
-          {results?.map((found) => (
-            <Row key={found.id} account={found}>
-              {found.relationship === 'none' ? (
-                <Action
-                  label="Add"
-                  tone="primary"
-                  onPress={() => act(() => sendFriendRequest(found.handle), 'Could not send')}
-                />
+            <SectionLabel>{list.friends.length > 0 ? `Friends · ${list.friends.length}` : 'Friends'}</SectionLabel>
+            <Card>
+              {list.friends.length === 0 ? (
+                <EmptyState title="No friends yet" body="Search for someone’s @handle to send the first request." />
               ) : (
-                <Text style={styles.stateText}>
-                  {found.relationship === 'friends'
-                    ? 'Friends'
-                    : found.relationship === 'request_sent'
-                      ? 'Requested'
-                      : found.relationship === 'request_received'
-                        ? 'Asked you'
-                        : 'Blocked'}
-                </Text>
+                list.friends.map((friend, index) => {
+                  const live = sharing.visible_to_me.some((row) => row.id === friend.account.id);
+                  return (
+                    <Row
+                      key={friend.account.id}
+                      title={friend.account.display_name}
+                      subtitle={live ? 'Sharing their location with you' : `@${friend.account.handle}`}
+                      leading={
+                        <View>
+                          <Avatar name={friend.account.display_name} tone={live ? 'accent' : 'soft'} />
+                          {live ? <View style={styles.liveDot} /> : null}
+                        </View>
+                      }
+                      onPress={() => router.push(`/friend/${friend.account.id}`)}
+                      last={index === list.friends.length - 1}
+                    />
+                  );
+                })
               )}
-            </Row>
-          ))}
+            </Card>
 
-          {list.incoming.length > 0 ? (
-            <>
-              <Text style={styles.sectionTitle}>Requests</Text>
-              {list.incoming.map((request) => (
-                <Row key={request.id} account={request.account}>
-                  <Action
-                    label="Accept"
-                    tone="primary"
-                    onPress={() => act(() => acceptFriendRequest(request.id), 'Could not accept')}
-                  />
-                  <Action
-                    label="Decline"
-                    onPress={() => act(() => declineFriendRequest(request.id), 'Could not decline')}
-                  />
-                </Row>
-              ))}
-            </>
-          ) : null}
+            {list.outgoing.length > 0 && (
+              <>
+                <SectionLabel>Sent</SectionLabel>
+                <Card>
+                  {list.outgoing.map((request, index) => (
+                    <Row
+                      key={request.id}
+                      title={request.account.display_name}
+                      subtitle={`@${request.account.handle}`}
+                      leading={<Avatar name={request.account.display_name} />}
+                      last={index === list.outgoing.length - 1}
+                      trailing={<Pill label="Cancel" onPress={() => act(() => removeFriend(request.account.id), 'Could not cancel')} />}
+                    />
+                  ))}
+                </Card>
+              </>
+            )}
 
-          {list.outgoing.length > 0 ? (
-            <>
-              <Text style={styles.sectionTitle}>Sent</Text>
-              {list.outgoing.map((request) => (
-                <Row key={request.id} account={request.account}>
-                  <Action
-                    label="Cancel"
-                    onPress={() =>
-                      act(() => removeFriend(request.account.id), 'Could not cancel')
-                    }
-                  />
-                </Row>
-              ))}
-            </>
-          ) : null}
-
-          <Text style={styles.sectionTitle}>
-            {list.friends.length > 0 ? `Friends · ${list.friends.length}` : 'Friends'}
-          </Text>
-          {list.friends.length === 0 ? (
-            <Text style={styles.hint}>
-              No friends yet. Search for someone’s handle to send the first request.
-            </Text>
-          ) : (
-            list.friends.map((friend) => {
-              const entry = sharing.sharing_with.find(
-                (row) => row.account.id === friend.account.id
-              ) ?? {
-                account: friend.account,
-                share_location: false,
-                notify_on_run_start: false,
-                location_expires_at: null,
-              };
-              return (
-                <FriendCard
-                  key={friend.account.id}
-                  entry={entry}
-                  watching={sharing.visible_to_me.some((row) => row.id === friend.account.id)}
-                  onToggle={(update) => toggleSharing(friend.account.id, update)}
-                  onChallenge={() =>
-                    router.push(`/challenges?opponent=${friend.account.id}`)
-                  }
-                  onManage={() => confirmRemove(friend.account)}
-                />
-              );
-            })
-          )}
-
-          {list.blocked.length > 0 ? (
-            <>
-              <Text style={styles.sectionTitle}>Blocked</Text>
-              {list.blocked.map((blocked) => (
-                <Row key={blocked.id} account={blocked}>
-                  <Action
-                    label="Unblock"
-                    onPress={() => act(() => unblockAccount(blocked.id), 'Could not unblock')}
-                  />
-                </Row>
-              ))}
-            </>
-          ) : null}
-        </ScrollView>
-      )}
-    </SafeAreaView>
+            {list.blocked.length > 0 && (
+              <>
+                <SectionLabel>Blocked</SectionLabel>
+                <Card>
+                  {list.blocked.map((blocked, index) => (
+                    <Row
+                      key={blocked.id}
+                      title={blocked.display_name}
+                      leading={<Avatar name={blocked.display_name} />}
+                      last={index === list.blocked.length - 1}
+                      trailing={<Pill label="Unblock" onPress={() => act(() => unblockAccount(blocked.id), 'Could not unblock')} />}
+                    />
+                  ))}
+                </Card>
+              </>
+            )}
+          </>
+        )}
+      </ScrollView>
+      <TabBar active="friends" badge={unread > 0 || incoming > 0} />
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.background },
-  header: {
+  fill: { flex: 1 },
+  content: { paddingBottom: 32 },
+  segment: { paddingHorizontal: 16, paddingBottom: 4 },
+  search: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
+    gap: 10,
+    marginHorizontal: 16,
+    marginTop: 12,
+    height: 46,
+    paddingHorizontal: 14,
+    borderRadius: 14,
+    backgroundColor: ui.surface,
   },
-  headerSpacer: { width: 48 },
-  back: { color: colors.textMuted, fontSize: fontSize.md, width: 48 },
-  title: { fontSize: fontSize.lg, fontWeight: fontWeight.bold, color: colors.text },
-  loading: { marginTop: spacing.xl },
-  content: { padding: spacing.md, paddingBottom: spacing.xl, gap: spacing.sm },
-
-  identity: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius.md,
-    padding: spacing.md,
-    gap: spacing.xs,
-  },
-  identityLabel: { color: colors.textMuted, fontSize: fontSize.sm },
-  identityEdit: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  identityHandle: { flex: 1, fontSize: fontSize.lg, fontWeight: fontWeight.bold, color: colors.text },
-  identityChange: { color: colors.textMuted, fontSize: fontSize.sm },
-  identityInput: { flex: 1 },
-
-  sectionTitle: {
-    marginTop: spacing.md,
-    fontSize: fontSize.md,
-    fontWeight: fontWeight.bold,
-    color: colors.text,
-  },
-  hint: { color: colors.textMuted, fontSize: fontSize.sm },
-
-  searchRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  searchInput: { flex: 1 },
-  input: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius.sm,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.sm,
-    color: colors.text,
-  },
-
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    paddingVertical: spacing.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  rowText: { flex: 1 },
-  rowName: { fontSize: fontSize.md, color: colors.text, fontWeight: fontWeight.medium },
-  rowHandle: { fontSize: fontSize.sm, color: colors.textMuted },
-  rowActions: { flexDirection: 'row', gap: spacing.xs },
-  stateText: { color: colors.textMuted, fontSize: fontSize.sm },
-
-  card: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius.md,
-    paddingHorizontal: spacing.sm,
-    marginBottom: spacing.sm,
-  },
-  toggleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    paddingVertical: spacing.xs,
-  },
-  toggleText: { flex: 1 },
-  toggleLabel: { fontSize: fontSize.sm, color: colors.text },
-  toggleHint: { fontSize: fontSize.xs, color: colors.textMuted },
-  watching: {
-    fontSize: fontSize.xs,
-    color: colors.ownedByYou,
-    paddingBottom: spacing.xs,
-  },
-
-  avatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: colors.border,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  avatarText: { fontSize: fontSize.md, fontWeight: fontWeight.bold, color: colors.text },
-
-  action: {
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
-    borderRadius: radius.sm,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  actionPrimary: { backgroundColor: colors.primary, borderColor: colors.primary },
-  actionDanger: { borderColor: colors.danger },
-  actionText: { fontSize: fontSize.sm, color: colors.text, fontWeight: fontWeight.medium },
-  actionTextPrimary: { color: colors.background },
-  actionTextDanger: { color: colors.danger },
+  searchInput: { flex: 1, fontFamily: fonts.regular, fontSize: 16, color: ui.ink },
+  results: { marginTop: 10 },
+  handle: { paddingHorizontal: 20, paddingTop: 10 },
+  state: { fontFamily: fonts.medium, fontSize: 14, color: ui.ink3 },
+  pills: { flexDirection: 'row', gap: 8 },
+  pill: { height: 32, paddingHorizontal: 14, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
+  pillPrimary: { backgroundColor: ui.accent },
+  pillNeutral: { backgroundColor: ui.segment },
+  pillText: { fontFamily: fonts.semibold, fontSize: 14, color: ui.ink },
+  liveDot: { position: 'absolute', right: -1, bottom: -1, width: 13, height: 13, borderRadius: 7, backgroundColor: ui.start, borderWidth: 2, borderColor: ui.surface },
 });

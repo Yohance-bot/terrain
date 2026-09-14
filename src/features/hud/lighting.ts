@@ -1,4 +1,4 @@
-export type WeatherReading = { code: number; cloud: number; observedAt: number; fetchedAt: number; sunrise: number | null; sunset: number | null; cell: string };
+export type WeatherReading = { code: number; cloud: number; observedAt: number; fetchedAt: number; sunrise: number | null; sunset: number | null; cell: string; temperatureC: number | null };
 export function daylight(now: Date, weather: WeatherReading | null): number {
   const time = now.getTime();
   if (weather?.sunrise && weather.sunset && time >= weather.sunrise - 6 * 3600000 && time <= weather.sunset + 6 * 3600000) {

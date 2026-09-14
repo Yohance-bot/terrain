@@ -67,6 +67,7 @@ export async function getDb(): Promise<SQLite.SQLiteDatabase> {
       const opened = await SQLite.openDatabaseAsync('run-prototype.db');
       await opened.execAsync(SCHEMA);
       await migrateRunsSchema(opened);
+      await migrateSamplesSchema(opened);
       database = opened;
       return opened;
     })().catch((error: unknown) => {
@@ -103,6 +104,14 @@ async function migrateRunsSchema(db: SQLite.SQLiteDatabase): Promise<void> {
   );
 }
 
+async function migrateSamplesSchema(db: SQLite.SQLiteDatabase): Promise<void> {
+  const columns = await db.getAllAsync<{ name: string }>('PRAGMA table_info(samples)');
+  const existing = new Set(columns.map((column) => column.name));
+  // Altitude arrived with elevation stats; samples recorded before it stay null.
+  if (!existing.has('altitude_m')) await db.execAsync('ALTER TABLE samples ADD COLUMN altitude_m REAL');
+  if (!existing.has('altitude_accuracy_m')) await db.execAsync('ALTER TABLE samples ADD COLUMN altitude_accuracy_m REAL');
+}
+
 export type StoredSample = {
   ts: number;
   lat: number;
@@ -111,6 +120,8 @@ export type StoredSample = {
   speed_mps: number | null;
   provider: string | null;
   is_mock: boolean;
+  altitude_m?: number | null;
+  altitude_accuracy_m?: number | null;
 };
 
 export type LocalRunStatus = 'recording' | 'queued' | 'submitting' | 'synced' | 'rejected';
@@ -174,8 +185,8 @@ export async function appendSample(
   const db = await getDb();
   await db.runAsync(
     `INSERT OR REPLACE INTO samples
-       (run_id, seq, ts, lat, lon, accuracy_m, speed_mps, provider, is_mock)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       (run_id, seq, ts, lat, lon, accuracy_m, speed_mps, provider, is_mock, altitude_m, altitude_accuracy_m)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       runId,
       seq,
@@ -186,6 +197,8 @@ export async function appendSample(
       sample.speed_mps,
       sample.provider,
       sample.is_mock ? 1 : 0,
+      sample.altitude_m ?? null,
+      sample.altitude_accuracy_m ?? null,
     ]
   );
   await db.runAsync('UPDATE runs SET last_sample_at = ? WHERE id = ?', [
@@ -204,6 +217,8 @@ export async function loadSamples(runId: string): Promise<StoredSample[]> {
     speed_mps: number | null;
     provider: string | null;
     is_mock: number;
+    altitude_m: number | null;
+    altitude_accuracy_m: number | null;
   }>('SELECT * FROM samples WHERE run_id = ? ORDER BY seq ASC', [runId]);
 
   return rows.map((row) =>
@@ -215,6 +230,8 @@ export async function loadSamples(runId: string): Promise<StoredSample[]> {
       speed_mps: row.speed_mps,
       provider: row.provider,
       is_mock: row.is_mock === 1,
+      altitude_m: row.altitude_m ?? null,
+      altitude_accuracy_m: row.altitude_accuracy_m ?? null,
     })
   );
 }

@@ -1,29 +1,17 @@
 import { router, useFocusEffect } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
 import { useCallback, useState } from 'react';
-import {
-  ActivityIndicator,
-  Alert,
-  Pressable,
-  RefreshControl,
-  ScrollView,
-  StyleSheet,
-  Switch,
-  Text,
-  View,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Alert, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { useGhostRace } from '@/features/social/useGhostRace';
+import { GhostIcon } from '@/components/icons';
+import { Button, Card, EmptyState, ErrorState, IconTile, Loading, NavHeader, Row, Screen, SectionLabel, Toggle } from '@/components/ui';
+import { useHudPreferences } from '@/features/hud/usePresentation';
 import { useRecorder } from '@/features/recorder/useRecorder';
-import {
-  deleteGhost,
-  fetchMyGhosts,
-  fetchNearbyGhosts,
-  updateGhost,
-} from '@/services/api/client';
+import { useGhostRace } from '@/features/social/useGhostRace';
+import { formatClock, formatDistance } from '@/lib/format';
+import { deleteGhost, fetchMyGhosts, fetchNearbyGhosts, updateGhost } from '@/services/api/client';
 import type { GhostSummary } from '@/services/api/types';
-import { formatDistance } from '@/lib/geo';
-import { colors, fontSize, fontWeight, radius, spacing } from '@/theme';
+import { fonts, typeScale, ui } from '@/theme';
 
 /**
  * Ghosts you have recorded, and public ones nearby.
@@ -39,70 +27,53 @@ function message(error: unknown): string {
   return detail?.[1] ?? error.message;
 }
 
-function formatDuration(seconds: number): string {
-  const minutes = Math.floor(seconds / 60);
-  const rest = seconds % 60;
-  return `${minutes}:${String(rest).padStart(2, '0')}`;
-}
-
-function GhostCard({
+function GhostItem({
   ghost,
+  last,
   onRace,
   onBroadcast,
   onShareLive,
   onDelete,
 }: {
   ghost: GhostSummary;
+  last: boolean;
   onRace: () => void;
   onBroadcast?: (value: boolean) => void;
   onShareLive?: (value: boolean) => void;
   onDelete?: () => void;
 }) {
+  const units = useHudPreferences((s) => s.units);
   return (
-    <View style={styles.card}>
-      <View style={styles.cardHead}>
-        <View style={styles.cardText}>
-          <Text style={styles.cardTitle}>{ghost.name}</Text>
-          <Text style={styles.cardMeta}>
-            {formatDistance(ghost.distance_m)} · {formatDuration(ghost.duration_s)}
+    <View style={[styles.item, !last && styles.divider]}>
+      <View style={styles.head}>
+        <IconTile><GhostIcon size={22} /></IconTile>
+        <View style={styles.text}>
+          <Text style={typeScale.rowTitle}>{ghost.name}</Text>
+          <Text style={typeScale.meta}>
+            {formatDistance(ghost.distance_m, units)} · {formatClock(ghost.duration_s)}
             {ghost.is_yours ? '' : ` · @${ghost.owner.handle}`}
           </Text>
-          {ghost.best_elapsed_s !== null ? (
-            <Text style={styles.cardMeta}>Best attempt {formatDuration(ghost.best_elapsed_s)}</Text>
-          ) : null}
+          {ghost.best_elapsed_s !== null ? <Text style={typeScale.meta}>Best attempt {formatClock(ghost.best_elapsed_s)}</Text> : null}
         </View>
-        <Pressable style={styles.raceButton} onPress={onRace}>
-          <Text style={styles.raceButtonText}>Race</Text>
-        </Pressable>
+        <Button label="Race" onPress={onRace} style={styles.race} />
       </View>
-
       {onBroadcast ? (
-        <View style={styles.toggleRow}>
-          <View style={styles.cardText}>
-            <Text style={styles.toggleLabel}>Broadcast this ghost</Text>
-            <Text style={styles.hint}>
-              Anyone nearby can race it. Both ends of the route are hidden from them.
-            </Text>
-          </View>
-          <Switch value={ghost.is_public} onValueChange={onBroadcast} />
-        </View>
+        <Row
+          title="Broadcast this ghost"
+          subtitle="Anyone nearby can race it. Both ends of the route are hidden."
+          trailing={<Toggle label="Broadcast this ghost" value={ghost.is_public} onChange={onBroadcast} />}
+          last={!(onShareLive && ghost.is_public)}
+        />
       ) : null}
-
       {onShareLive && ghost.is_public ? (
-        <View style={styles.toggleRow}>
-          <View style={styles.cardText}>
-            <Text style={styles.toggleLabel}>Also show me live on it</Text>
-            <Text style={styles.hint}>Off by default. Broadcasting alone never reveals this.</Text>
-          </View>
-          <Switch value={ghost.share_live_location} onValueChange={onShareLive} />
-        </View>
+        <Row
+          title="Also show me live on it"
+          subtitle="Off by default. Broadcasting alone never reveals this."
+          trailing={<Toggle label="Also show me live on it" value={ghost.share_live_location} onChange={onShareLive} />}
+          last
+        />
       ) : null}
-
-      {onDelete ? (
-        <Pressable onPress={onDelete}>
-          <Text style={styles.delete}>Delete ghost</Text>
-        </Pressable>
-      ) : null}
+      {onDelete ? <Button variant="danger" label="Delete ghost" onPress={onDelete} style={styles.delete} /> : null}
     </View>
   );
 }
@@ -111,29 +82,36 @@ export default function GhostsScreen() {
   const [mine, setMine] = useState<GhostSummary[]>([]);
   const [nearby, setNearby] = useState<GhostSummary[]>([]);
   const [busy, setBusy] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [failed, setFailed] = useState(false);
   const fix = useRecorder((state) => state.liveFix);
   const active = useGhostRace((state) => state.ghost);
   const ghostState = useGhostRace((state) => state.ghostState);
 
+  // Nearby needs a position, but only a rough one: rounding to ~110 m keeps a
+  // stream of GPS fixes from refetching the list on every step.
+  const coordinate = fix?.coordinate;
+  const lat = coordinate ? Math.round(coordinate[1] * 1000) / 1000 : null;
+  const lon = coordinate ? Math.round(coordinate[0] * 1000) / 1000 : null;
+
   const load = useCallback(() => {
     void fetchMyGhosts()
-      .then(setMine)
-      .catch(() => undefined)
-      .finally(() => setBusy(false));
-    // Nearby needs a position; without one there is simply nothing to show.
-    const coordinate = fix?.coordinate;
-    if (coordinate) {
-      void fetchNearbyGhosts(coordinate[1], coordinate[0])
-        .then(setNearby)
-        .catch(() => undefined);
+      .then((ghosts) => {
+        setMine(ghosts);
+        setFailed(false);
+      })
+      .catch(() => setFailed(true))
+      .finally(() => {
+        setBusy(false);
+        setRefreshing(false);
+      });
+    if (lat !== null && lon !== null) {
+      void fetchNearbyGhosts(lat, lon).then(setNearby).catch(() => undefined);
     }
-  }, [fix?.coordinate]);
+  }, [lat, lon]);
   useFocusEffect(load);
 
-  const change = (
-    ghostId: string,
-    update: { is_public?: boolean; share_live_location?: boolean }
-  ) => {
+  const change = (ghostId: string, update: { is_public?: boolean; share_live_location?: boolean }) => {
     setMine((current) =>
       current.map((ghost) =>
         ghost.id === ghostId
@@ -141,11 +119,10 @@ export default function GhostsScreen() {
               ...ghost,
               ...update,
               // Withdrawing the broadcast takes the live sharing with it.
-              share_live_location:
-                update.is_public === false ? false : update.share_live_location ?? ghost.share_live_location,
+              share_live_location: update.is_public === false ? false : update.share_live_location ?? ghost.share_live_location,
             }
-          : ghost
-      )
+          : ghost,
+      ),
     );
     void updateGhost(ghostId, update).catch((error) => {
       Alert.alert('Could not update that ghost', message(error));
@@ -163,10 +140,10 @@ export default function GhostsScreen() {
           text: 'Start',
           onPress: () => {
             void useGhostRace.getState().begin(ghost.id);
-            router.push('/');
+            router.navigate('/');
           },
         },
-      ]
+      ],
     );
 
   const stop = () => {
@@ -174,154 +151,93 @@ export default function GhostsScreen() {
       .getState()
       .end({ save: true })
       .then((result) => {
-        if (result) {
-          Alert.alert(result.beatGhost ? 'You beat the ghost' : 'The ghost held on');
-        }
+        if (result) Alert.alert(result.beatGhost ? 'You beat the ghost' : 'The ghost held on');
         load();
       });
   };
 
-  return (
-    <SafeAreaView style={styles.screen} edges={['top']}>
-      <View style={styles.header}>
-        <Pressable onPress={() => router.back()}>
-          <Text style={styles.back}>‹ Back</Text>
-        </Pressable>
-        <Text style={styles.title}>Ghosts</Text>
-        <View style={styles.headerSpacer} />
-      </View>
+  const others = nearby.filter((ghost) => !ghost.is_yours);
 
+  return (
+    <Screen>
+      <StatusBar style="dark" />
+      <NavHeader title="Ghosts" onBack={() => router.back()} />
       {busy ? (
-        <ActivityIndicator style={styles.loading} color={colors.primary} />
+        <Loading />
+      ) : failed && mine.length === 0 ? (
+        <ErrorState onRetry={() => { setBusy(true); load(); }} />
       ) : (
         <ScrollView
           contentContainerStyle={styles.content}
-          refreshControl={<RefreshControl refreshing={false} onRefresh={load} />}>
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={() => {
+                setRefreshing(true);
+                load();
+              }}
+              tintColor={ui.accent}
+            />
+          }
+        >
           {active ? (
-            <View style={styles.activeCard}>
+            <Card style={styles.active}>
               <Text style={styles.activeTitle}>Racing {active.name}</Text>
-              <Text style={styles.hint}>
-                {ghostState
-                  ? `Ghost ${Math.round(ghostState.progress * 100)}% along its route`
-                  : 'Starting…'}
-              </Text>
-              <Pressable style={styles.stopButton} onPress={stop}>
-                <Text style={styles.stopButtonText}>End ghost race</Text>
-              </Pressable>
-            </View>
+              <Text style={typeScale.meta}>{ghostState ? `Ghost ${Math.round(ghostState.progress * 100)}% along its route` : 'Starting…'}</Text>
+              <Button variant="secondary" label="End ghost race" onPress={stop} />
+            </Card>
           ) : null}
 
-          <Text style={styles.sectionTitle}>Your ghosts</Text>
-          {mine.length === 0 ? (
-            <Text style={styles.hint}>
-              Finish a run and save it as a ghost from the run summary to build a benchmark.
-            </Text>
-          ) : (
-            mine.map((ghost) => (
-              <GhostCard
-                key={ghost.id}
-                ghost={ghost}
-                onRace={() => race(ghost)}
-                onBroadcast={(value) => change(ghost.id, { is_public: value })}
-                onShareLive={(value) => change(ghost.id, { share_live_location: value })}
-                onDelete={() =>
-                  Alert.alert(`Delete ${ghost.name}?`, 'Attempts against it go too.', [
-                    { text: 'Cancel', style: 'cancel' },
-                    {
-                      text: 'Delete',
-                      style: 'destructive',
-                      onPress: () => void deleteGhost(ghost.id).then(load),
-                    },
-                  ])
-                }
-              />
-            ))
-          )}
-
-          <Text style={styles.sectionTitle}>Nearby</Text>
-          {nearby.length === 0 ? (
-            <Text style={styles.hint}>
-              No broadcast ghosts around here yet. They stay off the map until you open this list.
-            </Text>
-          ) : (
-            nearby
-              .filter((ghost) => !ghost.is_yours)
-              .map((ghost) => (
-                <GhostCard key={ghost.id} ghost={ghost} onRace={() => race(ghost)} />
+          <SectionLabel>Your ghosts</SectionLabel>
+          <Card>
+            {mine.length === 0 ? (
+              <EmptyState title="No ghosts yet" body="Save a finished run as a ghost from its summary to build a benchmark." />
+            ) : (
+              mine.map((ghost, index) => (
+                <GhostItem
+                  key={ghost.id}
+                  ghost={ghost}
+                  last={index === mine.length - 1}
+                  onRace={() => race(ghost)}
+                  onBroadcast={(value) => change(ghost.id, { is_public: value })}
+                  onShareLive={(value) => change(ghost.id, { share_live_location: value })}
+                  onDelete={() =>
+                    Alert.alert(`Delete ${ghost.name}?`, 'Attempts against it go too.', [
+                      { text: 'Cancel', style: 'cancel' },
+                      { text: 'Delete', style: 'destructive', onPress: () => void deleteGhost(ghost.id).then(load) },
+                    ])
+                  }
+                />
               ))
-          )}
+            )}
+          </Card>
+
+          <SectionLabel>Nearby</SectionLabel>
+          <Card>
+            {others.length === 0 ? (
+              lat === null ? (
+                <EmptyState title="Waiting for your position" body="Nearby ghosts are the ones close to you, so this needs a location fix first." />
+              ) : (
+                <EmptyState title="None nearby" body="Broadcast ghosts appear here when you’re close to their route." />
+              )
+            ) : (
+              others.map((ghost, index) => <GhostItem key={ghost.id} ghost={ghost} last={index === others.length - 1} onRace={() => race(ghost)} />)
+            )}
+          </Card>
         </ScrollView>
       )}
-    </SafeAreaView>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.background },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-  },
-  headerSpacer: { width: 56 },
-  back: { color: colors.textMuted, fontSize: fontSize.md, width: 56 },
-  title: { fontSize: fontSize.lg, fontWeight: fontWeight.bold, color: colors.text },
-  loading: { marginTop: spacing.xl },
-  content: { padding: spacing.md, paddingBottom: spacing.xxl, gap: spacing.xs },
-
-  sectionTitle: {
-    marginTop: spacing.md,
-    fontSize: fontSize.md,
-    fontWeight: fontWeight.bold,
-    color: colors.text,
-  },
-  hint: { color: colors.textMuted, fontSize: fontSize.xs },
-
-  card: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius.md,
-    padding: spacing.md,
-    gap: spacing.xs,
-    marginTop: spacing.xs,
-  },
-  cardHead: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  cardText: { flex: 1 },
-  cardTitle: { fontSize: fontSize.md, fontWeight: fontWeight.medium, color: colors.text },
-  cardMeta: { fontSize: fontSize.xs, color: colors.textMuted },
-  toggleRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  toggleLabel: { fontSize: fontSize.sm, color: colors.text },
-  delete: { fontSize: fontSize.xs, color: colors.danger, marginTop: spacing.xs },
-
-  raceButton: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderRadius: radius.sm,
-    backgroundColor: colors.primary,
-  },
-  raceButtonText: {
-    color: colors.background,
-    fontSize: fontSize.sm,
-    fontWeight: fontWeight.medium,
-  },
-
-  activeCard: {
-    borderWidth: 1,
-    borderColor: colors.ownedByYou,
-    borderRadius: radius.md,
-    padding: spacing.md,
-    gap: spacing.xs,
-  },
-  activeTitle: { fontSize: fontSize.md, fontWeight: fontWeight.bold, color: colors.text },
-  stopButton: {
-    paddingVertical: spacing.sm,
-    borderRadius: radius.sm,
-    borderWidth: 1,
-    borderColor: colors.border,
-    alignItems: 'center',
-    marginTop: spacing.xs,
-  },
-  stopButtonText: { fontSize: fontSize.sm, color: colors.text },
+  content: { paddingBottom: 48 },
+  item: { paddingVertical: 12, gap: 6 },
+  divider: { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: ui.line },
+  head: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16 },
+  text: { flex: 1, gap: 1 },
+  race: { height: 38, paddingHorizontal: 16 },
+  delete: { alignSelf: 'flex-start', marginLeft: 6 },
+  active: { padding: 16, gap: 8, marginTop: 8 },
+  activeTitle: { fontFamily: fonts.bold, fontSize: 18, color: ui.ink },
 });

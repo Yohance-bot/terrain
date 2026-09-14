@@ -19,6 +19,8 @@ import { haversineMetres } from '@/lib/geo';
 import { IncrementalGpsCleaner, type GeoCoord } from '@/lib/gpsClean';
 import { normalizeSampleTimestampMs } from '@/lib/runSamples';
 import { bearingBetween, type RunFix, type TimedDistance } from '@/features/hud/telemetry';
+import { currentConditions } from '@/features/hud/weatherCache';
+import type { RunConditions } from '@/services/api/types';
 
 /**
  * Run recorder with an optional background location task.
@@ -98,6 +100,22 @@ export function recoverRecorderOnce(): Promise<unknown> {
 // Module-level cleaner — lives as long as the JS bundle, reset on each run.
 const gpsCleaner = new IncrementalGpsCleaner();
 
+/** The weather a run started in, kept with the run until it is submitted. */
+async function recordStartConditions(runId: string): Promise<void> {
+  const conditions = currentConditions();
+  if (conditions) await setMeta(`run.conditions.${runId}`, JSON.stringify(conditions)).catch(() => undefined);
+}
+
+export async function startConditions(runId: string): Promise<RunConditions | null> {
+  const raw = await getMeta(`run.conditions.${runId}`).catch(() => null);
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw) as RunConditions;
+  } catch {
+    return null;
+  }
+}
+
 async function getActiveRun(): Promise<ActiveRun | null> {
   const value = await getMeta(ACTIVE_RUN_META_KEY);
   if (!value) return null;
@@ -127,7 +145,7 @@ function enqueueLocationSample(location: Location.LocationObject): Promise<void>
       // a gap, but never lets a later task overwrite an already persisted fix.
       await setActiveRun({ ...activeRun, nextSequence: activeRun.nextSequence + 1 });
 
-      const { latitude, longitude, accuracy, speed } = location.coords;
+      const { latitude, longitude, accuracy, speed, altitude, altitudeAccuracy } = location.coords;
       const sample: StoredSample = {
         ts: normalizeSampleTimestampMs(location.timestamp),
         lat: latitude,
@@ -136,6 +154,8 @@ function enqueueLocationSample(location: Location.LocationObject): Promise<void>
         speed_mps: speed ?? null,
         provider: location.mocked === undefined ? null : 'expo-location',
         is_mock: location.mocked ?? false,
+        altitude_m: altitude ?? null,
+        altitude_accuracy_m: altitudeAccuracy ?? null,
       };
 
       try {
@@ -245,6 +265,7 @@ export const useRecorder = create<RecorderState>((set, get) => ({
       runId = Crypto.randomUUID();
       const startedAt = new Date();
       await createLocalRun(runId, startedAt);
+      await recordStartConditions(runId);
       gpsCleaner.reset();
       lastDisplayTimestamp = 0;
       await setActiveRun({ runId, nextSequence: 0 });
@@ -291,6 +312,7 @@ export const useRecorder = create<RecorderState>((set, get) => ({
       const runId = Crypto.randomUUID();
       const startedAt = new Date();
       await createLocalRun(runId, startedAt);
+      await recordStartConditions(runId);
       gpsCleaner.reset(); lastDisplayTimestamp = 0;
       await setActiveRun({ runId, nextSequence: 0 });
       set({ status: 'recording', runId, startedAt, sampleCount: 0, droppedCount: 0, liveDistanceM: 0, path: [], cleanPath: [], error: null, isSimulation: true, liveFix: null, paceWindow: [], segmentStarts: [] });

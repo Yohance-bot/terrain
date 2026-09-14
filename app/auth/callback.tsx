@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Pressable, Text, View } from "react-native";
+import { Text, View } from "react-native";
+import { Screen, Loading, Button } from "@/components/ui";
+import { typeScale } from "@/theme";
 import { router, useLocalSearchParams } from "expo-router";
 import { completeGoogleSignIn } from "@/lib/auth/google";
 export default function Callback() {
@@ -20,20 +22,18 @@ export default function Callback() {
       .catch((e) => setError(e.message));
   }, [params.code, params.error, params.error_description]); // One exchange per callback code.
   return (
-    <View style={{ flex: 1, justifyContent: "center", padding: 32, gap: 20 }}>
+    <Screen><View style={{ flex: 1, justifyContent: "center", padding: 32, gap: 20 }}>
       {error ? (
         <>
-          <Text>{error}</Text>
-          <Pressable onPress={() => router.replace("/sign-in")}>
-            <Text>Return to sign in</Text>
-          </Pressable>
+          <Text style={typeScale.body} accessibilityRole="alert">{error}</Text>
+          <Button label="Return to sign in" onPress={() => router.replace("/sign-in")} />
         </>
       ) : (
         <>
-          <ActivityIndicator />
-          <Text>Finishing Google sign-in…</Text>
+          <Loading />
+          <Text style={typeScale.body}>Finishing Google sign-in…</Text>
         </>
       )}
-    </View>
+    </View></Screen>
   );
 }

@@ -1,17 +1,20 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, Animated, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Alert, Animated, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { TerritoryMap } from '@/features/map/TerritoryMap';
 import { loadSamples } from '@/lib/db';
-import { formatDistance, formatDuration } from '@/lib/geo';
+import { formatClock as formatDuration, formatDistance, formatPace, paceSeconds } from '@/lib/format';
+import { useHudPreferences } from '@/features/hud/usePresentation';
+import { Button, ErrorState, Loading, NavHeader, Screen } from '@/components/ui';
+import { StatusBar } from 'expo-status-bar';
 import { cleanGps, type GeoCoord } from '@/lib/gpsClean';
 import { detectLoopCandidate } from '@/lib/runCapture';
 import { buildTrail } from '@/features/hud/trail';
 import { createGhost, fetchRun } from '@/services/api/client';
 import type { RunResult } from '@/services/api/types';
-import { colors, fontSize, fontWeight, radius, spacing } from '@/theme';
+import { colors, fonts, ui, fontSize, radius, spacing } from '@/theme';
 
 /**
  * The post-run reveal. The only place in the app where territory information
@@ -24,11 +27,13 @@ export default function RunSummaryScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const units = useHudPreferences(s => s.units);
 
   const [result, setResult] = useState<RunResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [completedPath, setCompletedPath] = useState<GeoCoord[]>([]);
   const [ghostSaved, setGhostSaved] = useState(false);
+  const [ghostBusy, setGhostBusy] = useState(false);
 
   // Entrance animation
   const heroFade = useRef(new Animated.Value(0)).current;
@@ -37,20 +42,13 @@ export default function RunSummaryScreen() {
   const captureScale = useRef(new Animated.Value(0.8)).current;
   const captureFade = useRef(new Animated.Value(0)).current;
 
-  useEffect(() => {
+  const load = useCallback(() => {
     if (!id) return;
-    fetchRun(id)
-      .then(setResult)
-      .catch(() => setError('Could not load this run.'));
-    loadSamples(id)
-      .then((samples) => setCompletedPath(cleanGps(samples.map((sample) => ({
-        lat: sample.lat,
-        lon: sample.lon,
-        accuracy: sample.accuracy_m ?? undefined,
-      }))).cleanedPath))
-      // The authoritative result is still useful if local history was cleared.
-      .catch(() => setCompletedPath([]));
+    setError(null);
+    void fetchRun(id).then(setResult).catch(() => setError('Could not load this run. It may still be syncing.'));
+    void loadSamples(id).then(samples => setCompletedPath(cleanGps(samples.map(sample => ({ lat: sample.lat, lon: sample.lon, accuracy: sample.accuracy_m ?? undefined }))).cleanedPath)).catch(() => setCompletedPath([]));
   }, [id]);
+  useEffect(load, [load]);
 
   // Staggered entrance when result loads
   useEffect(() => {
@@ -68,20 +66,8 @@ export default function RunSummaryScreen() {
     ]).start();
   }, [result, heroFade, heroSlide, statsFade, captureScale, captureFade]);
 
-  if (error) {
-    return (
-      <View style={styles.centered}>
-        <Text style={styles.error}>{error}</Text>
-      </View>
-    );
-  }
-
-  if (!result) {
-    return (
-      <View style={styles.centered}>
-        <ActivityIndicator color={colors.revealAccent} />
-      </View>
-    );
+  if (error || !result) {
+    return <Screen><NavHeader title="Run summary" onBack={() => router.back()} />{error ? <ErrorState message={error} onRetry={load} /> : <Loading />}</Screen>;
   }
 
   const isApplied = result.status === 'applied';
@@ -105,10 +91,12 @@ export default function RunSummaryScreen() {
   const traversedRoads = buildTrail(completedPath, []);
   const loopCandidate = detectLoopCandidate(completedPath);
   const hasCaptured = captureCount > 0;
-  const ctaText = hasCaptured ? 'Claim your territory' : 'Keep running';
+  const ctaText = 'Back to map';
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
+    <Screen>
+      <StatusBar style="dark" />
+      <NavHeader title="Run summary" onBack={() => router.back()} />
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
 
         {/* ── Hero Section ─────────────────────────── */}
@@ -120,11 +108,11 @@ export default function RunSummaryScreen() {
 
         {/* ── Stats Card ──────────────────────────── */}
         <Animated.View style={[styles.statsCard, { opacity: statsFade }]}>
-          <RevealStat label="Distance" value={formatDistance(result.distance_m)} accent />
+          <RevealStat label="Distance" value={formatDistance(result.distance_m, units)} accent />
           <View style={styles.statDivider} />
           <RevealStat label="Time" value={formatDuration(result.duration_s)} />
           <View style={styles.statDivider} />
-          <RevealStat label="Pace" value={result.distance_m > 0 ? `${formatDuration((result.duration_s * 1000) / result.distance_m)}/km` : '—'} />
+          <RevealStat label="Elapsed pace" value={formatPace(paceSeconds(result.distance_m, result.duration_s, units), units)} />
         </Animated.View>
 
         {/* ── Capture Hero ────────────────────────── */}
@@ -198,7 +186,7 @@ export default function RunSummaryScreen() {
                     </View>
                   </View>
                   <Text style={styles.segmentMeta}>
-                    {formatDistance(segment.distance_m)} in {formatDuration(segment.seconds_in)}
+                    {formatDistance(segment.distance_m, units)} in {formatDuration(segment.seconds_in)}
                   </Text>
                   <View style={styles.influenceRow}>
                     <Text style={styles.influenceLabel}>
@@ -228,23 +216,28 @@ export default function RunSummaryScreen() {
         {isApplied && result.distance_m > 0 && (
           <Pressable
             style={styles.ghostButton}
-            disabled={ghostSaved}
+            disabled={ghostSaved || ghostBusy}
             onPress={() => {
-              const name = `${formatDistance(result.distance_m)} · ${new Date().toLocaleDateString()}`;
+              if (ghostBusy) return;
+              setGhostBusy(true);
+              const name = `${formatDistance(result.distance_m, units)} · ${new Date().toLocaleDateString()}`;
               void createGhost(result.run_id, name)
                 .then(() => {
                   setGhostSaved(true);
                   Alert.alert('Saved as a ghost', 'Race it any time from the Ghosts screen.');
                 })
-                .catch(() => Alert.alert('Could not save that ghost'));
+                .catch(() => Alert.alert('Could not save that ghost'))
+                .finally(() => setGhostBusy(false));
             }}
           >
             <Text style={styles.ghostButtonText}>
-              {ghostSaved ? 'Saved as a ghost' : 'Save this run as a ghost'}
+              {ghostBusy ? 'Saving…' : ghostSaved ? 'Saved as a ghost' : 'Save this run as a ghost'}
             </Text>
           </Pressable>
         )}
       </ScrollView>
+
+      {isApplied && <Button label="Training details" variant="text" onPress={() => router.push(`/activity/${result.run_id}`)} />}
 
       {/* ── Footer CTA ────────────────────────────── */}
       <View style={[styles.footer, { paddingBottom: insets.bottom + spacing.md }]}>
@@ -261,7 +254,7 @@ export default function RunSummaryScreen() {
           </Text>
         </Pressable>
       </View>
-    </View>
+    </Screen>
   );
 }
 
@@ -364,28 +357,28 @@ function RevealStat({ label, value, accent = false }: { label: string; value: st
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.revealBg },
-  centered: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.revealBg },
+  container: { flex: 1, backgroundColor: ui.surface },
+  centered: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: ui.surface },
   content: { padding: spacing.lg, paddingBottom: spacing.xxl },
   error: { color: colors.danger, fontSize: fontSize.sm },
 
   // Hero
   eyebrow: {
     fontSize: 11,
-    fontWeight: fontWeight.bold,
-    color: colors.revealAccent,
+    fontFamily: fonts.bold,
+    color: ui.accent,
     letterSpacing: 2,
     marginBottom: spacing.xs,
   },
   heading: {
     fontSize: 28,
-    fontWeight: fontWeight.bold,
-    color: colors.surface,
+    fontFamily: fonts.bold,
+    color: ui.ink,
     lineHeight: 34,
   },
   outcomeDetail: {
     fontSize: fontSize.sm,
-    color: '#94A3B8',
+    color: ui.ink2,
     marginTop: spacing.sm,
     marginBottom: spacing.lg,
     lineHeight: 20,
@@ -394,18 +387,18 @@ const styles = StyleSheet.create({
   // Stats card
   statsCard: {
     flexDirection: 'row',
-    backgroundColor: colors.revealCardBg,
+    backgroundColor: ui.surface,
     borderRadius: radius.lg,
     borderWidth: 1,
-    borderColor: colors.revealCardBorder,
+    borderColor: ui.line,
     paddingVertical: spacing.lg,
     marginBottom: spacing.lg,
   },
   revealStat: { flex: 1, alignItems: 'center' },
-  revealStatValue: { fontSize: 22, fontWeight: fontWeight.bold, color: colors.surface },
-  revealStatValueAccent: { color: colors.revealAccent },
-  revealStatLabel: { fontSize: fontSize.xs, color: '#64748B', marginTop: 4 },
-  statDivider: { width: 1, backgroundColor: colors.revealCardBorder, marginVertical: spacing.xs },
+  revealStatValue: { fontSize: 22, fontFamily: fonts.bold, color: ui.ink },
+  revealStatValueAccent: { color: ui.accent },
+  revealStatLabel: { fontSize: fontSize.xs, color: ui.ink3, marginTop: 4 },
+  statDivider: { width: 1, backgroundColor: ui.line, marginVertical: spacing.xs },
 
   // Capture hero
   captureHero: {
@@ -413,61 +406,61 @@ const styles = StyleSheet.create({
   },
   captureGlowBorder: {
     alignItems: 'center',
-    backgroundColor: colors.revealCardBg,
+    backgroundColor: ui.surface,
     borderRadius: radius.lg,
     paddingVertical: spacing.xl,
     borderWidth: 1.5,
-    borderColor: colors.revealAccent,
-    shadowColor: colors.revealAccent,
-    shadowOpacity: 0.3,
+    borderColor: ui.accent,
+    shadowColor: ui.accent,
+    shadowOpacity: 0.06,
     shadowRadius: 20,
-    elevation: 8,
+    elevation: 2,
   },
   captureCount: {
-    color: colors.surface,
+    color: ui.ink,
     fontSize: 56,
-    fontWeight: fontWeight.bold,
+    fontFamily: fonts.bold,
     lineHeight: 62,
   },
   captureLabel: {
-    color: colors.revealAccent,
+    color: ui.accent,
     fontSize: 11,
-    fontWeight: fontWeight.bold,
+    fontFamily: fonts.bold,
     letterSpacing: 1.5,
     marginTop: 4,
   },
   captureMeta: {
-    color: '#64748B',
+    color: ui.ink3,
     fontSize: fontSize.sm,
     marginTop: spacing.xs,
   },
   captureItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.revealCardBg,
+    backgroundColor: ui.surface,
     borderRadius: radius.md,
     padding: spacing.md,
     marginTop: spacing.sm,
     borderWidth: 1,
-    borderColor: colors.revealCardBorder,
+    borderColor: ui.line,
   },
   captureCheck: {
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: colors.revealAccent,
+    backgroundColor: ui.accent,
     marginRight: spacing.sm,
   },
   captureItemName: {
     flex: 1,
-    color: colors.surface,
+    color: ui.ink,
     fontSize: fontSize.sm,
-    fontWeight: fontWeight.semibold,
+    fontFamily: fonts.semibold,
   },
   captureItemBadge: {
     fontSize: 10,
-    fontWeight: fontWeight.bold,
-    color: colors.revealAccent,
+    fontFamily: fonts.bold,
+    color: ui.accent,
     letterSpacing: 1,
   },
 
@@ -478,28 +471,28 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     marginBottom: spacing.lg,
     borderWidth: 1,
-    borderColor: colors.revealCardBorder,
+    borderColor: ui.line,
   },
 
   // Territory segments
   sectionTitle: {
     fontSize: fontSize.xs,
-    fontWeight: fontWeight.bold,
-    color: '#64748B',
+    fontFamily: fonts.bold,
+    color: ui.ink3,
     textTransform: 'uppercase',
     letterSpacing: 1.2,
     marginBottom: spacing.md,
   },
-  empty: { color: '#64748B', fontSize: fontSize.sm, lineHeight: 20 },
+  empty: { color: ui.ink3, fontSize: fontSize.sm, lineHeight: 20 },
 
   segmentCard: {
     flexDirection: 'row',
-    backgroundColor: colors.revealCardBg,
+    backgroundColor: ui.surface,
     borderRadius: radius.md,
     marginBottom: spacing.sm,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: colors.revealCardBorder,
+    borderColor: ui.line,
   },
   segmentAccent: {
     width: 4,
@@ -516,8 +509,8 @@ const styles = StyleSheet.create({
   },
   segmentName: {
     fontSize: fontSize.md,
-    color: colors.surface,
-    fontWeight: fontWeight.semibold,
+    color: ui.ink,
+    fontFamily: fonts.semibold,
     flex: 1,
   },
   segmentBadge: {
@@ -527,13 +520,13 @@ const styles = StyleSheet.create({
   },
   segmentBadgeText: {
     fontSize: 10,
-    fontWeight: fontWeight.bold,
-    color: colors.revealBg,
+    fontFamily: fonts.bold,
+    color: ui.surface,
     letterSpacing: 0.5,
   },
   segmentMeta: {
     fontSize: fontSize.xs,
-    color: '#64748B',
+    color: ui.ink3,
     marginBottom: spacing.sm,
   },
   influenceRow: {
@@ -543,16 +536,16 @@ const styles = StyleSheet.create({
   },
   influenceLabel: {
     fontSize: fontSize.xs,
-    color: colors.revealAccent,
-    fontWeight: fontWeight.semibold,
+    color: ui.accent,
+    fontFamily: fonts.semibold,
   },
   legacyLabel: {
     fontSize: fontSize.xs,
-    color: '#64748B',
+    color: ui.ink3,
   },
   influenceTrack: {
     height: 4,
-    backgroundColor: '#1E293B',
+    backgroundColor: ui.line,
     borderRadius: 4,
     overflow: 'hidden',
   },
@@ -566,14 +559,14 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: colors.revealCardBorder,
+    borderColor: ui.line,
     alignItems: 'center',
   },
-  ghostButtonText: { color: colors.revealAccent, fontSize: fontSize.sm, fontWeight: fontWeight.medium },
+  ghostButtonText: { color: ui.accent, fontSize: fontSize.sm, fontFamily: fonts.medium },
   footnote: {
     marginTop: spacing.lg,
     fontSize: fontSize.xs,
-    color: '#475569',
+    color: ui.ink2,
   },
 
   // Footer
@@ -581,26 +574,26 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.md,
     borderTopWidth: 1,
-    borderTopColor: colors.revealCardBorder,
-    backgroundColor: colors.revealBg,
+    borderTopColor: ui.line,
+    backgroundColor: ui.surface,
   },
   ctaButton: {
-    backgroundColor: colors.surface,
+    backgroundColor: ui.ink,
     paddingVertical: spacing.md,
     borderRadius: radius.md,
     alignItems: 'center',
   },
   ctaButtonCapture: {
-    backgroundColor: colors.revealAccent,
+    backgroundColor: ui.accent,
   },
   ctaButtonPressed: { opacity: 0.7 },
   ctaButtonText: {
-    color: colors.revealBg,
+    color: ui.surface,
     fontSize: fontSize.md,
-    fontWeight: fontWeight.bold,
+    fontFamily: fonts.bold,
     letterSpacing: 0.5,
   },
   ctaButtonTextCapture: {
-    color: '#042F2E',
+    color: ui.surface,
   },
 });

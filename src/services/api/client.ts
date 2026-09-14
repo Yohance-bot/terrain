@@ -4,8 +4,19 @@ import { readAuth, writeAuth } from '@/lib/auth/storage';
 import { DEV_RUNNERS, setDevRunnerId, getDeviceId } from '@/lib/device';
 
 import { ApiRequestError } from './errors';
+import { localTimeZone } from '@/lib/format';
 import type {
   HomeTerritoryUpdate,
+  AthleteSettings,
+  AthleteStats,
+  FriendProfile,
+  GoalMetric,
+  GoalProgress,
+  RunActivity,
+  RunAnnotationUpdate,
+  RunPage,
+  RunSummary,
+  ShoeRecord,
   AccountSummary,
   ChallengeDraft,
   ChallengeRecord,
@@ -504,4 +515,85 @@ export function finishGhostAttempt(
     method: 'POST',
     body: JSON.stringify({ elapsed_s: elapsedS, ...(runId ? { run_id: runId } : {}) }),
   });
+}
+
+// --- Athlete profile ------------------------------------------------------------
+// Calendar groupings happen server-side in the phone's timezone, so every read
+// that buckets by week or month carries it.
+
+function athleteQuery(params: Record<string, string | number | undefined> = {}): string {
+  const query = new URLSearchParams();
+  const zone = localTimeZone();
+  if (zone) query.set('tz', zone);
+  for (const [key, value] of Object.entries(params)) {
+    if (value !== undefined) query.set(key, String(value));
+  }
+  const text = query.toString();
+  return text ? `?${text}` : '';
+}
+
+export function fetchAthleteStats(weeks = 12): Promise<AthleteStats> {
+  return request<AthleteStats>(`/v1/athlete/stats${athleteQuery({ weeks })}`);
+}
+
+export function fetchRunsPage(options: { month?: string; before?: string; limit?: number } = {}): Promise<RunPage> {
+  return request<RunPage>(`/v1/athlete/runs${athleteQuery(options)}`);
+}
+
+export function fetchActivity(runId: string): Promise<RunActivity> {
+  return request<RunActivity>(`/v1/athlete/runs/${runId}`);
+}
+
+export function annotateRun(runId: string, change: RunAnnotationUpdate): Promise<RunSummary> {
+  return request<RunSummary>(`/v1/athlete/runs/${runId}`, { method: 'PATCH', body: JSON.stringify(change) });
+}
+
+export function fetchWeeklyGoal(): Promise<GoalProgress | null> {
+  return request<GoalProgress | null>(`/v1/athlete/goal${athleteQuery()}`);
+}
+
+/** `target` is metres for distance, seconds for time, a count for runs. */
+export function saveWeeklyGoal(metric: GoalMetric, target: number): Promise<GoalProgress> {
+  return request<GoalProgress>(`/v1/athlete/goal${athleteQuery()}`, {
+    method: 'PUT',
+    body: JSON.stringify({ metric, target }),
+  });
+}
+
+export async function clearWeeklyGoal(): Promise<void> {
+  await requestResponse('/v1/athlete/goal', { method: 'DELETE' });
+}
+
+export function fetchAthleteSettings(): Promise<AthleteSettings> {
+  return request<AthleteSettings>('/v1/athlete/settings');
+}
+
+export function saveAthleteSettings(settings: AthleteSettings): Promise<AthleteSettings> {
+  return request<AthleteSettings>('/v1/athlete/settings', { method: 'PUT', body: JSON.stringify(settings) });
+}
+
+export function fetchShoes(): Promise<ShoeRecord[]> {
+  return request<ShoeRecord[]>('/v1/athlete/shoes');
+}
+
+export function createShoe(name: string, isDefault = false): Promise<ShoeRecord> {
+  return request<ShoeRecord>('/v1/athlete/shoes', {
+    method: 'POST',
+    body: JSON.stringify({ name, is_default: isDefault }),
+  });
+}
+
+export function updateShoe(
+  shoeId: string,
+  change: { name?: string; is_default?: boolean; retired?: boolean },
+): Promise<ShoeRecord> {
+  return request<ShoeRecord>(`/v1/athlete/shoes/${shoeId}`, { method: 'PATCH', body: JSON.stringify(change) });
+}
+
+export async function deleteShoe(shoeId: string): Promise<void> {
+  await requestResponse(`/v1/athlete/shoes/${shoeId}`, { method: 'DELETE' });
+}
+
+export function fetchFriendProfile(accountId: string): Promise<FriendProfile> {
+  return request<FriendProfile>(`/v1/social/accounts/${accountId}/profile${athleteQuery()}`);
 }
