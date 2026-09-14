@@ -1,0 +1,92 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&amp;display=swap">
+  <style>
+    body { margin: 0; background: #F6F7F3; font-family: 'Barlow', 'Helvetica Neue', Helvetica, sans-serif; color: #0E1A13; -webkit-font-smoothing: antialiased; }
+    * { box-sizing: border-box; }
+    a { color: #1F7A4D; text-decoration: none; }
+    a:hover { color: #123D28; }
+    svg { display: block; }
+  </style>
+</helmet>
+<div style="position: relative; width: 390px; height: 1040px; overflow: hidden; background: #F6F7F3;">
+  <div style="display: flex; align-items: center; justify-content: space-between; padding: 54px 12px 0; height: 98px;">
+    <div style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; color: #0E1A13;">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"></path></svg>
+    </div>
+    <div style="font-size: 17px; font-weight: 600;">Settings</div>
+    <div style="width: 44px; height: 44px;"></div>
+  </div>
+
+  <div style="font-size: 12px; font-weight: 600; letter-spacing: 0.08em; color: #8A958E; padding: 18px 20px 8px;">RUNNING</div>
+  <div style="background: #FFFFFF; border-top: 1px solid #E2E6E0; border-bottom: 1px solid #E2E6E0; padding-left: 20px;">
+    <div style="display: flex; align-items: center; justify-content: space-between; min-height: 54px; padding-right: 20px; border-bottom: 1px solid #E2E6E0;">
+      <div style="font-size: 16px; font-weight: 500;">Units</div>
+      <div style="display: flex; height: 32px; padding: 2px; border-radius: 9px; background: #E9ECE6;">
+        <div style="width: 48px; display: flex; align-items: center; justify-content: center; border-radius: 7px; background: #FFFFFF; box-shadow: 0 1px 2px rgba(14,26,19,0.08); font-size: 14px; font-weight: 600;">km</div>
+        <div style="width: 48px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 500; color: #4A5750;">mi</div>
+      </div>
+    </div>
+    <div style="display: flex; align-items: center; justify-content: space-between; min-height: 54px; padding-right: 16px; border-bottom: 1px solid #E2E6E0;">
+      <div style="font-size: 16px; font-weight: 500;">Run trail</div>
+      <div style="display: flex; align-items: center; gap: 6px; font-size: 15px; color: #4A5750;">Light up streets<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B5BDB8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"></path></svg></div>
+    </div>
+    <div style="display: flex; align-items: center; justify-content: space-between; min-height: 64px; padding-right: 20px; border-bottom: 1px solid #E2E6E0;">
+      <div style="display: flex; flex-direction: column; gap: 1px;"><div style="font-size: 16px; font-weight: 500;">Run cues &amp; haptics</div><div style="font-size: 13px; color: #4A5750;">Splits and territory feedback</div></div>
+      <div style="width: 51px; height: 31px; border-radius: 16px; background: #1F7A4D; padding: 2px; display: flex; justify-content: flex-end;"><div style="width: 27px; height: 27px; border-radius: 14px; background: #FFFFFF; box-shadow: 0 2px 4px rgba(14,26,19,0.2);"></div></div>
+    </div>
+    <div style="display: flex; align-items: center; justify-content: space-between; min-height: 64px; padding-right: 20px;">
+      <div style="display: flex; flex-direction: column; gap: 1px;"><div style="font-size: 16px; font-weight: 500;">Battery saver</div><div style="font-size: 13px; color: #4A5750;">Less glow, slower map updates, calm camera</div></div>
+      <div style="width: 51px; height: 31px; border-radius: 16px; background: #E2E6E0; padding: 2px; display: flex; justify-content: flex-start;"><div style="width: 27px; height: 27px; border-radius: 14px; background: #FFFFFF; box-shadow: 0 2px 4px rgba(14,26,19,0.2);"></div></div>
+    </div>
+  </div>
+
+  <div style="font-size: 12px; font-weight: 600; letter-spacing: 0.08em; color: #8A958E; padding: 26px 20px 8px;">MAP</div>
+  <div style="background: #FFFFFF; border-top: 1px solid #E2E6E0; border-bottom: 1px solid #E2E6E0; padding-left: 20px;">
+    <div style="display: flex; align-items: center; justify-content: space-between; min-height: 54px; padding-right: 16px; border-bottom: 1px solid #E2E6E0;">
+      <div style="font-size: 16px; font-weight: 500;">You on the map</div>
+      <div style="display: flex; align-items: center; gap: 6px; font-size: 15px; color: #4A5750;">3D runner<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B5BDB8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"></path></svg></div>
+    </div>
+    <div style="display: flex; align-items: center; justify-content: space-between; min-height: 54px; padding-right: 16px; border-bottom: 1px solid #E2E6E0;">
+      <div style="font-size: 16px; font-weight: 500;">Capture colour</div>
+      <div style="display: flex; align-items: center; gap: 8px;"><div style="width: 18px; height: 18px; border-radius: 9px; background: #00E676;"></div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B5BDB8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"></path></svg></div>
+    </div>
+    <div style="display: flex; align-items: center; justify-content: space-between; min-height: 64px; padding-right: 20px;">
+      <div style="display: flex; flex-direction: column; gap: 1px; max-width: 260px;"><div style="font-size: 16px; font-weight: 500;">Weather lighting</div><div style="font-size: 13px; color: #4A5750;">Approximate location, every 15 minutes</div></div>
+      <div style="width: 51px; height: 31px; border-radius: 16px; background: #1F7A4D; padding: 2px; display: flex; justify-content: flex-end;"><div style="width: 27px; height: 27px; border-radius: 14px; background: #FFFFFF; box-shadow: 0 2px 4px rgba(14,26,19,0.2);"></div></div>
+    </div>
+  </div>
+
+  <div style="font-size: 12px; font-weight: 600; letter-spacing: 0.08em; color: #8A958E; padding: 26px 20px 8px;">ACCOUNT</div>
+  <div style="background: #FFFFFF; border-top: 1px solid #E2E6E0; border-bottom: 1px solid #E2E6E0; padding-left: 20px;">
+    <div style="display: flex; align-items: center; justify-content: space-between; min-height: 54px; padding-right: 16px; border-bottom: 1px solid #E2E6E0;">
+      <div style="font-size: 16px; font-weight: 500;">Name</div>
+      <div style="display: flex; align-items: center; gap: 6px; font-size: 15px; color: #4A5750;">[Your name]<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B5BDB8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"></path></svg></div>
+    </div>
+    <div style="display: flex; align-items: center; justify-content: space-between; min-height: 54px; padding-right: 16px; border-bottom: 1px solid #E2E6E0;">
+      <div style="font-size: 16px; font-weight: 500;">Username</div>
+      <div style="display: flex; align-items: center; gap: 6px; font-size: 15px; color: #4A5750;">@yourhandle<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B5BDB8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"></path></svg></div>
+    </div>
+    <div style="display: flex; align-items: center; justify-content: space-between; min-height: 54px; padding-right: 16px;">
+      <div style="font-size: 16px; font-weight: 500;">Password</div>
+      <div style="display: flex; align-items: center; gap: 6px; font-size: 15px; color: #4A5750;">Change<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B5BDB8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"></path></svg></div>
+    </div>
+  </div>
+
+  <div style="margin-top: 26px; background: #FFFFFF; border-top: 1px solid #E2E6E0; border-bottom: 1px solid #E2E6E0; padding-left: 20px;">
+    <div style="display: flex; align-items: center; min-height: 54px; border-bottom: 1px solid #E2E6E0; font-size: 16px; font-weight: 500;">Sign out</div>
+    <div style="display: flex; align-items: center; min-height: 54px; font-size: 16px; font-weight: 500; color: #B42318;">Delete account</div>
+  </div>
+
+  <div style="text-align: center; font-size: 12px; line-height: 18px; color: #8A958E; padding: 24px 20px;">TerraRun 1.0.0<br>© OpenStreetMap contributors · Weather: Open-Meteo</div>
+</div>
+</x-dc>
+</body>
+</html>

@@ -1,0 +1,69 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&amp;display=swap">
+  <style>
+    body { margin: 0; background: #F6F7F3; font-family: 'Barlow', 'Helvetica Neue', Helvetica, sans-serif; color: #0E1A13; -webkit-font-smoothing: antialiased; }
+    * { box-sizing: border-box; }
+    a { color: #1F7A4D; text-decoration: none; }
+    a:hover { color: #123D28; }
+    svg { display: block; }
+  </style>
+</helmet>
+<div style="position: relative; width: 390px; height: 844px; overflow: hidden; background: #F6F7F3;">
+  <div style="padding: 58px 20px 0; display: flex; flex-direction: column; gap: 14px;">
+    <div style="font-size: 32px; font-weight: 700; letter-spacing: -0.015em; color: #0E1A13;">Profile</div>
+    <div style="height: 64px; border-radius: 32px; width: 64px; background: #1F7A4D;"></div>
+    <div style="height: 14px; width: 60%; border-radius: 7px; background: #E2E6E0;"></div>
+    <div style="height: 10px; width: 40%; border-radius: 5px; background: #E2E6E0;"></div>
+  </div>
+  <div style="position: absolute; inset: 0; background: rgba(14,26,19,0.34);"></div>
+
+  <div style="position: absolute; left: 0; right: 0; bottom: 0; background: #FFFFFF; border-radius: 22px 22px 0 0; padding: 10px 20px 34px; display: flex; flex-direction: column; align-items: stretch;">
+    <div style="align-self: center; width: 36px; height: 5px; border-radius: 3px; background: #E2E6E0; margin-bottom: 18px;"></div>
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <div style="width: 40px; height: 40px; border-radius: 12px; background: #E6EEE8; color: #1F7A4D; display: flex; align-items: center; justify-content: center;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20.5V4.5M19 20.5V4.5"></path><path d="M5 8c3.5 2.6 10.5 2.6 14 0"></path></svg>
+      </div>
+      <div style="display: flex; flex-direction: column;">
+        <div style="font-size: 22px; font-weight: 700; letter-spacing: -0.01em;">Weekly goal</div>
+        <div style="font-size: 14px; color: #4A5750;">Resets every Monday</div>
+      </div>
+    </div>
+
+    <div style="display: flex; height: 38px; padding: 3px; border-radius: 11px; background: #E9ECE6; margin-top: 22px;">
+      <div style="flex-grow: 1; display: flex; align-items: center; justify-content: center; border-radius: 8px; background: #FFFFFF; box-shadow: 0 1px 2px rgba(14,26,19,0.08); font-size: 15px; font-weight: 600;">Distance</div>
+      <div style="flex-grow: 1; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 500; color: #4A5750;">Time</div>
+      <div style="flex-grow: 1; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 500; color: #4A5750;">Runs</div>
+    </div>
+
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 30px;">
+      <div style="width: 56px; height: 56px; border-radius: 28px; border: 1.5px solid #E2E6E0; display: flex; align-items: center; justify-content: center; color: #0E1A13;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"></path></svg></div>
+      <div style="display: flex; align-items: baseline; gap: 6px;">
+        <div style="font-size: 72px; font-weight: 600; line-height: 72px; letter-spacing: -0.02em;">25</div>
+        <div style="font-size: 22px; font-weight: 500; color: #4A5750;">km</div>
+      </div>
+      <div style="width: 56px; height: 56px; border-radius: 28px; border: 1.5px solid #E2E6E0; display: flex; align-items: center; justify-content: center; color: #0E1A13;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg></div>
+    </div>
+    <div style="text-align: center; font-size: 14px; color: #4A5750; margin-top: 10px;">Your last 4 weeks averaged 20.6 km</div>
+
+    <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-top: 22px;">
+      <div style="height: 40px; border-radius: 20px; border: 1px solid #E2E6E0; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 500;">15</div>
+      <div style="height: 40px; border-radius: 20px; border: 1px solid #E2E6E0; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 500;">20</div>
+      <div style="height: 40px; border-radius: 20px; border: 1.5px solid #1F7A4D; background: #E6EEE8; color: #123D28; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 600;">25</div>
+      <div style="height: 40px; border-radius: 20px; border: 1px solid #E2E6E0; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 500;">30</div>
+    </div>
+
+    <div style="height: 54px; border-radius: 14px; background: #1F7A4D; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 17px; font-weight: 600; margin-top: 28px;">Save goal</div>
+    <div style="text-align: center; font-size: 15px; font-weight: 600; color: #4A5750; margin-top: 16px;">Remove goal</div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

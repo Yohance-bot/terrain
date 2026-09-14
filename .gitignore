@@ -89,3 +89,12 @@ ngrok.json
 
 # Generated read-only assistant index
 backend/codebase-context.json
+
+# Filament spike models. Large binaries for a rendering experiment, not app
+# assets: the spike is reproducible from the source scenes it was made from.
+assets/filament-spike/
+
+# The per-screen mockups in design/redesign are the reference the UI was built
+# against and stay committed. The single-file export is a 2.6 MB bundle of the
+# same screens, regenerated whenever the canvas is exported.
+design/redesign/terrarun-redesign.html

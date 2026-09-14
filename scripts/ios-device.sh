@@ -16,22 +16,23 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 # devicectl exits non-zero transiently while a tunnel to the phone is active,
 # which `set -o pipefail` would turn into "no device". Retry, and never let the
 # detection itself abort the script.
-if [ -z "$DEVICE" ]; then
+find_device() {
   for _ in 1 2 3; do
     DEVICE=$(xcrun devicectl list devices 2>/dev/null \
       | awk 'NR>2 && $0 ~ /available/ {print $3; exit}' || true)
-    [ -n "$DEVICE" ] && break
+    [ -n "$DEVICE" ] && return
     sleep 2
   done
-fi
-if [ -z "$DEVICE" ]; then
-  echo "No paired iPhone found. Connect it, unlock it, and trust this Mac." >&2
-  exit 1
-fi
+}
+[ -z "$DEVICE" ] && find_device
 
-echo "→ Building Release for $DEVICE"
+echo "→ Building Release"
+# Built for a generic iOS destination rather than this device's id. Targeting the
+# id makes xcodebuild mount the developer disk image first, which fails whenever
+# the phone is locked or its tunnel has dropped — and none of that is needed to
+# compile. Only the install and launch below actually require the device.
 xcodebuild -workspace "$ROOT/ios/run.xcworkspace" -scheme run \
-  -configuration Release -destination "id=$DEVICE" \
+  -configuration Release -destination 'generic/platform=iOS' \
   -derivedDataPath "$ROOT/ios/build/device-release" \
   -allowProvisioningUpdates build
 
@@ -40,6 +41,17 @@ test -f "$APP/main.jsbundle" || {
   echo "No embedded bundle — the app would need a Metro server." >&2
   exit 1
 }
+
+# The phone is only needed from here on, so a locked or unplugged phone costs
+# the install rather than the whole build.
+[ -z "$DEVICE" ] && find_device
+if [ -z "$DEVICE" ]; then
+  echo
+  echo "Built, but no paired iPhone is reachable, so nothing was installed."
+  echo "Connect it, unlock it, trust this Mac, then re-run: npm run ios:device"
+  echo "The build is cached, so that second run only installs."
+  exit 1
+fi
 
 echo "→ Installing"
 xcrun devicectl device install app --device "$DEVICE" "$APP"

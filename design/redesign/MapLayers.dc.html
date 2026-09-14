@@ -1,0 +1,102 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&amp;display=swap">
+  <style>
+    body { margin: 0; background: #F6F7F3; font-family: 'Barlow', 'Helvetica Neue', Helvetica, sans-serif; color: #0E1A13; -webkit-font-smoothing: antialiased; }
+    * { box-sizing: border-box; }
+    a { color: #1F7A4D; text-decoration: none; }
+    a:hover { color: #123D28; }
+    svg { display: block; }
+  </style>
+</helmet>
+<div style="position: relative; width: 390px; height: 844px; overflow: hidden; background: #BEDCCB;">
+  <svg width="390" height="844" viewBox="0 0 390 844" style="position: absolute; left: 0; top: 0;">
+    <rect width="390" height="844" fill="#BEDCCB"></rect>
+    <path d="M232 70 L390 52 L390 318 L250 338 Z" fill="#80C89B"></path>
+    <g fill="none">
+      <path d="M-20 350 L410 306" stroke="#5F7D70" stroke-width="26"></path>
+      <path d="M-20 560 L410 516" stroke="#5F7D70" stroke-width="26"></path>
+      <path d="M128 -20 L178 870" stroke="#5F7D70" stroke-width="30"></path>
+      <path d="M262 -20 L300 870" stroke="#5F7D70" stroke-width="22"></path>
+      <path d="M-20 350 L410 306" stroke="#F7F4EC" stroke-width="21"></path>
+      <path d="M-20 560 L410 516" stroke="#F7F4EC" stroke-width="21"></path>
+      <path d="M128 -20 L178 870" stroke="#F1E9D5" stroke-width="25"></path>
+      <path d="M262 -20 L300 870" stroke="#F7F4EC" stroke-width="17"></path>
+    </g>
+    <g fill="#F0EDE5" stroke="#6E8C7E" stroke-width="2" stroke-linejoin="round">
+      <path d="M18 120 L96 112 L102 170 L24 178 Z"></path>
+      <path d="M22 200 L98 192 L104 262 L28 270 Z"></path>
+      <path d="M170 100 L226 94 L232 150 L176 156 Z"></path>
+      <path d="M176 176 L234 170 L240 250 L182 256 Z"></path>
+      <path d="M26 392 L100 384 L106 452 L32 460 Z"></path>
+      <path d="M160 368 L222 362 L228 432 L166 438 Z"></path>
+      <path d="M306 350 L376 342 L382 410 L312 418 Z"></path>
+    </g>
+    <path d="M40 300 C 90 240, 150 280, 190 210 S 300 150, 350 190" fill="none" stroke="#0E1A13" stroke-opacity="0.55" stroke-width="3" stroke-dasharray="1 7" stroke-linecap="round"></path>
+    <circle cx="350" cy="190" r="5" fill="#FFFFFF" stroke="#0E1A13" stroke-width="2"></circle>
+  </svg>
+  <div style="position: absolute; inset: 0; background: rgba(14,26,19,0.30);"></div>
+
+  <div style="position: absolute; left: 0; right: 0; bottom: 0; background: #FFFFFF; border-radius: 22px 22px 0 0; padding: 10px 20px 34px; display: flex; flex-direction: column;">
+    <div style="align-self: center; width: 36px; height: 5px; border-radius: 3px; background: #E2E6E0; margin-bottom: 16px;"></div>
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px;">
+      <div style="font-size: 22px; font-weight: 700; letter-spacing: -0.01em;">Map layers</div>
+      <div style="width: 32px; height: 32px; border-radius: 16px; background: #F1F3EE; color: #4A5750; display: flex; align-items: center; justify-content: center;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"></path></svg>
+      </div>
+    </div>
+
+    <div style="font-size: 12px; font-weight: 600; letter-spacing: 0.08em; color: #8A958E; margin-bottom: 4px;">SHOW</div>
+    <div style="display: flex; flex-direction: column;">
+      <div style="display: flex; align-items: center; justify-content: space-between; height: 54px; border-bottom: 1px solid #E2E6E0;">
+        <div style="display: flex; flex-direction: column; gap: 1px;">
+          <div style="font-size: 16px; font-weight: 600;">Everything</div>
+          <div style="font-size: 13px; color: #4A5750;">Territories and your captures</div>
+        </div>
+        <div style="width: 22px; height: 22px; border-radius: 11px; border: 2px solid #1F7A4D; display: flex; align-items: center; justify-content: center;"><div style="width: 10px; height: 10px; border-radius: 5px; background: #1F7A4D;"></div></div>
+      </div>
+      <div style="display: flex; align-items: center; justify-content: space-between; height: 54px; border-bottom: 1px solid #E2E6E0;">
+        <div style="font-size: 16px; font-weight: 500;">Territories only</div>
+        <div style="width: 22px; height: 22px; border-radius: 11px; border: 2px solid #C9D2CC;"></div>
+      </div>
+      <div style="display: flex; align-items: center; justify-content: space-between; height: 54px;">
+        <div style="font-size: 16px; font-weight: 500;">My captures only</div>
+        <div style="width: 22px; height: 22px; border-radius: 11px; border: 2px solid #C9D2CC;"></div>
+      </div>
+    </div>
+
+    <div style="font-size: 12px; font-weight: 600; letter-spacing: 0.08em; color: #8A958E; margin: 22px 0 4px;">GHOSTS</div>
+    <div style="display: flex; flex-direction: column;">
+      <div style="display: flex; align-items: center; gap: 14px; height: 62px; border-bottom: 1px solid #E2E6E0;">
+        <div style="width: 36px; height: 36px; border-radius: 10px; background: #E6EEE8; color: #1F7A4D; display: flex; align-items: center; justify-content: center;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 17.5C6.5 11 11 11 13 11s5.5-.5 5.5-6.5" stroke-dasharray="2.2 2.8"></path><circle cx="6.5" cy="18" r="2.2"></circle><path d="M16 6.5 18.5 4 21 6.5"></path></svg>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 1px; flex-grow: 1;">
+          <div style="font-size: 16px; font-weight: 600;">Ghosts nearby</div>
+          <div style="font-size: 13px; color: #4A5750;">Public routes you can race</div>
+        </div>
+        <div style="width: 51px; height: 31px; border-radius: 16px; background: #1F7A4D; padding: 2px; display: flex; justify-content: flex-end;"><div style="width: 27px; height: 27px; border-radius: 14px; background: #FFFFFF; box-shadow: 0 2px 4px rgba(14,26,19,0.2);"></div></div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 14px; height: 62px;">
+        <div style="width: 36px; height: 36px; border-radius: 10px; background: #F1F3EE; color: #4A5750; display: flex; align-items: center; justify-content: center;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3.5" width="14" height="17" rx="2"></rect><path d="M9 3.5v17"></path><path d="M12 8h4M12 11.5h4"></path></svg>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 1px; flex-grow: 1;">
+          <div style="font-size: 16px; font-weight: 600;">My ghosts</div>
+          <div style="font-size: 13px; color: #4A5750;">3 recorded · 1 broadcasting</div>
+        </div>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8A958E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"></path></svg>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>
