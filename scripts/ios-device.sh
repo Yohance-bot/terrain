@@ -26,7 +26,21 @@ find_device() {
 }
 [ -z "$DEVICE" ] && find_device
 
-echo "→ Building Release"
+# One compile job per core is the xcodebuild default, and it is the wrong
+# default here: Filament, Hermes and MapLibre are C++ heavy enough that eight
+# concurrent compilers need well over 8 GB. Past that point the machine swaps
+# and every compiler waits on disk instead of working, which is slower than
+# running fewer of them. Roughly 2.5 GB per job, never fewer than two.
+JOBS="${JOBS:-}"
+if [ -z "$JOBS" ]; then
+  GB=$(( $(sysctl -n hw.memsize) / 1073741824 ))
+  JOBS=$(( GB * 10 / 25 ))
+  [ "$JOBS" -lt 2 ] && JOBS=2
+  CORES=$(sysctl -n hw.ncpu)
+  [ "$JOBS" -gt "$CORES" ] && JOBS=$CORES
+fi
+
+echo "→ Building Release ($JOBS compile jobs)"
 # Built for a generic iOS destination rather than this device's id. Targeting the
 # id makes xcodebuild mount the developer disk image first, which fails whenever
 # the phone is locked or its tunnel has dropped — and none of that is needed to
@@ -34,7 +48,7 @@ echo "→ Building Release"
 xcodebuild -workspace "$ROOT/ios/run.xcworkspace" -scheme run \
   -configuration Release -destination 'generic/platform=iOS' \
   -derivedDataPath "$ROOT/ios/build/device-release" \
-  -allowProvisioningUpdates build
+  -jobs "$JOBS" -allowProvisioningUpdates build
 
 APP="$ROOT/ios/build/device-release/Build/Products/Release-iphoneos/run.app"
 test -f "$APP/main.jsbundle" || {
