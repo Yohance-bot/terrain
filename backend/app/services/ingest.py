@@ -26,6 +26,11 @@ from app.models import (
     TerritoryStanding,
 )
 from app.schemas import GpsSample, RunResult, RunSubmission, SegmentResult
+from app.services.athlete import (
+    altitudes_for,
+    apply_new_run_defaults,
+    record_run_metrics,
+)
 from app.services.influence import (
     InfluenceTuning,
     active_share,
@@ -120,6 +125,9 @@ def process_run(session: Session, device: Device, submission: RunSubmission) -> 
         geom=f"SRID=4326;LINESTRING({wkt})" if wkt else None,
         sample_ts=[s.ts for s in usable],
         sample_accuracy_m=[s.accuracy_m or -1.0 for s in usable],
+        sample_altitude_m=altitudes_for(usable),
+        temperature_c=submission.conditions.temperature_c if submission.conditions else None,
+        weather_code=submission.conditions.weather_code if submission.conditions else None,
         raw_payload=submission.model_dump(mode="json"),
         status="submitted",
         source=submission.source,
@@ -152,6 +160,10 @@ def process_run(session: Session, device: Device, submission: RunSubmission) -> 
     _transition(session, run, "validated")
     _transition(session, run, "applied")
     run.processed_at = datetime.now(UTC)
+
+    # Derived once here, from every usable fix: retention later thins the trace.
+    record_run_metrics(session, run, usable)
+    apply_new_run_defaults(session, run, device.id)
 
     # Separate public overlay: never mutates fixed territory geometry.
     if run.source == "tracked":

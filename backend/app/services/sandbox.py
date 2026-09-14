@@ -14,7 +14,7 @@ import uuid
 from datetime import UTC, datetime, timedelta
 
 from fastapi import HTTPException
-from sqlalchemy import delete, func, or_, select, text
+from sqlalchemy import delete, func, or_, select, text, update
 from sqlalchemy.orm import Session
 
 from app.core.authentication import issue_session
@@ -40,6 +40,7 @@ from app.models import (
     RunTerritorySegment,
     SandboxAccount,
     SocialEvent,
+    TerritoryOwnership,
 )
 from app.services.ownership import recompute_ownership
 
@@ -220,6 +221,11 @@ def teardown(session: Session, account_ids: list[uuid.UUID] | None = None) -> di
         ).scalars()
     )
 
+    # Include ownership-only references (for example after a standings reset).
+    touched.update(session.execute(select(TerritoryOwnership.territory_id).where(
+        or_(TerritoryOwnership.owner_device_id.in_(devices), TerritoryOwnership.previous_owner_id.in_(devices))
+    )).scalars())
+
     # Social state first: these reference accounts, and some cascade from runs.
     ghost_ids = list(
         session.execute(select(GhostRun.id).where(GhostRun.account_id.in_(ids))).scalars()
@@ -282,6 +288,16 @@ def teardown(session: Session, account_ids: list[uuid.UUID] | None = None) -> di
         text("DELETE FROM territory_standings WHERE device_id = ANY(:ids)"), {"ids": devices}
     )
 
+    # Rebuild while the devices still exist. The FK otherwise prevents deleting
+    # a lab runner that currently owns a territory. Previous-owner pointers must
+    # also be cleared before those disposable devices are removed.
+    for territory_id in touched:
+        recompute_ownership(session, territory_id)
+    session.flush()
+    session.execute(update(TerritoryOwnership).where(
+        TerritoryOwnership.previous_owner_id.in_(devices)
+    ).values(previous_owner_id=None))
+
     session.execute(delete(AuthSession).where(AuthSession.principal_id.in_(ids)))
     session.execute(delete(AccountAuthMethod).where(AccountAuthMethod.account_id.in_(ids)))
     session.execute(delete(SandboxAccount).where(SandboxAccount.account_id.in_(ids)))
@@ -289,10 +305,6 @@ def teardown(session: Session, account_ids: list[uuid.UUID] | None = None) -> di
     session.execute(delete(Account).where(Account.id.in_(ids)))
     session.execute(delete(Device).where(Device.id.in_(devices)))
     session.flush()
-
-    # Recompute last, once the lab's grants are gone, so ownership settles back.
-    for territory_id in touched:
-        recompute_ownership(session, territory_id)
 
     return {
         "runners": len(ids),

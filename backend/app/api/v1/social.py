@@ -20,17 +20,20 @@ from app.models import Account, Friendship
 from app.schemas import (
     Friend,
     FriendList,
+    FriendProfile,
     FriendRequest,
     FriendRequestCreate,
     HandleUpdate,
     PublicAccount,
 )
+from app.services.athlete import athlete_stats, recent_public_runs
 from app.services.social import (
     friendship_between,
     handle_for,
     normalise_handle,
     record_event,
     relationship_label,
+    require_friend,
     search_accounts,
 )
 
@@ -295,3 +298,31 @@ def unblock_account(
         raise HTTPException(404, "You have not blocked that account.")
     # Unblocking returns the pair to strangers, not to their previous friendship.
     session.delete(friendship)
+
+
+@router.get("/accounts/{account_id}/profile", response_model=FriendProfile)
+def friend_profile(
+    account_id: uuid.UUID,
+    tz: str | None = Query(default=None, max_length=64),
+    account: Account = Depends(current_account),
+    session: Session = Depends(get_session),
+) -> FriendProfile:
+    """A friend's training. Same refusal for strangers and blocks, by design."""
+    friendship = require_friend(session, account.id, account_id)
+    other = session.get(Account, account_id)
+    if other is None:
+        raise HTTPException(404, "Account not found")
+    stats = athlete_stats(session, other, tz)
+    return FriendProfile(
+        account=public(session, other, account.id),
+        friends_since=friendship.updated_at,
+        this_week=stats.this_week,
+        year_to_date=stats.year_to_date,
+        all_time=stats.all_time,
+        weeks=stats.weeks,
+        streak=stats.streak,
+        best_efforts=stats.best_efforts,
+        longest_run=stats.longest_run,
+        territories_held=stats.territories_held,
+        recent_runs=recent_public_runs(session, other),
+    )

@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import date, datetime
 from typing import Any, Literal
 
 from pydantic import BaseModel, Field
@@ -31,8 +31,19 @@ class GpsSample(BaseModel):
     lon: float = Field(ge=-180, le=180)
     accuracy_m: float | None = None
     speed_mps: float | None = None
+    # Metres above sea level and its reported accuracy. Absent from runs recorded
+    # before altitude was captured; elevation is simply unknown for those.
+    altitude_m: float | None = Field(default=None, ge=-500, le=9000)
+    altitude_accuracy_m: float | None = None
     provider: str | None = None
     is_mock: bool = False
+
+
+class RunConditions(BaseModel):
+    """Weather as the phone read it when the run started; purely descriptive."""
+
+    temperature_c: float | None = Field(default=None, ge=-60, le=60)
+    weather_code: int | None = Field(default=None, ge=0, le=99)
 
 
 class RunSubmission(BaseModel):
@@ -41,6 +52,7 @@ class RunSubmission(BaseModel):
     ended_at: datetime
     samples: list[GpsSample]
     source: RunSource = "tracked"
+    conditions: RunConditions | None = None
 
 
 class RunLifecycleEventRecord(BaseModel):
@@ -533,3 +545,202 @@ class StakeableArea(BaseModel):
     area_m2: float
     run_id: uuid.UUID
     created_at: datetime
+
+
+# --- Athlete profile ----------------------------------------------------------
+#
+# Distances are metres and durations seconds throughout; the phone formats them
+# in the athlete's units. Calendar groupings (weeks from Monday, months) are
+# computed in the timezone the phone sends, so a run just after midnight lands
+# on the day the athlete lived it.
+
+GoalMetric = Literal["distance", "time", "runs"]
+
+
+class AthleteTotals(BaseModel):
+    runs: int
+    distance_m: float
+    moving_s: int
+    elevation_gain_m: float
+
+
+class FourWeekAverages(BaseModel):
+    runs_per_week: float
+    distance_m_per_week: float
+    moving_s_per_week: float
+
+
+class WeekBucket(BaseModel):
+    week_start: date
+    runs: int
+    distance_m: float
+    moving_s: int
+    elevation_gain_m: float
+
+
+class MonthBucket(BaseModel):
+    month: str
+    runs: int
+    distance_m: float
+    moving_s: int
+    elevation_gain_m: float
+
+
+class StreakSummary(BaseModel):
+    """Consecutive weeks with at least one run. This week counts once run in."""
+
+    current_weeks: int
+    best_weeks: int
+    current_since: date | None = None
+    ran_this_week: bool
+
+
+class BestEffortRecord(BaseModel):
+    distance_m: int
+    elapsed_s: float
+    run_id: uuid.UUID
+    started_at: datetime
+
+
+class RunRecord(BaseModel):
+    run_id: uuid.UUID
+    started_at: datetime
+    distance_m: float
+    elevation_gain_m: float | None = None
+
+
+class WeeklyGoalUpdate(BaseModel):
+    """`target` is metres for distance, seconds for time, a count for runs."""
+
+    metric: GoalMetric
+    target: float = Field(gt=0, le=1_000_000)
+
+
+class GoalProgress(BaseModel):
+    metric: GoalMetric
+    target: float
+    value: float
+    updated_at: datetime
+
+
+class AthleteStats(BaseModel):
+    timezone: str
+    generated_at: datetime
+    this_week: AthleteTotals
+    this_month: AthleteTotals
+    year_to_date: AthleteTotals
+    all_time: AthleteTotals
+    last_four_weeks: FourWeekAverages
+    week_days_m: list[float]
+    weeks: list[WeekBucket]
+    months: list[MonthBucket]
+    streak: StreakSummary
+    best_efforts: list[BestEffortRecord]
+    longest_run: RunRecord | None = None
+    biggest_climb: RunRecord | None = None
+    goal: GoalProgress | None = None
+    territories_held: int
+    territories_captured: int
+
+
+class ShoeRef(BaseModel):
+    id: uuid.UUID
+    name: str
+
+
+class RunSummary(BaseModel):
+    run_id: uuid.UUID
+    started_at: datetime
+    ended_at: datetime
+    distance_m: float
+    moving_s: int
+    elapsed_s: int
+    elevation_gain_m: float | None = None
+    # Null until the athlete names it; the phone titles it by time of day.
+    title: str | None = None
+    note: str | None = None
+    shoe: ShoeRef | None = None
+    captures: int = 0
+    # Distances at which this run was the fastest yet when it was recorded.
+    personal_records: list[int] = []
+    temperature_c: float | None = None
+    weather_code: int | None = None
+
+
+class RunPage(BaseModel):
+    runs: list[RunSummary]
+    next_before: datetime | None = None
+
+
+class RunSplit(BaseModel):
+    index: int
+    distance_m: float
+    moving_s: float
+    elevation_delta_m: float | None = None
+
+
+class RunEffort(BaseModel):
+    distance_m: int
+    elapsed_s: float
+    # 1-3 among every effort this athlete has run at the distance, else null.
+    rank: int | None = None
+    personal_record: bool = False
+
+
+class RunActivity(BaseModel):
+    summary: RunSummary
+    splits: list[RunSplit]
+    pace_series: list[tuple[float, float]]
+    elevation_series: list[tuple[float, float]]
+    best_efforts: list[RunEffort]
+    elevation_loss_m: float | None = None
+    calories: int | None = None
+
+
+class RunAnnotationUpdate(BaseModel):
+    """Only the fields sent change; send null to clear one."""
+
+    title: str | None = Field(default=None, max_length=80)
+    note: str | None = Field(default=None, max_length=1000)
+    shoe_id: uuid.UUID | None = None
+
+
+class AthleteSettingsRecord(BaseModel):
+    weight_kg: float | None = Field(default=None, ge=25, le=300)
+
+
+class ShoeRecord(BaseModel):
+    id: uuid.UUID
+    name: str
+    is_default: bool
+    retired: bool
+    distance_m: float
+    runs: int
+    created_at: datetime
+
+
+class ShoeCreate(BaseModel):
+    name: str = Field(min_length=1, max_length=48)
+    is_default: bool = False
+
+
+class ShoeUpdate(BaseModel):
+    name: str | None = Field(default=None, min_length=1, max_length=48)
+    is_default: bool | None = None
+    retired: bool | None = None
+
+
+class FriendProfile(BaseModel):
+    """A friend's training, and nothing that places them: no routes, notes or shoes."""
+
+    account: PublicAccount
+    friends_since: datetime
+    this_week: AthleteTotals
+    year_to_date: AthleteTotals
+    all_time: AthleteTotals
+    weeks: list[WeekBucket]
+    streak: StreakSummary
+    best_efforts: list[BestEffortRecord]
+    longest_run: RunRecord | None = None
+    territories_held: int
+    recent_runs: list[RunSummary]

@@ -70,6 +70,7 @@ def _run() -> Run:
         raw_payload={"samples": [{"lat": 12.9, "lon": 77.6}]},
         sample_ts=[1],
         sample_accuracy_m=[3.0],
+        sample_altitude_m=[900.0],
         pipeline_version=1,
     )
 
@@ -87,6 +88,7 @@ def test_retention_erases_only_raw_trace_fields() -> None:
     assert run.raw_payload == {}
     assert run.sample_ts is None
     assert run.sample_accuracy_m is None
+    assert run.sample_altitude_m is None
     assert run.raw_trace_deleted_at == now
     assert run.distance_m == 1_234
     assert session.executed_params == {"simplification_m": 25.0}

@@ -35,6 +35,7 @@ def _erase_raw_trace(run: Run, *, now: datetime, erase_route: bool) -> None:
     run.raw_payload = {}
     run.sample_ts = None
     run.sample_accuracy_m = None
+    run.sample_altitude_m = None
     run.raw_trace_deleted_at = now
     if erase_route:
         run.geom = None

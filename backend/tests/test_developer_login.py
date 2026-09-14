@@ -5,10 +5,14 @@ from fastapi.testclient import TestClient
 
 from app.api.v1.accounts import DEVELOPER_DEVICE_IDS
 from app.main import app
+from app.core.config import settings
 
 
-@pytest.fixture(scope="module")
-def client():
+@pytest.fixture()
+def client(monkeypatch):
+    monkeypatch.setattr(settings, "authenticated_accounts_enabled", False)
+    monkeypatch.setattr(settings, "developer_mode_enabled", True)
+    monkeypatch.setattr(settings, "local_accounts_enabled", True)
     return TestClient(app)
 
 

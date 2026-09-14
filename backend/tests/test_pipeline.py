@@ -18,6 +18,7 @@ from sqlalchemy import text
 
 from app.core.db import SessionLocal, engine
 from app.main import app
+from app.core.config import settings
 from app.models import Device, InfluenceGrant, RunLifecycleEvent, Territory, TerritoryOwnership
 
 # A square roughly 900 m on a side, sitting in open ground south of Jayanagar so
@@ -28,8 +29,11 @@ TEST_SQUARE = (
 )
 
 
-@pytest.fixture(scope="module")
-def client():
+@pytest.fixture()
+def client(monkeypatch):
+    monkeypatch.setattr(settings, "authenticated_accounts_enabled", False)
+    monkeypatch.setattr(settings, "developer_mode_enabled", True)
+    monkeypatch.setattr(settings, "local_accounts_enabled", True)
     return TestClient(app)
 
 

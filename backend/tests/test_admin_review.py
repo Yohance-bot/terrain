@@ -2,7 +2,7 @@ import uuid
 from datetime import UTC, datetime
 
 import pytest
-from fastapi import HTTPException
+from fastapi import Request, HTTPException
 from fastapi.testclient import TestClient
 from pydantic import SecretStr
 
@@ -24,17 +24,17 @@ def test_admin_token_is_disabled_until_configured(monkeypatch: pytest.MonkeyPatc
     monkeypatch.setattr(settings, "admin_operations_token", None)
 
     with pytest.raises(HTTPException) as exc_info:
-        require_admin_operations_token("any-value")
+        require_admin_operations_token(Request({"type": "http"}), "any-value", None, None)
 
     assert exc_info.value.status_code == 403
 
 
 def test_admin_token_requires_an_exact_match(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(settings, "admin_operations_token", SecretStr("internal-secret"))
-    require_admin_operations_token("internal-secret")
+    require_admin_operations_token(Request({"type": "http"}), "internal-secret", None, None)
 
     with pytest.raises(HTTPException) as exc_info:
-        require_admin_operations_token("wrong-secret")
+        require_admin_operations_token(Request({"type": "http"}), "wrong-secret", None, None)
 
     assert exc_info.value.status_code == 403
 

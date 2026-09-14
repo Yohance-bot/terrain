@@ -17,6 +17,7 @@ from app.api.v1 import (
     profile,
     races,
     runs,
+    athlete,
     sandbox,
     social,
     territories,
@@ -59,6 +60,7 @@ app.include_router(admin_review.router, prefix="/v1")
 app.include_router(admin_dashboard.router, prefix="/v1")
 app.include_router(admin_social.router, prefix="/v1")
 app.include_router(sandbox.router, prefix="/v1")
+app.include_router(athlete.router, prefix="/v1")
 app.include_router(admin_territory.router, prefix="/v1")
 configure_observability(app)
 

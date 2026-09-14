@@ -180,6 +180,14 @@ class Run(Base):
     )
     sample_ts: Mapped[list[int] | None] = mapped_column(ARRAY(BigInteger), nullable=True)
     sample_accuracy_m: Mapped[list[float] | None] = mapped_column(ARRAY(Float), nullable=True)
+    # Parallel to `sample_ts`, NULL where a fix carried no altitude. Absent on
+    # runs recorded before altitude was captured.
+    sample_altitude_m: Mapped[list[float | None] | None] = mapped_column(
+        ARRAY(Float), nullable=True
+    )
+    # Conditions when the run started, as the phone read them; optional.
+    temperature_c: Mapped[float | None] = mapped_column(Float, nullable=True)
+    weather_code: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
     # Retained in full. These traces are the dataset for designing the real
     # route-matching algorithm, which `03` leaves open. The retention service
@@ -712,3 +720,97 @@ class SandboxAccount(Base):
     label: Mapped[str] = mapped_column(String(64), nullable=False)
     created_by: Mapped[str | None] = mapped_column(String(128), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+# --- Athlete profile ----------------------------------------------------------
+
+
+class RunMetrics(Base):
+    """Numbers derived from a run's own samples; rebuilt when the version moves."""
+
+    __tablename__ = "run_metrics"
+
+    run_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("runs.id", ondelete="CASCADE"), primary_key=True
+    )
+    metrics_version: Mapped[int] = mapped_column(Integer, nullable=False)
+    moving_s: Mapped[int] = mapped_column(Integer, nullable=False)
+    elevation_gain_m: Mapped[float | None] = mapped_column(Float, nullable=True)
+    elevation_loss_m: Mapped[float | None] = mapped_column(Float, nullable=True)
+    splits: Mapped[list] = mapped_column(JSONB, nullable=False, default=list)
+    pace_series: Mapped[list] = mapped_column(JSONB, nullable=False, default=list)
+    elevation_series: Mapped[list] = mapped_column(JSONB, nullable=False, default=list)
+    computed_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+
+
+class RunBestEffort(Base):
+    """The fastest stretch of one run at a standard distance."""
+
+    __tablename__ = "run_best_efforts"
+
+    run_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("runs.id", ondelete="CASCADE"), primary_key=True
+    )
+    distance_m: Mapped[int] = mapped_column(Integer, primary_key=True)
+    elapsed_s: Mapped[float] = mapped_column(Float, nullable=False)
+
+
+class Shoe(Base):
+    __tablename__ = "shoes"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    account_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("accounts.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    name: Mapped[str] = mapped_column(String(48), nullable=False)
+    is_default: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    retired: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class RunAnnotation(Base):
+    """What the athlete wrote about a run, and what they wore."""
+
+    __tablename__ = "run_annotations"
+
+    run_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("runs.id", ondelete="CASCADE"), primary_key=True
+    )
+    title: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    note: Mapped[str | None] = mapped_column(String(1000), nullable=True)
+    shoe_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("shoes.id", ondelete="SET NULL"), nullable=True
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+
+class WeeklyGoal(Base):
+    __tablename__ = "weekly_goals"
+
+    account_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("accounts.id", ondelete="CASCADE"), primary_key=True
+    )
+    metric: Mapped[str] = mapped_column(String(16), nullable=False)
+    target: Mapped[float] = mapped_column(Float, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+
+class AthleteSettings(Base):
+    __tablename__ = "athlete_settings"
+
+    account_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("accounts.id", ondelete="CASCADE"), primary_key=True
+    )
+    weight_kg: Mapped[float | None] = mapped_column(Float, nullable=True)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )

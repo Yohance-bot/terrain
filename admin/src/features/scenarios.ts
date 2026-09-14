@@ -394,4 +394,94 @@ export const SCENARIOS: Scenario[] = [
       log("Ghost beaten and still available for the next person");
     },
   },
+  {
+    id: "athlete",
+    title: "Runs become stats, a streak, records, a goal and shoe mileage",
+    covers: "Athlete profile · training log · goals · shoes · friend profile",
+    run: async ({ runner, log }) => {
+      const athlete = await runner("Athlete");
+      const friend = await runner("Athlete Friend");
+
+      const shoe = await asRunner<any>(athlete, "/athlete/shoes", {
+        method: "POST",
+        body: JSON.stringify({ name: "Lab trainers" }),
+      });
+      check(shoe.is_default, "The first pair of shoes did not become the default");
+
+      // Two real submissions, a week apart, straight north at 5:00 /km.
+      const submit = async (daysAgo: number, km: number) => {
+        const start = Date.now() - daysAgo * 86_400_000;
+        const speed = 1000 / 300;
+        const count = Math.floor((km * 1000) / speed / 2);
+        const samples = Array.from({ length: count + 1 }, (_, i) => ({
+          ts: start + i * 2000,
+          lat: BENGALURU.lat + 0.02 + (i * 2 * speed) / 111_195,
+          lon: BENGALURU.lon + 0.05,
+          accuracy_m: 5,
+          speed_mps: speed,
+          provider: "lab",
+          is_mock: false,
+          altitude_m: 900 + Math.min(i, 150) * 0.1,
+        }));
+        const body = {
+          run_id: crypto.randomUUID(),
+          started_at: new Date(start).toISOString(),
+          ended_at: new Date(start + count * 2000).toISOString(),
+          samples,
+          conditions: { temperature_c: 26, weather_code: 2 },
+        };
+        return asRunner<any>(athlete, "/runs", { method: "POST", body: JSON.stringify(body) });
+      };
+      const older = await submit(8, 5.2);
+      const recent = await submit(1, 3.1);
+      log("Two runs submitted a week apart");
+
+      const stats = await asRunner<any>(athlete, "/athlete/stats?tz=UTC");
+      check(stats.all_time.runs === 2, `Expected 2 runs in all-time stats, got ${stats.all_time.runs}`);
+      check(stats.streak.best_weeks >= 1, "The weekly streak was not counted");
+      check(
+        stats.best_efforts.some((effort: any) => effort.distance_m === 5000),
+        "A 5.2 km run produced no 5K best effort",
+      );
+      check(stats.longest_run?.run_id === older.run_id, "The longest run is not the 5.2 km one");
+      log(`Stats: ${stats.all_time.runs} runs, ${(stats.all_time.distance_m / 1000).toFixed(1)} km, streak ${stats.streak.current_weeks}`);
+
+      const goal = await asRunner<any>(athlete, "/athlete/goal?tz=UTC", {
+        method: "PUT",
+        body: JSON.stringify({ metric: "runs", target: 3 }),
+      });
+      check(goal.target === 3, "The weekly goal was not saved");
+      log(`Weekly goal: ${goal.value} of ${goal.target} runs`);
+
+      const shoes = await asRunner<any[]>(athlete, "/athlete/shoes");
+      check(shoes[0].runs === 2, `The default shoes should have carried 2 runs, not ${shoes[0].runs}`);
+
+      await asRunner(athlete, `/athlete/runs/${recent.run_id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ title: "Lab shakeout", note: "Private note" }),
+      });
+      const activity = await asRunner<any>(athlete, `/athlete/runs/${recent.run_id}`);
+      check(activity.summary.title === "Lab shakeout", "The run title did not save");
+      check(activity.splits.length >= 3, "A 3.1 km run should have at least three splits");
+      check(activity.summary.temperature_c === 26, "The run's weather was not kept");
+      log(`Run detail: ${activity.splits.length} splits, ${activity.best_efforts.length} best efforts`);
+
+      let refused = false;
+      try {
+        await asRunner(friend, `/social/accounts/${athlete.account_id}/profile`);
+      } catch {
+        refused = true;
+      }
+      check(refused, "A stranger could open the athlete's profile");
+
+      await friends(athlete, friend);
+      const profile = await asRunner<any>(friend, `/social/accounts/${athlete.account_id}/profile`);
+      check(profile.all_time.runs === 2, "A friend sees the wrong run count");
+      check(
+        profile.recent_runs.every((run: any) => run.note === null && run.shoe === null),
+        "A friend can see private notes or shoes",
+      );
+      log("Friend profile: stats visible, notes and shoes hidden");
+    },
+  },
 ];
