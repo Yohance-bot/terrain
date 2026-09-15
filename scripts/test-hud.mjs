@@ -95,6 +95,17 @@ const pose = { bearing: 359, pitch: 30, zoom: 16 };
 assert.equal(followPose(pose, { ...fix, speedMps: 0, bearing: 180 }, false).bearing, 359);
 assert.equal(followPose(pose, fix, true).pitch, 0);
 assert.equal(followPose(pose, fix, true).bearing, 0);
+
+const { fixTimestampMs, shouldFollowFix, followDurationMs, metresApart } = load('src/features/hud/cameraFollow.ts');
+assert.equal(fixTimestampMs(1_700_000_000), 1_700_000_000_000);
+assert.equal(fixTimestampMs(1_700_000_000_000), 1_700_000_000_000);
+const aged = { ...fix, ts: 1 };
+assert.equal(shouldFollowFix(20_000, aged, false, 0), true);
+assert.equal(shouldFollowFix(20_000, aged, true, 0), false);
+assert.equal(shouldFollowFix(1_500, { ...fix, ts: 1_000 }, true, 0), true);
+assert.equal(followDurationMs(false, false, false, false), 0);
+assert.equal(followDurationMs(true, true, false, false), 0);
+assert.ok(metresApart([77.5838, 12.925], [77.594, 12.935]) > 80);
 console.log(`HUD production-module tests passed. Desktop synthetic 90-minute route: trail ${ms.toFixed(1)} ms. These are not device FPS or battery measurements.`);
 
 // Recorder integration: real store/actions and queue, mocked platform + durable boundary.

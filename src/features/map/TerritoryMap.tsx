@@ -181,11 +181,20 @@ export const TerritoryMap = memo(function TerritoryMap({
   // MapLibre will start its location feed without asking. On a fresh Android
   // install that feed is empty until a run requests permission, so the camera
   // stays on Jayanagar. Ask here, then start the feed only once it can succeed.
-  const locating = useBrowseLocation(presentationActive && !simulation);
-  const nativePosition = useCurrentPosition({ enabled: locating && !recording && presentationActive && !simulation, minDisplacement: 5 });
-  const browseFix = useMemo<RunFix | null>(() => nativePosition ? { coordinate: [nativePosition.coords.longitude, nativePosition.coords.latitude], ts: nativePosition.timestamp, speedMps: 0, bearing: null, accuracyM: nativePosition.coords.accuracy, segment: 0 } : null, [nativePosition]);
+  const { granted: locating, fix: expoFix } = useBrowseLocation(presentationActive && !simulation);
+  const nativePosition = useCurrentPosition({ enabled: locating && !recording && presentationActive && !simulation, minDisplacement: 0 });
+  const browseFix = useMemo<RunFix | null>(() => nativePosition ? { coordinate: [nativePosition.coords.longitude, nativePosition.coords.latitude], ts: nativePosition.timestamp, speedMps: nativePosition.coords.speed ?? 0, bearing: nativePosition.coords.heading, accuracyM: nativePosition.coords.accuracy, segment: 0 } : expoFix, [nativePosition, expoFix]);
   const lastBrowse = useRef<RunFix | null>(null);
   if (browseFix) lastBrowse.current = browseFix;
+  else if (expoFix) lastBrowse.current = expoFix;
+  // Hold the map until a real coordinate exists so Camera's first frame is the
+  // player, not Jayanagar. Two and a half seconds is long enough for last-known
+  // GPS; after that we open on the fallback rather than sit on a blank view.
+  const [waitedForFix, setWaitedForFix] = useState(false);
+  useEffect(() => {
+    const timer = setTimeout(() => setWaitedForFix(true), 2500);
+    return () => clearTimeout(timer);
+  }, []);
   // A run starts by clearing `liveFix`. Using only that empty value unmounts
   // Filament for a beat; Android does not recreate the scene when the first
   // sample arrives, so the runner vanishes at Start. iOS remounts. Keep the
@@ -354,6 +363,10 @@ export const TerritoryMap = memo(function TerritoryMap({
   }, [avatarEnabled, clearAvatar, placeAvatar, trackCamera]);
   const modelLoaded = useAvatarVisibility(s => s.ids.includes('self'));
   const avatarDrawn = avatarEnabled && avatarCamera.placed && modelLoaded;
+  const openingCenter = effectiveFix?.coordinate ?? lastBrowse.current?.coordinate ?? null;
+  if (!openingCenter && !waitedForFix && !simulation) {
+    return <View style={styles.container} onLayout={avatarCamera.onLayout} />;
+  }
 
   return (
     <View style={styles.container} onLayout={avatarCamera.onLayout}>
@@ -389,7 +402,7 @@ export const TerritoryMap = memo(function TerritoryMap({
         <Camera
           ref={cameraRef}
           initialViewState={{
-            center: JAYANAGAR_CENTER,
+            center: openingCenter ?? JAYANAGAR_CENTER,
             zoom: DEFAULT_ZOOM,
             pitch: reducedMotion || economy ? 0 : DEFAULT_PITCH,
             bearing: reducedMotion || economy ? 0 : DEFAULT_BEARING,
