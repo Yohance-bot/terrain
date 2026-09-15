@@ -55,7 +55,12 @@ export function TabBar({ active, badge, onStart, onStartOptions }: {
           <StartIcon size={22} color={ui.startInk} /><Text style={styles.startLabel}>Start run</Text>
         </LinearGradient>
       </Pressable>}
-    <View style={[styles.bar, { paddingBottom: Platform.OS === 'ios' ? Math.max(8, insets.bottom - 16) : Math.max(insets.bottom, 6) }]} accessibilityRole="tabbar">
+    {/* `tablist`, not `tabbar`: the latter is an iOS-only role, and Android does
+        not warn about roles it does not know — it throws from the view manager on
+        the main thread, which killed the app the moment this bar was mounted.
+        `tablist` is valid on both, and is the correct pairing for the `tab` roles
+        on the buttons below. `scripts/test-a11y-roles.mjs` guards the rest. */}
+    <View style={[styles.bar, { paddingBottom: Platform.OS === 'ios' ? Math.max(8, insets.bottom - 16) : Math.max(insets.bottom, 6) }]} accessibilityRole="tablist">
       {TABS.map((tab) => {
         const selected = tab.key === active;
         const Icon = tab.key === 'map' ? MapIcon : tab.key === 'friends' ? FriendsIcon : ProfileIcon;

@@ -18,6 +18,7 @@
     "test:avatar": "node scripts/test-avatar.mjs",
     "test:borders": "node scripts/test-ground-borders.mjs",
     "test:format": "node scripts/test-format.mjs",
+    "test:a11y": "node scripts/test-a11y-roles.mjs",
     "ios:standalone": "expo run:ios --configuration Release --device",
     "ios:device": "bash scripts/ios-device.sh",
     "ios:simulator": "bash scripts/ios-simulator.sh",
