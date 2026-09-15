@@ -20,7 +20,8 @@
     "ios:standalone": "expo run:ios --configuration Release --device",
     "ios:device": "bash scripts/ios-device.sh",
     "ios:simulator": "bash scripts/ios-simulator.sh",
-    "test:live-activity": "node scripts/test-live-activity.mjs"
+    "test:live-activity": "node scripts/test-live-activity.mjs",
+    "android:apk": "bash scripts/android-apk.sh"
   },
   "dependencies": {
     "@expo-google-fonts/manrope": "^0.4.2",
