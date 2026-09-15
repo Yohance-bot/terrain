@@ -19,10 +19,11 @@
     "test:format": "node scripts/test-format.mjs",
     "ios:standalone": "expo run:ios --configuration Release --device",
     "ios:device": "bash scripts/ios-device.sh",
-    "ios:simulator": "bash scripts/ios-simulator.sh"
+    "ios:simulator": "bash scripts/ios-simulator.sh",
+    "test:live-activity": "node scripts/test-live-activity.mjs"
   },
   "dependencies": {
-    "@expo-google-fonts/barlow": "^0.4.1",
+    "@expo-google-fonts/manrope": "^0.4.2",
     "@expo/vector-icons": "^15.0.3",
     "@maplibre/maplibre-react-native": "^11.3.6",
     "@react-navigation/bottom-tabs": "^7.4.0",

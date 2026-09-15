@@ -101,6 +101,8 @@ console.log(`HUD production-module tests passed. Desktop synthetic 90-minute rou
 const meta = new Map();
 const persisted = [];
 let recovered = 0, callback, permission = true, created = 0;
+const activityEvents = [];
+stubs.set('@/features/liveActivity/client', { runActivity: Object.fromEntries(['start', 'update', 'end', 'clear'].map(name => [name, async (...args) => { activityEvents.push([name, ...args]); }])) });
 stubs.set('@/lib/db', {
   getMeta: async key => meta.get(key) ?? null,
   setMeta: async (key, value) => { meta.set(key, value); },
@@ -146,6 +148,9 @@ assert.ok(useRecorder.getState().liveDistanceM > beforeStop, 'stop must drain th
 assert.equal(useRecorder.getState().cleanPath.length, useRecorder.getState().sampleCount, 'stop must preserve section indices through the claim animation');
 assert.deepEqual(useRecorder.getState().segmentStarts, [1]);
 assert.equal(persisted.length, 7, 'raw duplicates and inaccurate fixes remain durable evidence');
+assert.equal(activityEvents.filter(e => e[0] === 'start').length, 1);
+assert.equal(activityEvents.at(-1)[0], 'end');
+assert.equal(activityEvents.at(-1)[2], useRecorder.getState().liveDistanceM, 'Live Activity finishes with the drained distance');
 permission = false; await useRecorder.getState().start();
 assert.equal(useRecorder.getState().status, 'idle'); assert.match(useRecorder.getState().error, /permission/);
 console.log('Recorder integration passed: recovery/remount, permission denial, chronological fixes, gap reacquisition, raw persistence and stop queue drain.');
@@ -157,6 +162,9 @@ assert.equal(confirmedClaimCue({ ...result, status: 'rejected' }, [77, 13]), nul
 assert.equal(confirmedClaimCue({ ...result, status: 'applied' }, [77, 13]).title, 'TERRITORY CLAIMED');
 assert.equal(confirmedClaimCue({ ...result, status: 'applied', segments: [{ ...result.segments[0], is_owned_by_you: false }] }, [77, 13]), null);
 assert.equal(confirmedClaimCue({ ...result, status: 'applied', segments: [result.segments[0], result.segments[0]] }, [77, 13]).territoryIds.length, 1);
+const outsideResult = { ...result, status: 'applied', segments: [], captured_area_id: 'area', captured_area_m2: 1500 };
+assert.match(confirmedClaimCue(outsideResult, [77, 13]).detail, /1,500 m² claimed/);
+assert.equal(confirmedClaimCue({ ...outsideResult, status: 'provisional' }, [77, 13]), null);
 const { weatherKind } = load('src/features/hud/lighting.ts');
 assert.equal(weatherKind(71, 100), 'Snow'); assert.equal(weatherKind(95, 100), 'Storm'); assert.equal(weatherKind(48, 80), 'Fog');
 console.log('Authoritative claim gating and weather classification passed.');

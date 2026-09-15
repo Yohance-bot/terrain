@@ -30,7 +30,7 @@ import { detectLoopCandidate } from '@/lib/runCapture';
 import { runEventCopy, type RunEvent } from '@/lib/runEvents';
 import { ApiRequestError, logApiRequestErrorInDev, queuedRunNotice } from '@/services/api/errors';
 import { createRace, fetchAccount, fetchCapturedAreas, fetchFriends, fetchNearbyGhosts, fetchOwnedTerritoryAreas, fetchRun, fetchTerritoryDetails, getCachedAccount, resetDeveloperTerritory, submitRun } from '@/services/api/client';
-import type { AccountSummary, GhostSummary, RunResult, TerritoryDetails } from '@/services/api/types';
+import type { TerritoryState, AccountSummary, GhostSummary, RunResult, TerritoryDetails } from '@/services/api/types';
 import { loadOwnership, loadTerritories } from '@/services/territories';
 import {
   getLocalRun,
@@ -51,8 +51,9 @@ import { useGhostRace } from '@/features/social/useGhostRace';
 import { formatLead, leadMetres } from '@/features/social/ghostPlayback';
 import { StatusBar } from 'expo-status-bar';
 import { TabBar } from '@/components/TabBar';
-import { ChevronRightIcon, GhostIcon, LayersIcon, LogIcon, StartIcon } from '@/components/icons';
+import { ChevronRightIcon, GhostIcon, SunIcon, MoonIcon, LogIcon } from '@/components/icons';
 import { Toggle } from '@/components/ui';
+import { LinearGradient } from 'expo-linear-gradient';
 import { daylight } from '@/features/hud/lighting';
 
 // Bundled territories used for point-in-polygon during a live run.
@@ -71,6 +72,8 @@ export default function MapScreen() {
   const [territories, setTerritories] = useState<GeoJSON.FeatureCollection | null>(null);
   const [capturedAreas, setCapturedAreas] = useState<GeoJSON.FeatureCollection | null>(null);
   const [ownedTerritoryAreas, setOwnedTerritoryAreas] = useState<GeoJSON.FeatureCollection | null>(null);
+  const [isDay, setIsDay] = useState(() => daylight(new Date(), null) >= 0.5);
+  const [territoryLeaders, setTerritoryLeaders] = useState<TerritoryState[]>([]);
   const [ownedByYou, setOwnedByYou] = useState<Set<string>>(new Set());
   const [ownedByOthers, setOwnedByOthers] = useState<Set<string>>(new Set());
   const [notice, setNotice] = useState<string | null>(null);
@@ -264,6 +267,7 @@ export default function MapScreen() {
       void fetchAccount().then(setAccount).catch(() => undefined);
       setTerritories(collection);
       const ownership = await loadOwnership(deviceId);
+      setTerritoryLeaders(ownership.states);
       setOwnedByYou(ownership.ownedByYou);
       setOwnedByOthers(ownership.ownedByOthers);
       // Loop areas are decorative public overlays. A failed refresh must never
@@ -673,17 +677,18 @@ export default function MapScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar style={daylight(new Date(), null) > 0.5 ? 'dark' : 'light'} />
+      <StatusBar style={isDay ? 'dark' : 'light'} />
       <TerritoryMap
         fix={fix}
         presentationActive={presentation.active}
         reducedMotion={presentation.reducedMotion}
         economy={presentation.economy}
         simulation={isSimulation}
-        bottomInset={insets.bottom + (recording ? 112 : 72)}
+        bottomInset={insets.bottom + (recording ? 112 : 132)}
         territories={territories}
         capturedAreas={capturedAreas}
         ownedTerritoryAreas={ownedTerritoryAreas}
+        territoryLeaders={territoryLeaders}
         ownedByYou={ownedByYou}
         ownedByOthers={ownedByOthers}
         traversedRoads={traversedRoads}
@@ -699,6 +704,7 @@ export default function MapScreen() {
         nearbyGhosts={ghostLayerOn ? nearbyGhosts : undefined}
         onDropRacePin={recording ? undefined : dropRacePin}
         showAvatar
+        onDayChange={setIsDay}
       />
 
       <View pointerEvents="none" style={{ position: 'absolute', top: 0, left: 0, right: 0, height: insets.top, backgroundColor: '#081D354D' }} />
@@ -798,9 +804,9 @@ export default function MapScreen() {
       {!recording && !busy && (
         <View style={[styles.topBar, { top: insets.top + spacing.sm }]}>
           <Pressable onPress={() => router.push('/profile')} style={styles.topBarLeft}>
-            <View style={styles.avatarCircle}>
+            <LinearGradient colors={['#FFE98A', '#FFC800', '#A86A00']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.avatarCircle}>
               <Text style={styles.avatarText}>{account?.display_name?.slice(0, 2).toUpperCase() ?? 'AR'}</Text>
-            </View>
+            </LinearGradient>
             <View style={styles.topBarInfo}>
               <Text style={styles.topBarName} numberOfLines={1}>{account?.display_name ?? 'Runner'}</Text>
               <View style={styles.topBarStats}>
@@ -810,8 +816,8 @@ export default function MapScreen() {
               </View>
             </View>
           </Pressable>
-          <Pressable accessibilityRole="button" accessibilityLabel="Map layers" accessibilityState={{ expanded: layersPanelOpen }} style={[styles.layersButton, layersPanelOpen && styles.layersButtonActive]} onPress={() => setLayersPanelOpen((v) => !v)}>
-            <LayersIcon size={22} color={ui.icon} strokeWidth={2} />
+          <Pressable accessibilityRole="button" accessibilityLabel={`${isDay ? 'Day' : 'Night'} map. Open map layers`} accessibilityState={{ expanded: layersPanelOpen }} style={[styles.layersButton, layersPanelOpen && styles.layersButtonActive]} onPress={() => setLayersPanelOpen((v) => !v)}>
+            {isDay ? <SunIcon size={24} /> : <MoonIcon size={24} />}
           </Pressable>
         </View>
       )}
@@ -847,13 +853,13 @@ export default function MapScreen() {
 
       {/* Racing a ghost: a single number, readable at a glance, no interaction. */}
       {ghostRun && (
-        <View style={[styles.socialStrip, { bottom: insets.bottom + (recording ? 132 : 92) }]}>
+        <View style={[styles.socialStrip, { bottom: insets.bottom + (recording ? 132 : 152) }]}>
           <Text style={styles.socialStripTitle}>{ghostRun.name}</Text>
           <Text style={styles.socialStripValue}>{formatLead(leadMetres(liveDistanceM, ghostState))}</Text>
         </View>
       )}
       {runningRace && (
-        <View style={[styles.socialStrip, { bottom: insets.bottom + (recording ? 176 : 136) }]}>
+        <View style={[styles.socialStrip, { bottom: insets.bottom + (recording ? 176 : 196) }]}>
           <Text style={styles.socialStripTitle}>
             Racing {runningRace.role === 'challenger' ? runningRace.opponent.display_name : runningRace.challenger.display_name}
           </Text>
@@ -873,22 +879,11 @@ export default function MapScreen() {
 
       {/* ── Start and tabs ───────────────────────────────── */}
       {!recording && !busy && (
-        <>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Start a run"
-            accessibilityHint={developerMode && ENABLE_SIMULATION ? 'Long press for developer run options' : undefined}
-            onPress={() => void onStart(false)}
-            onLongPress={developerMode && ENABLE_SIMULATION ? () => router.push('/play') : undefined}
-            style={({ pressed }) => [styles.startButton, { bottom: insets.bottom + 72 }, pressed && styles.startPressed]}
-          >
-            <StartIcon size={22} color={ui.startInk} />
-            <Text style={styles.startText}>Start</Text>
-          </Pressable>
-          <View style={styles.tabDock}>
-            <TabBar active="map" badge={unreadCount > 0} />
-          </View>
-        </>
+        <View style={styles.tabDock}>
+          <TabBar active="map" badge={unreadCount > 0}
+            onStart={() => void onStart(false)}
+            onStartOptions={developerMode && ENABLE_SIMULATION ? () => router.push('/play') : undefined} />
+        </View>
       )}
     </View>
   );
@@ -912,7 +907,7 @@ const styles = StyleSheet.create({
   topBar: { position: 'absolute', left: spacing.md, right: spacing.md, zIndex: 8, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   topBarLeft: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.96)', borderRadius: radius.pill, paddingRight: spacing.md, paddingVertical: 5, paddingLeft: 5, shadowColor: '#0E1A13', shadowOpacity: 0.12, shadowRadius: 10, shadowOffset: { width: 0, height: 3 }, elevation: 4 },
   avatarCircle: { width: 36, height: 36, borderRadius: 18, backgroundColor: ui.accent, alignItems: 'center', justifyContent: 'center' },
-  avatarText: { color: ui.surface, fontSize: 13, fontFamily: fonts.semibold },
+  avatarText: { color: ui.ink, fontSize: 13, fontFamily: fonts.semibold },
   topBarInfo: { marginLeft: spacing.sm },
   topBarName: { color: ui.ink, fontSize: 15, fontFamily: fonts.semibold },
   topBarStats: { flexDirection: 'row', alignItems: 'center', marginTop: 1 },
@@ -1021,9 +1016,6 @@ const styles = StyleSheet.create({
   tabIconActive: { color: colors.tabActive },
   tabLabel: { fontSize: 10, fontWeight: fontWeight.semibold, color: '#64748B' },
   tabLabelActive: { color: colors.tabActive },
-  startButton: { position: 'absolute', alignSelf: 'center', zIndex: 6, flexDirection: 'row', alignItems: 'center', gap: 8, height: 52, paddingLeft: 22, paddingRight: 28, borderRadius: 26, backgroundColor: ui.start, shadowColor: '#0E1A13', shadowOpacity: 0.18, shadowRadius: 14, shadowOffset: { width: 0, height: 6 }, elevation: 6 },
-  startPressed: { transform: [{ scale: 0.97 }] },
-  startText: { color: ui.startInk, fontSize: 18, fontFamily: fonts.bold, letterSpacing: 0.2 },
   tabDock: { position: 'absolute', left: 0, right: 0, bottom: 0, zIndex: 5 },
 
   // ── Joystick ────────────────────────────────────────

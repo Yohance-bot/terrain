@@ -1,3 +1,4 @@
+import { ActionSheet, type SheetAction } from '@/components/ActionSheet';
 import { router, useFocusEffect } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useCallback, useState } from 'react';
@@ -17,6 +18,7 @@ export default function ShoesScreen() {
   const [name, setName] = useState('');
   const [failed, setFailed] = useState(false);
   const [adding, setAdding] = useState(false);
+  const [sheet, setSheet] = useState<{ title: string; actions: SheetAction[] } | null>(null);
 
   const load = useCallback(async () => {
     try {
@@ -53,13 +55,11 @@ export default function ShoesScreen() {
     }
   };
 
-  const manage = (shoe: ShoeRecord) =>
-    Alert.alert(shoe.name, `${formatDistance(shoe.distance_m, units)} across ${shoe.runs} ${shoe.runs === 1 ? 'run' : 'runs'}`, [
-      ...(!shoe.is_default && !shoe.retired ? [{ text: 'Wear by default', onPress: () => run(() => updateShoe(shoe.id, { is_default: true })) }] : []),
-      { text: shoe.retired ? 'Bring back' : 'Retire', onPress: () => run(() => updateShoe(shoe.id, { retired: !shoe.retired })) },
-      { text: 'Delete', style: 'destructive' as const, onPress: () => run(() => deleteShoe(shoe.id)) },
-      { text: 'Cancel', style: 'cancel' as const },
-    ]);
+  const manage = (shoe: ShoeRecord) => setSheet({ title: shoe.name, actions: [
+    ...(!shoe.is_default && !shoe.retired ? [{ label: 'Wear by default', onPress: () => run(() => updateShoe(shoe.id, { is_default: true })) }] : []),
+    { label: shoe.retired ? 'Bring back' : 'Retire', onPress: () => run(() => updateShoe(shoe.id, { retired: !shoe.retired })) },
+    { label: 'Delete', destructive: true, onPress: () => run(() => deleteShoe(shoe.id)) },
+  ] });
 
   const active = (shoes ?? []).filter((shoe) => !shoe.retired);
   const retired = (shoes ?? []).filter((shoe) => shoe.retired);
@@ -78,6 +78,7 @@ export default function ShoesScreen() {
 
   return (
     <Screen>
+      <ActionSheet title={sheet?.title ?? "Shoes"} actions={sheet?.actions ?? null} onClose={() => setSheet(null)} />
       <StatusBar style="dark" />
       <NavHeader title="Shoes" onBack={() => router.back()} />
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">

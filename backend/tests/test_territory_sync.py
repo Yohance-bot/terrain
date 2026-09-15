@@ -83,6 +83,8 @@ def test_live_ownership_identifies_the_shape_dataset_it_applies_to():
         ),
         None,
         42.5,
+        None,
+        None,
     )
     session = SimpleNamespace(execute=lambda _statement: SimpleNamespace(all=lambda: [row]))
     response = Response()

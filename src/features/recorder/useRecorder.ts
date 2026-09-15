@@ -1,3 +1,5 @@
+import { runActivity } from '@/features/liveActivity/client';
+import { useHudPreferences } from '@/features/hud/preferences';
 import * as Crypto from 'expo-crypto';
 import * as Location from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
@@ -92,6 +94,7 @@ export function recoverRecorderOnce(): Promise<unknown> {
     await Location.stopLocationUpdatesAsync(BACKGROUND_LOCATION_TASK).catch(() => undefined);
     await sampleWriteQueue;
     await setActiveRun(null);
+    await runActivity.clear();
     return recoverInterruptedRuns();
   })().catch(error => { recovery = null; throw error; });
   return recovery;
@@ -194,6 +197,9 @@ function enqueueLocationSample(location: Location.LocationObject): Promise<void>
         liveFix: { coordinate, ts: sample.ts, speedMps, bearing: previousFix && distanceM > 1 && !gap ? bearingBetween(previousFix.coordinate, coordinate) : previousFix?.bearing ?? null, accuracyM: accuracy, segment },
         paceWindow: [...(gap ? [] : recorder.paceWindow.filter(p => p.ts >= sample.ts - 25_000)), { ts: sample.ts, distanceM: liveDistanceM }],
       });
+      const latest = useRecorder.getState();
+      // This path also runs in the background task; no extra GPS watch/timer.
+      void runActivity.update(activeRun.runId, liveDistanceM, latest.paceWindow, useHudPreferences.getState().units);
     });
 
   return sampleWriteQueue;
@@ -289,9 +295,11 @@ export const useRecorder = create<RecorderState>((set, get) => ({
         set({ error: 'Keep TerraRun open to record: background location is unavailable.' });
       }
       observeForegroundInterruption(runId);
+      void runActivity.start(runId, startedAt.getTime(), false, useHudPreferences.getState().units);
     } catch (error) {
       subscription?.remove(); subscription = null;
       removeAppStateListener();
+      void runActivity.clear();
       await Location.stopLocationUpdatesAsync(BACKGROUND_LOCATION_TASK).catch(() => undefined);
       await setActiveRun(null).catch(() => undefined);
       if (runId) {
@@ -316,6 +324,7 @@ export const useRecorder = create<RecorderState>((set, get) => ({
       gpsCleaner.reset(); lastDisplayTimestamp = 0;
       await setActiveRun({ runId, nextSequence: 0 });
       set({ status: 'recording', runId, startedAt, sampleCount: 0, droppedCount: 0, liveDistanceM: 0, path: [], cleanPath: [], error: null, isSimulation: true, liveFix: null, paceWindow: [], segmentStarts: [] });
+      void runActivity.start(runId, startedAt.getTime(), true, useHudPreferences.getState().units);
     } catch (error) {
       set({ status: 'idle', error: 'Could not start simulation.' });
       throw error;
@@ -364,6 +373,7 @@ export const useRecorder = create<RecorderState>((set, get) => ({
 
     const endedAt = new Date();
     await finishLocalRun(runId, endedAt);
+    void runActivity.end(runId, get().liveDistanceM, endedAt.getTime());
     gpsCleaner.reset();
 
     set({ status: 'idle', runId: null, startedAt: null, cleanPath: finalCleanPath, isSimulation: false });

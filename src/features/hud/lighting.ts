@@ -34,6 +34,7 @@ export function lightingPalette(now: Date, weather: WeatherReading | null) {
   const haze = weather ? (rain ? 0.28 : Math.min(0.2, weather.cloud / 500)) : 0;
   const blend = (night: string, light: string) => mixColor(mixColor(night, light, day), kind === 'Snow' ? '#B9D1DF' : kind === 'Storm' ? '#655C87' : rain ? '#526D84' : '#8A9EA6', haze);
   return {
+    isDay: day >= 0.5,
     background: blend('#153447', '#D9EEDC'), land: blend('#244A54', '#BEDCCB'), park: blend('#23635D', '#80C89B'),
     water: blend('#174F71', '#8FCBD9'), road: blend('#88ADB0', '#F7F4EC'), casing: blend('#416F7C', '#B4C3B6'),
     avenue: blend('#A7B8AB', '#F1E9D5'), path: blend('#6DAFA0', '#DCEBDD'), roadMarking: blend('#CEE1D0', '#CFC6B2'),

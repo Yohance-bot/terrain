@@ -1,156 +1,95 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import {
-  Animator,
-  DefaultLight,
-  FilamentScene,
-  FilamentView,
-  Model,
-  RenderCallbackContext,
-  useFilamentContext,
-  type AnimationItem,
-} from 'react-native-filament';
+import { Animator, DefaultLight, FilamentScene, FilamentView, ModelInstance, ModelRenderer, RenderCallbackContext, useFilamentContext, useModel, type AnimationItem } from 'react-native-filament';
 import { useSharedValue } from 'react-native-worklets-core';
-
+import { useSocial } from '@/features/social/useSocial';
+import { useGhostRace } from '@/features/social/useGhostRace';
+import { mapActors, MAX_MAP_ACTORS, type MapActor } from './actors';
+import { useAvatarVisibility } from './visibility';
 import type { AvatarCamera } from './useAvatarCamera';
-import { FAR_PLANE, FOCAL_LENGTH_MM, NEAR_PLANE, type Float3 } from './mapCamera';
+import { FAR_PLANE, FOCAL_LENGTH_MM, NEAR_PLANE } from './mapCamera';
 
-/**
- * The player's 3D avatar, standing in the map rather than on top of it.
- *
- * Filament renders into its own view over MapLibre, so the two share no depth
- * buffer and the avatar can never be occluded by buildings. What they *can*
- * share is the camera: `mapCamera` rebuilds MapLibre's view from centre, zoom,
- * bearing and pitch, and this drives Filament with the result. That is the
- * difference between an object standing in the world — leaning as it moves off
- * centre, foreshortening as the map tilts, swinging round as the map turns —
- * and a sprite sliding across the screen.
- *
- * The ground contact is left to the map: the hologram is a MapLibre layer, so
- * it tilts and is occluded correctly, which is exactly what this layer cannot do.
- */
-
-// Metro resolves binary assets through require(); a static import does not
-// produce an asset reference the native side can load.
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const RUNNER = require('../../../assets/avatar/runner.glb');
+const SLOTS = Array.from({ length: MAX_MAP_ACTORS }, (_, i) => i);
+type Props = { camera: AvatarCamera; running: boolean };
 
-/**
- * How tall the avatar stands, in map pixels — which at the centre of a flat map
- * is its height in points.
- *
- * Calibrated against the screen rather than derived: `transformToUnitCube` does
- * not normalise to exactly one unit, so this renders about 1.6x taller than the
- * number says. 20 puts the character at roughly 32 points, which is the width
- * of the marker it replaced — small enough to read as something standing on the
- * map rather than something sitting on top of it.
+/** One scene/asset shared by the player, nearby sharing friends and active ghost.
+ * MapLibre and Filament do not share depth: buildings cannot occlude these models.
  */
-const AVATAR_HEIGHT = 20;
-
-/** Blend between Run and Idle rather than snapping between poses. */
-const TRANSITION_SECONDS = 0.25;
-
-/**
- * Stable identities, and that is the whole point of hoisting them.
- *
- * Filament re-applies an entity's transforms whenever these props change by
- * reference, and re-applying `transformToUnitCube` resets the entity to one
- * unit while the scale and translate are skipped as "unchanged". Array literals
- * in JSX are new objects on every render, so the model ends up one unit tall —
- * a dot — and never lifted onto its feet.
- */
-const AVATAR_SCALE: Float3 = [AVATAR_HEIGHT, AVATAR_HEIGHT, AVATAR_HEIGHT];
-const AVATAR_LIFT: Float3 = [0, AVATAR_HEIGHT / 2, 0];
-
-type Props = {
-  /** The map's camera, as shared values the render thread can read. */
-  camera: AvatarCamera;
-  /** Drives the clip: true plays Run, false plays Idle. */
-  running: boolean;
-};
-
-/**
- * Aims Filament's camera from the shared values, once per rendered frame.
- *
- * Deliberately not `<Camera>`: that component takes its numbers as props, so
- * every pose change re-registers its render callback and the camera can only
- * move as often as React re-renders. Reading shared values inside the callback
- * registers once, and then a pan costs no React work at all.
- */
-function CameraRig({ rig }: { rig: AvatarCamera }) {
-  const { camera, view } = useFilamentContext();
+function Runners({ camera: rig, running }: Props) {
+  const { camera, view, transformManager } = useFilamentContext();
+  const friends = useSocial(s => s.friends);
+  const ghost = useGhostRace(s => s.ghostState);
+  const [now, setNow] = useState(Date.now);
+  useEffect(() => { const timer = setInterval(() => setNow(Date.now()), 5000); return () => clearInterval(timer); }, []);
+  const actors = mapActors(rig.frame.value.origin, running, friends, ghost, now);
+  const sharedActors = useSharedValue<MapActor[]>([]);
+  useEffect(() => { sharedActors.value = actors; });
+  const model = useModel(RUNNER, { instanceCount: MAX_MAP_ACTORS });
+  const asset = model.state === 'loaded' ? model.asset : null;
+  const instances = useMemo(() => asset?.getAssetInstances() ?? [], [asset]);
+  const roots = useMemo(() => instances.map(instance => instance.getRoot()), [instances]);
+  const box = model.state === 'loaded' ? model.boundingBox : null;
+  // Absolute transforms start from this immutable normalization every frame.
+  // Applying React transform props repeatedly compounds the scale/rotation.
+  const base = useMemo(() => {
+    if (!box) return null;
+    const scale = 32 / Math.max(.001, box.max[1] - box.min[1]);
+    return transformManager.createIdentityMatrix().translate([-box.center[0], -box.min[1], -box.center[2]]).scaling([scale, scale, scale]);
+  }, [box, transformManager]);
+  const hidden = useMemo(() => transformManager.createIdentityMatrix().scaling([0, 0, 0]), [transformManager]);
+  const signature = actors.map(a => a.id).join('|');
+  useEffect(() => {
+    useAvatarVisibility.setState({ ids: asset ? signature.split('|') : [] });
+    return () => { useAvatarVisibility.setState({ ids: [] }); };
+  }, [asset, signature]);
+  const [clips, setClips] = useState({ run: 0, idle: 0 });
+  const onAnimationsLoaded = useCallback((animations: AnimationItem[]) => {
+    setClips({ run: animations.find(a => a.name.toLowerCase() === 'run')?.index ?? 0, idle: animations.find(a => a.name.toLowerCase() === 'idle')?.index ?? 0 });
+  }, []);
   const lastAspect = useSharedValue(0);
-  const { eye, target, up } = rig;
-
+  const { frame } = rig;
   RenderCallbackContext.useRenderCallback(() => {
     'worklet';
     const aspect = view.getAspectRatio();
-    if (lastAspect.value !== aspect) {
+    if (aspect > 0 && lastAspect.value !== aspect) {
       lastAspect.value = aspect;
-      // Filament takes a focal length rather than an angle; 36mm is MapLibre's
-      // 36.87 degree vertical field of view on a 35mm frame. World units are
-      // map pixels, so the camera sits over a thousand of them from its target
-      // and Filament's 0.1/100 planes would clip the scene away entirely.
       camera.setLensProjection(FOCAL_LENGTH_MM, aspect, NEAR_PLANE, FAR_PLANE);
     }
-    // Rebuilt element by element: a shared value holding an array arrives on
-    // the render thread as a plain object, which Filament rejects outright.
-    const e = eye.value;
-    const t = target.value;
-    const u = up.value;
+    const f = frame.value, e = f.eye, t = f.target, u = f.up;
     camera.lookAt([e[0], e[1], e[2]], [t[0], t[1], t[2]], [u[0], u[1], u[2]]);
-  }, [camera, view, lastAspect, eye, target, up]);
-
-  return null;
-}
-
-export function PlayerAvatar({ camera, running }: Props) {
-  const [clips, setClips] = useState<{ run: number; idle: number } | null>(null);
-
-  // Clips are matched by name. Indices depend on export order, and silently
-  // playing the wrong one is the kind of bug that survives a long time.
-  const onAnimationsLoaded = useCallback((animations: AnimationItem[]) => {
-    const find = (name: string) =>
-      animations.find((item) => item.name.toLowerCase() === name)?.index;
-    const run = find('run');
-    const idle = find('idle');
-    if (run === undefined || idle === undefined) {
-      console.warn(
-        `[avatar] expected Run and Idle clips, got: ${animations.map((a) => a.name).join(', ')}`,
-      );
+    if (!base) return;
+    const list = sharedActors.value;
+    const bearing = f.pose.bearing * Math.PI / 180;
+    const size = 512 * Math.pow(2, f.pose.zoom);
+    const lat0 = f.origin[1] * Math.PI / 180;
+    const y0 = Math.log(Math.tan(lat0) + 1 / Math.cos(lat0));
+    const cos = Math.cos(bearing), sin = Math.sin(bearing);
+    const nowMs = Date.now();
+    for (let i = 0; i < roots.length; i++) {
+      const actor = list[i];
+      if (!actor || nowMs >= actor.expiresAt) { transformManager.setTransform(roots[i]!, hidden); continue; }
+      const self = actor.id === 'self';
+      const lat = (self ? f.origin[1] : actor.coordinate[1]) * Math.PI / 180;
+      const east = self ? 0 : (actor.coordinate[0] - f.origin[0]) / 360 * size;
+      const south = self ? 0 : (y0 - Math.log(Math.tan(lat) + 1 / Math.cos(lat))) / (2 * Math.PI) * size;
+      const x = east * cos + south * sin, z = south * cos - east * sin;
+      const yaw = self ? f.yaw : Math.PI - (actor.heading - f.pose.bearing) * Math.PI / 180;
+      transformManager.setTransform(roots[i]!, base.rotate(yaw, [0, 1, 0]).translate([x, 0, z]));
     }
-    setClips({ run: run ?? 0, idle: idle ?? 0 });
-  }, []);
-
-  // Nothing is drawn until a real camera has been read: a guessed one would put
-  // the character somewhere the player is not.
-  if (!camera.placed) return null;
-
-  return (
-    <View pointerEvents="none" style={StyleSheet.absoluteFill}>
-      <FilamentScene>
-        <FilamentView style={StyleSheet.absoluteFill} enableTransparentRendering>
-          <CameraRig rig={camera} />
-          <DefaultLight />
-          <Model
-            source={RUNNER}
-            // Sized in map pixels, then lifted by half its height so the feet
-            // rest on the ground plane rather than the model's centre.
-            // Every one of these is constant, and deliberately so: Filament
-            // multiplies transform props onto the entity's existing transform,
-            // so anything that changes here compounds instead of replacing.
-            transformToUnitCube
-            scale={AVATAR_SCALE}
-            translate={AVATAR_LIFT}
-          >
-            <Animator
-              animationIndex={clips ? (running ? clips.run : clips.idle) : 0}
-              transitionDuration={TRANSITION_SECONDS}
-              onAnimationsLoaded={onAnimationsLoaded}
-            />
-          </Model>
-        </FilamentView>
-      </FilamentScene>
-    </View>
-  );
+  }, [camera, view, lastAspect, frame, base, roots, sharedActors, transformManager, hidden]);
+  return <ModelRenderer model={model}>
+    {SLOTS.map(index => <ModelInstance key={index} index={index}>
+      {actors[index] && <Animator animationIndex={actors[index]!.running ? clips.run : clips.idle} transitionDuration={.25} onAnimationsLoaded={index === 0 ? onAnimationsLoaded : undefined} />}
+    </ModelInstance>)}
+  </ModelRenderer>;
+}
+export function PlayerAvatar(props: Props) {
+  if (!props.camera.placed) return null;
+  return <View pointerEvents="none" style={StyleSheet.absoluteFill}>
+    <FilamentScene><FilamentView style={StyleSheet.absoluteFill} enableTransparentRendering>
+      <DefaultLight /><Runners {...props} />
+    </FilamentView></FilamentScene>
+  </View>;
 }

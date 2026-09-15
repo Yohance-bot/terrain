@@ -1,30 +1,12 @@
 import { useIsFocused } from '@react-navigation/native';
 import { useEffect, useState } from 'react';
 import { AccessibilityInfo, AppState } from 'react-native';
-import { create } from 'zustand';
-import { getMeta, setMeta } from '@/lib/db';
-import { getNotificationsEnabled, getUnits, type UnitPreference } from '@/lib/preferences';
+import { getMeta } from '@/lib/db';
+import { getNotificationsEnabled, getUnits } from '@/lib/preferences';
 
-export type RouteDisplay = 'streets' | 'gps';
-/** How the player is drawn on the map: the 3D character, or the plain marker
- *  that predates it. The marker stays a first-class choice — it is quieter,
- *  cheaper, and some people just want a dot. */
-export type PlayerMarker = 'avatar' | 'classic';
+import { useHudPreferences } from './preferences';
 
-export const useHudPreferences = create<{
-  routeDisplay: RouteDisplay; setRouteDisplay: (value: RouteDisplay) => void;
-  playerMarker: PlayerMarker; setPlayerMarker: (value: PlayerMarker) => void;
-  economy: boolean; haptics: boolean; weather: boolean; units: UnitPreference;
-  setEconomy: (value: boolean) => void; setWeather: (value: boolean) => void;
-}>((set) => ({
-  routeDisplay: 'streets',
-  setRouteDisplay: routeDisplay => { set({ routeDisplay }); void setMeta('hud.route-display.v1', routeDisplay).catch(() => undefined); },
-  playerMarker: 'avatar',
-  setPlayerMarker: playerMarker => { set({ playerMarker }); void setMeta('hud.player-marker.v1', playerMarker).catch(() => undefined); },
-  economy: false, haptics: true, weather: true, units: 'km',
-  setEconomy: economy => { set({ economy }); void setMeta('hud.economy.v1', String(economy)).catch(() => undefined); },
-  setWeather: weather => { set({ weather }); void setMeta('hud.weather.v1', String(weather)).catch(() => undefined); },
-}));
+export { useHudPreferences, type RouteDisplay, type PlayerMarker } from './preferences';
 
 export function usePresentation() {
   const focused = useIsFocused();

@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "run",
+    "name": "TerraRun",
     "slug": "run",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -15,7 +15,9 @@
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "Used to record your route while a run is in progress.",
         "NSLocationAlwaysAndWhenInUseUsageDescription": "Used to keep recording your route while a run is in progress.",
-        "UIBackgroundModes": ["location"]
+        "UIBackgroundModes": [
+          "location"
+        ]
       }
     },
     "android": {
@@ -34,7 +36,14 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "versionCode": 2,
+      "allowBackup": false,
+      "blockedPermissions": [
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.SYSTEM_ALERT_WINDOW"
+      ]
     },
     "web": {
       "output": "static",
@@ -63,7 +72,9 @@
           "isAndroidForegroundServiceEnabled": true,
           "isIosBackgroundLocationEnabled": true
         }
-      ]
+      ],
+      "./plugins/withRunLiveActivity",
+      "./plugins/withAndroidRelease"
     ],
     "experiments": {
       "typedRoutes": true,

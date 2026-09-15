@@ -1,5 +1,7 @@
 import { GeoJSONSource, Layer } from '@maplibre/maplibre-react-native';
-import { memo, useMemo } from 'react';
+import { memo, useMemo, useEffect, useState } from 'react';
+import { useAvatarVisibility } from '@/features/avatar/visibility';
+import { freshFriends } from '@/features/avatar/actors';
 
 import { colors } from '@/theme';
 import type { GhostSummary } from '@/services/api/types';
@@ -33,6 +35,9 @@ function pointFeature(
 }
 
 export const SocialMapLayers = memo(function SocialMapLayers({ nearbyGhosts }: Props) {
+  const avatarIds = useAvatarVisibility(s => s.ids);
+  const [now, setNow] = useState(Date.now);
+  useEffect(() => { const timer = setInterval(() => setNow(Date.now()), 5000); return () => clearInterval(timer); }, []);
   const friends = useSocial((state) => state.friends);
   const races = useSocial((state) => state.races);
   const ghost = useGhostRace((state) => state.ghost);
@@ -41,14 +46,15 @@ export const SocialMapLayers = memo(function SocialMapLayers({ nearbyGhosts }: P
   const friendPoints = useMemo<GeoJSON.FeatureCollection<GeoJSON.Point>>(
     () => ({
       type: 'FeatureCollection',
-      features: friends.map((friend) =>
+      features: freshFriends(friends, now).map((friend) =>
         pointFeature([friend.lon, friend.lat], {
           name: friend.account.display_name,
+          avatar: avatarIds.includes(friend.account.id),
           running: friend.is_running,
         })
       ),
     }),
-    [friends]
+    [friends, now, avatarIds]
   );
 
   const racePins = useMemo<GeoJSON.FeatureCollection<GeoJSON.Point>>(
@@ -125,12 +131,14 @@ export const SocialMapLayers = memo(function SocialMapLayers({ nearbyGhosts }: P
             id="ghost-runner-dot"
             type="circle"
             paint={{
-              'circle-radius': 6,
+              'circle-radius': ['step', ['zoom'], 6, 14, avatarIds.includes('ghost') ? 13 : 6],
+              'circle-opacity': avatarIds.includes('ghost') ? .25 : 1,
               'circle-color': GHOST_COLOR,
               'circle-stroke-width': 2,
               'circle-stroke-color': colors.surface,
             }}
           />
+          <Layer id="ghost-runner-label" beforeId="hud-player-anchor" type="symbol" layout={{ 'text-field': 'Ghost', 'text-size': 11, 'text-anchor': 'top', 'text-offset': [0, 1.4] }} paint={{ 'text-color': GHOST_COLOR, 'text-halo-color': '#142127', 'text-halo-width': 1.5 }} />
         </GeoJSONSource>
       )}
 
@@ -190,7 +198,8 @@ export const SocialMapLayers = memo(function SocialMapLayers({ nearbyGhosts }: P
               // Running friends read differently from friends simply out and
               // sharing, which is the distinction that matters on a glance.
               'circle-color': ['case', ['get', 'running'], FRIEND_RUNNING_COLOR, FRIEND_COLOR],
-              'circle-radius': 7,
+              'circle-radius': ['step', ['zoom'], 7, 14, ['case', ['get', 'avatar'], 13, 7]],
+              'circle-opacity': ['case', ['get', 'avatar'], .25, 1],
               'circle-stroke-width': 3,
               'circle-stroke-color': colors.surface,
             }}

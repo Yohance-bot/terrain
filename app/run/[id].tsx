@@ -82,12 +82,13 @@ export default function RunSummaryScreen() {
     newlyYours,
     otherOwnershipChanges,
     hasSegments: result.segments.length > 0,
+    capturedAreaM2: result.captured_area_id ? result.captured_area_m2 ?? 0 : null,
   });
   const confirmedLoopCaptures = result.segments.filter(
     (segment) => segment.capture_method === 'loop' && segment.is_owned_by_you,
   );
   const defended = confirmedLoopCaptures.filter((segment) => !segment.ownership_changed);
-  const captureCount = confirmedLoopCaptures.length;
+  const captureCount = result.status === 'applied' ? Math.max(confirmedLoopCaptures.length, result.captured_area_id ? 1 : 0) : 0;
   const traversedRoads = buildTrail(completedPath, []);
   const loopCandidate = detectLoopCandidate(completedPath);
   const hasCaptured = captureCount > 0;
@@ -122,7 +123,7 @@ export default function RunSummaryScreen() {
             <Text style={styles.captureLabel}>
               {captureCount === 1 ? 'TERRITORY CAPTURED' : 'TERRITORIES CAPTURED'}
             </Text>
-            {captureCount > 0 && (
+            {confirmedLoopCaptures.length > 0 && (
               <Text style={styles.captureMeta}>
                 {captureCount - defended.length} new · {defended.length} defended
               </Text>
@@ -263,11 +264,13 @@ function getOutcome({
   newlyYours,
   otherOwnershipChanges,
   hasSegments,
+  capturedAreaM2,
 }: {
   status: RunResult['status'];
   newlyYours: RunResult['segments'];
   otherOwnershipChanges: RunResult['segments'];
   hasSegments: boolean;
+  capturedAreaM2: number | null;
 }) {
   if (status === 'rejected') {
     return {
@@ -313,6 +316,10 @@ function getOutcome({
         ? 'Your presence changed the map. Keep it up.'
         : `${names.join(', ')} — all yours now.`,
     };
+  }
+
+  if (capturedAreaM2 !== null) {
+    return { eyebrow: 'LOOP CLAIMED', title: 'You made new territory', detail: `${Math.round(capturedAreaM2).toLocaleString()} m² added to the map. Loops work outside named territories too.` };
   }
 
   if (otherOwnershipChanges.length > 0) {

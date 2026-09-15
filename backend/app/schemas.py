@@ -124,6 +124,8 @@ class RunResult(BaseModel):
     sample_count: int
     samples_dropped: int
     segments: list[SegmentResult]
+    captured_area_id: uuid.UUID | None = None
+    captured_area_m2: float = 0
 
 
 class InternalRunReviewItem(BaseModel):
@@ -153,6 +155,8 @@ class ManualRunReversalResult(BaseModel):
 
 
 class TerritoryState(BaseModel):
+    owner_display_name: str | None = None
+    label_coordinate: list[float] | None = None
     territory_id: uuid.UUID
     slug: str
     name: str

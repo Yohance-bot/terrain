@@ -21,7 +21,7 @@ import { ChevronLeftIcon, ChevronRightIcon } from './icons';
 /**
  * The pieces every non-map screen is built from.
  *
- * Content sits on white cards over the mint gradient: the gradient gives the
+ * Content sits on white cards over the warm gradient: the gradient gives the
  * screen its colour, the cards keep text on a surface where it reads cleanly.
  */
 

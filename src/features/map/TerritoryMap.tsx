@@ -1,3 +1,5 @@
+import { useAvatarVisibility } from '@/features/avatar/visibility';
+import { LeaderBanners } from './LeaderBanners';
 import {
   Camera,
   type CameraRef,
@@ -16,7 +18,6 @@ import {
   DEFAULT_PITCH,
   DEFAULT_ZOOM,
   JAYANAGAR_CENTER,
-  MAP_ATTRIBUTION,
   MAP_STYLE,
 } from '@/constants/config';
 import { useHudDiagnostics } from '@/features/hud/useHudDiagnostics';
@@ -32,9 +33,12 @@ import { illuminateStreets } from './streetMatching';
 import { StreetTrailLayers } from './StreetTrailLayers';
 import { TrailLayers } from '@/features/hud/TrailLayers';
 import { SocialMapLayers } from '@/features/social/SocialMapLayers';
+import { smoothBearing } from '@/features/hud/telemetry';
+import { RecenterIcon } from '@/components/icons';
+import { MapAttribution } from './MapAttribution';
 import { PlayerAvatar } from '@/features/avatar/PlayerAvatar';
 import { useAvatarCamera } from '@/features/avatar/useAvatarCamera';
-import type { GhostSummary } from '@/services/api/types';
+import type { TerritoryState, GhostSummary } from '@/services/api/types';
 import { CueMapLayers } from '@/features/hud/CueMapLayers';
 import { ContestedBorders } from '@/features/hud/ContestedBorders';
 import { mockAdjacentBorders, sharedBorders, selectBorders } from '@/features/hud/borders';
@@ -55,6 +59,7 @@ type Props = {
   /** Server-dissolved fixed territory geometry grouped by owner. */
   ownedTerritoryAreas?: GeoJSON.FeatureCollection | null;
   /** Ownership, used only to choose a fill colour. */
+  territoryLeaders?: TerritoryState[];
   ownedByYou: Set<string>;
   ownedByOthers: Set<string>;
   /**
@@ -70,6 +75,7 @@ type Props = {
   economy?: boolean;
   simulation?: boolean;
   bottomInset?: number;
+  onDayChange?: (day: boolean) => void;
   /** Future multiplayer feed: only shared line geometry, never whole territories. */
   contestedBorders?: GeoJSON.FeatureCollection<GeoJSON.LineString>;
   loopCandidate: GeoJSON.Feature<GeoJSON.Polygon> | null;
@@ -146,6 +152,7 @@ export const TerritoryMap = memo(function TerritoryMap({
   territories,
   capturedAreas,
   ownedTerritoryAreas,
+  territoryLeaders = [],
   ownedByYou,
   ownedByOthers,
   traversedRoads,
@@ -160,7 +167,7 @@ export const TerritoryMap = memo(function TerritoryMap({
   visibleLayers = 'all',
   nearbyGhosts,
   onDropRacePin,
-  showAvatar = false,
+  showAvatar = false, onDayChange,
   fix = null, presentationActive = true, reducedMotion = false, economy = false, simulation = false, bottomInset = 8, contestedBorders,
 }: Props) {
   const showTerritories = visibleLayers === 'all' || visibleLayers === 'territories';
@@ -180,6 +187,7 @@ export const TerritoryMap = memo(function TerritoryMap({
   // to look for. Both are drawn from the same fix, so this only swaps the marks.
   const wantsAvatar = useHudPreferences(s => s.playerMarker) === 'avatar';
   const palette = useLighting(effectiveFix, presentationActive, simulation);
+  useEffect(() => { onDayChange?.(palette.isDay); }, [palette.isDay, onDayChange]);
   const hasOwnedAreaGeometry = Boolean(ownedTerritoryAreas?.features.length);
   const ownerColouredAreas = useMemo(() => withOwnerColors(ownedTerritoryAreas), [ownedTerritoryAreas]);
 
@@ -296,29 +304,41 @@ export const TerritoryMap = memo(function TerritoryMap({
   // player moves: a new fix must not cost a re-render of every layer.
   const avatarTarget = useRef(avatarCoordinate);
   avatarTarget.current = avatarCoordinate;
-  const trackCamera = useCallback(
-    (state: ViewState) => avatarCamera.track(state, avatarTarget.current),
-    [avatarCamera],
-  );
+  const avatarHeading = useRef(0);
+  const lastHeadingTs = useRef<number | null>(null);
+  const lastPose = useRef<ViewState | null>(null);
+  const cameraRevision = useRef(0);
+  const { track: placeAvatar, clear: clearAvatar } = avatarCamera;
+  const trackCamera = useCallback((state: ViewState) => {
+    cameraRevision.current += 1;
+    lastPose.current = state;
+    placeAvatar(state, avatarTarget.current, avatarHeading.current);
+  }, [placeAvatar]);
   useEffect(() => {
-    if (!avatarEnabled) {
-      avatarCamera.clear();
+    // Heading comes from displacement, not the phone compass. Keep the last
+    // reliable heading at rest and interpolate across north's 359°/0° seam.
+    if (effectiveFix?.bearing != null && effectiveFix.speedMps >= RUNNING_SPEED_MPS && effectiveFix.ts !== lastHeadingTs.current) {
+      avatarHeading.current = lastHeadingTs.current == null ? effectiveFix.bearing : smoothBearing(avatarHeading.current, effectiveFix.bearing, 0.45);
+      lastHeadingTs.current = effectiveFix.ts;
+    }
+    if (avatarEnabled && lastPose.current) placeAvatar(lastPose.current, avatarCoordinate, avatarHeading.current);
+  }, [effectiveFix, avatarCoordinate, avatarEnabled, placeAvatar]);
+  useEffect(() => {
+    if (!avatarEnabled) { clearAvatar(); return; }
+    if (lastPose.current) {
+      placeAvatar(lastPose.current, avatarTarget.current, avatarHeading.current);
       return;
     }
     let cancelled = false;
-    void mapRef.current
-      ?.getViewState()
-      .then((state) => {
-        if (!cancelled && state) trackCamera(state);
-      })
-      .catch(() => undefined);
-    return () => {
-      cancelled = true;
-    };
-    // avatarCamera is stable apart from `placed`, which must not re-seed.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [avatarEnabled, trackCamera]);
-  const avatarDrawn = avatarEnabled && avatarCamera.placed;
+    const revision = cameraRevision.current;
+    void mapRef.current?.getViewState().then(state => {
+      // A slow bridge response must never overwrite a newer gesture event.
+      if (!cancelled && revision === cameraRevision.current && state) trackCamera(state);
+    }).catch(() => undefined);
+    return () => { cancelled = true; };
+  }, [avatarEnabled, clearAvatar, placeAvatar, trackCamera]);
+  const modelLoaded = useAvatarVisibility(s => s.ids.includes('self'));
+  const avatarDrawn = avatarEnabled && avatarCamera.placed && modelLoaded;
 
   return (
     <View style={styles.container} onLayout={avatarCamera.onLayout}>
@@ -334,11 +354,11 @@ export const TerritoryMap = memo(function TerritoryMap({
         logo={false}
         scaleBar={false}
         onDidFinishLoadingMap={() => setMapReady(true)}
-        onRegionWillChange={event => { follow.onGesture(event.nativeEvent); if (avatarEnabled) trackCamera(event.nativeEvent); }}
-        onRegionIsChanging={event => { if (avatarEnabled) trackCamera(event.nativeEvent); }}
+        onRegionWillChange={event => { follow.onGesture(event.nativeEvent); trackCamera(event.nativeEvent); }}
+        onRegionIsChanging={event => { trackCamera(event.nativeEvent); }}
         onDidFinishRenderingFrame={onRenderedFrame}
         preferredFramesPerSecond={recording ? 30 : 60}
-        onRegionDidChange={event => { setZoom(event.nativeEvent.zoom); if (avatarEnabled) trackCamera(event.nativeEvent); }}
+        onRegionDidChange={event => { setZoom(event.nativeEvent.zoom); trackCamera(event.nativeEvent); }}
         onPress={(event) => {
           if (!onSimulationMove) return;
           const [lon, lat] = event.nativeEvent.lngLat;
@@ -691,6 +711,7 @@ export const TerritoryMap = memo(function TerritoryMap({
           </GeoJSONSource>
         )}
 
+        <LeaderBanners states={territoryLeaders} capturedAreas={showCaptures ? styledCapturedAreas : null} colors={colorByTerritory} />
         <SocialMapLayers nearbyGhosts={nearbyGhosts} />
       </Map>
 
@@ -706,10 +727,9 @@ export const TerritoryMap = memo(function TerritoryMap({
       {recording && <Pressable accessibilityRole="button" accessibilityLabel={`Trail display: ${routeDisplay === 'streets' ? 'light up streets' : 'GPS trail'}. Tap to switch.`} onPress={() => useHudPreferences.getState().setRouteDisplay(routeDisplay === 'streets' ? 'gps' : 'streets')} style={[styles.trailMode, simulation && { left: undefined, right: 66 }, { bottom: bottomInset + 44 }]}>
         <Text style={styles.trailModeLabel}>{routeDisplay === 'streets' ? '▰  LIT STREETS' : '⌁  GPS TRAIL'}</Text>
       </Pressable>}
-      {/* Required by ODbL at all times, no exceptions. Do not remove. */}
-      <View pointerEvents="none" style={[styles.mapFootnote, { bottom: bottomInset }]}>
-        <Text style={styles.environment}>{palette.name}{simulation && borders.features.length ? ' · DEMO BORDER' : borders.features.length ? ' · Rival border' : ''}</Text>
-        <Text style={styles.attribution}>{MAP_ATTRIBUTION} · Weather: Open-Meteo</Text>
+      {/* Compact, accessible attribution remains available on the map. */}
+      <View pointerEvents="box-none" style={[styles.mapFootnote, { bottom: bottomInset }]}>
+        <MapAttribution />
       </View>
       <Pressable
         accessibilityLabel={follow.following ? "Recenter on your location" : "Resume following your location"}
@@ -718,7 +738,7 @@ export const TerritoryMap = memo(function TerritoryMap({
         style={[styles.recenter, { bottom: bottomInset + 45 }]}
         onPress={follow.recenter}
       >
-        <Text style={styles.recenterText}>{follow.following ? '◎' : '↗'}</Text>
+        <RecenterIcon size={24} />
       </Pressable>
     </View>
   );

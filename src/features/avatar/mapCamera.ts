@@ -162,3 +162,8 @@ export function projectGround(
     y: (0.5 - ndcY * 0.5) * viewport.height,
   };
 }
+
+/** runner.glb faces +Z (toward the viewer). Compass north is -Z. */
+export function avatarYaw(heading: number, mapBearing: number): number {
+  return Math.PI - degrees(heading - mapBearing);
+}

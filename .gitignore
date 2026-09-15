@@ -98,3 +98,8 @@ assets/filament-spike/
 # against and stay committed. The single-file export is a 2.6 MB bundle of the
 # same screens, regenerated whenever the canvas is exported.
 design/redesign/terrarun-redesign.html
+
+# Shareable builds
+artifacts/
+*.apk
+*.aab

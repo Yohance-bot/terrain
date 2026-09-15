@@ -350,3 +350,38 @@ def cleanup_devices():
                 "(SELECT device_id FROM runs UNION SELECT device_id FROM run_territory_segments)"
             )
         )
+
+
+def test_loop_outside_named_territories_claims_once(client):
+    device = str(uuid.uuid4())
+    headers = {"X-Device-Id": device}
+    points = [(lon - 2, lat - 2) for lon, lat in enclosing_loop()]
+    payload = build_run(points, duration_s=25 * 60)
+    response = client.post('/v1/runs', json=payload, headers=headers)
+    assert response.status_code == 200, response.text
+    result = response.json()
+    assert result['status'] == 'applied'
+    assert result['segments'] == []
+    assert result['captured_area_id']
+    assert result['captured_area_m2'] > 1200
+    repeated = client.post('/v1/runs', json=payload, headers=headers)
+    assert repeated.status_code == 200, repeated.text
+    assert repeated.json()['captured_area_id'] == result['captured_area_id']
+    areas = client.get('/v1/captured-areas', headers=headers).json()['features']
+    own = [area for area in areas if area['properties']['owner_device_id'] == device]
+    assert len(own) == 1
+    assert own[0]['properties']['owner_display_name']
+    assert len(own[0]['properties']['label_coordinate']) == 2
+
+
+def test_territory_leader_has_map_anchor(client, territory):
+    device = str(uuid.uuid4())
+    response = client.post('/v1/runs', json=build_run(enclosing_loop(), duration_s=1500), headers={'X-Device-Id': device})
+    assert response.status_code == 200, response.text
+    response = client.get('/v1/territories/state?city=testland&area=testville')
+    assert response.status_code == 200, response.text
+    state = next(s for s in response.json() if s['territory_id'] == str(territory))
+    assert state['owner_device_id'] == device
+    assert state['owner_display_name']
+    lon, lat = state['label_coordinate']
+    assert 77.700 <= lon <= 77.708 and 12.800 <= lat <= 12.808

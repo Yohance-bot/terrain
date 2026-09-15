@@ -17,6 +17,7 @@ from sqlalchemy.orm import Session
 from app.core.config import settings
 from app.models import (
     Device,
+    CapturedArea,
     InfluenceGrant,
     Run,
     RunLifecycleEvent,
@@ -312,6 +313,11 @@ def build_result(session: Session, run: Run, samples_dropped: int | None = None)
     if samples_dropped is None:
         samples_dropped = len(run.raw_payload.get("samples", [])) - len(run.sample_ts or [])
 
+    captured = session.execute(
+        select(CapturedArea.id, func.ST_Area(CapturedArea.geom))
+        .where(CapturedArea.run_id == run.id)
+    ).first() if run.status == "applied" else None
+
     return RunResult(
         run_id=run.id,
         status=run.status,
@@ -320,6 +326,8 @@ def build_result(session: Session, run: Run, samples_dropped: int | None = None)
         sample_count=len(run.sample_ts or []),
         samples_dropped=samples_dropped,
         segments=segments,
+        captured_area_id=captured[0] if captured else None,
+        captured_area_m2=round(float(captured[1]), 1) if captured else 0,
     )
 
 

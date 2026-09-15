@@ -1,5 +1,5 @@
-import type { ReactNode } from 'react';
-import Svg, { Circle, Path, Rect } from 'react-native-svg';
+import { useId, type ReactNode } from 'react';
+import Svg, { Circle, Defs, LinearGradient, Path, Rect, Stop } from 'react-native-svg';
 
 import { ui } from '@/theme';
 
@@ -13,8 +13,17 @@ import { ui } from '@/theme';
 export type IconProps = { size?: number; color?: string; strokeWidth?: number };
 
 function Icon({ size = 24, color = ui.icon, strokeWidth = 1.75, children }: IconProps & { children: ReactNode }) {
+  const id = `icon-${useId().replace(/[^a-zA-Z0-9]/g, '')}`;
+  const ink = color === ui.icon ? `url(#${id})` : color;
   return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={ink} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+      <Defs>
+        <LinearGradient id={id} x1="0" y1="1" x2="1" y2="0">
+          <Stop offset="0" stopColor={ui.iconGradient[0]} />
+          <Stop offset="0.55" stopColor={ui.iconGradient[1]} />
+          <Stop offset="1" stopColor={ui.iconGradient[2]} />
+        </LinearGradient>
+      </Defs>
       {children}
     </Svg>
   );
@@ -175,3 +184,10 @@ export const NoteIcon = (p: IconProps) => (
     <Path d="m13.5 6.5 4 4" />
   </Icon>
 );
+
+export const SunIcon = (p: IconProps) => <Icon {...p}>
+  <Circle cx={12} cy={12} r={4} /><Path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5" />
+</Icon>;
+export const MoonIcon = (p: IconProps) => <Icon {...p}>
+  <Path d="M20 14A8.5 8.5 0 0 1 10 3a8.5 8.5 0 1 0 10 11Z" />
+</Icon>;

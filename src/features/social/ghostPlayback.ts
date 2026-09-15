@@ -18,7 +18,13 @@ export type GhostState = {
   /** Metres the ghost has covered so far. */
   distanceM: number;
   finished: boolean;
+  heading?: number;
 };
+
+function bearing(from: GhostPoint, to: GhostPoint): number {
+  const dy = to[1] - from[1], dx = (to[0] - from[0]) * Math.cos(from[1] * Math.PI / 180);
+  return (Math.atan2(dx, dy) * 180 / Math.PI + 360) % 360;
+}
 
 const EARTH_RADIUS_M = 6_371_000;
 
@@ -66,7 +72,7 @@ export function ghostAt(
 
   if (elapsedMs <= 0 || path.length === 1) {
     const first = path[0]!;
-    return { coordinate: [first[0], first[1]], progress: 0, distanceM: 0, finished: false };
+    return { coordinate: [first[0], first[1]], progress: 0, distanceM: 0, finished: false, heading: bearing(first, path[1] ?? first) };
   }
   if (elapsedMs >= duration) {
     return {
@@ -74,6 +80,7 @@ export function ghostAt(
       progress: 1,
       distanceM: distances[distances.length - 1]!,
       finished: true,
+      heading: bearing(path[Math.max(0, path.length - 2)]!, last),
     };
   }
 
@@ -96,6 +103,7 @@ export function ghostAt(
     progress: elapsedMs / duration,
     distanceM: distances[low]! + (distances[high]! - distances[low]!) * ratio,
     finished: false,
+    heading: bearing(from, to),
   };
 }
 

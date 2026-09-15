@@ -5,6 +5,7 @@ from hashlib import sha256
 
 from fastapi import APIRouter, Depends, Header, Response
 from sqlalchemy import func, select, text
+from geoalchemy2 import Geometry
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
@@ -163,8 +164,11 @@ def territory_state(
     )
 
     rows = session.execute(
-        select(Territory, TerritoryOwnership.owner_device_id, leader_distance)
+        select(Territory, TerritoryOwnership.owner_device_id, leader_distance, Account.display_name,
+               func.ST_AsGeoJSON(func.ST_PointOnSurface(Territory.geom.cast(Geometry))))
         .outerjoin(TerritoryOwnership, TerritoryOwnership.territory_id == Territory.id)
+        .outerjoin(DeviceLink, DeviceLink.device_id == TerritoryOwnership.owner_device_id)
+        .outerjoin(Account, Account.id == DeviceLink.account_id)
         .where(Territory.city == city, Territory.area == area)
         .order_by(Territory.name)
     ).all()
@@ -172,7 +176,7 @@ def territory_state(
     response.headers.update(
         dataset_headers(
             territory_dataset_version(
-                (territory for territory, _, _ in rows), city=city, area=area
+                (territory for territory, *_ in rows), city=city, area=area
             )
         )
     )
@@ -185,9 +189,11 @@ def territory_state(
             kind=territory.kind,
             version=territory.version,
             owner_device_id=owner_id,
+            owner_display_name=(display_name or f"Runner {str(owner_id)[:5]}") if owner_id else None,
+            label_coordinate=json.loads(label_point)["coordinates"] if label_point else None,
             total_distance_m=float(total or 0),
         )
-        for territory, owner_id, total in rows
+        for territory, owner_id, total, display_name, label_point in rows
     ]
 
 

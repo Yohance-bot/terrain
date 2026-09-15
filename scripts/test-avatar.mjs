@@ -127,3 +127,33 @@ assert.ok(tiltedEye[1] > 0 && tiltedEye[1] < distance, 'and lowers it');
 assert.equal(projectGround({ x: 0, z: 100000 }, { ...flat, pitch: 60 }, VIEWPORT), null);
 
 console.log('Map camera reconstruction passed: mercator, 1:1 ground scale, bearing, pitch and basis.');
+
+// The model's +Z front must point along motion for any rotated map.
+const { avatarYaw } = load('src/features/avatar/mapCamera.ts');
+for (const heading of [0, 45, 90, 180, 270, 359]) {
+  for (const bearing of [0, 90, 235, 359]) {
+    const yaw = avatarYaw(heading, bearing);
+    const relative = (heading - bearing) * Math.PI / 180;
+    assert.ok(Math.abs(Math.sin(yaw) - Math.sin(relative)) < 1e-9);
+    assert.ok(Math.abs(Math.cos(yaw) + Math.cos(relative)) < 1e-9);
+  }
+}
+console.log('Avatar heading: compass direction and rotated-map cases pass.');
+
+const { mapActors, freshFriends, MAX_MAP_ACTORS } = load('src/features/avatar/actors.ts');
+const timestamp = Date.now();
+const friend = (id, lat = 12.97, age = 1000) => ({ account: { id, display_name: id }, lon: 77.59, lat, heading: 90, is_running: true, speed_mps: 3, accuracy_m: 8, updated_at: new Date(timestamp - age).toISOString() });
+const people = Array.from({ length: 20 }, (_, i) => friend(`f${i}`, 12.97 + i * .0001));
+const activeGhost = { coordinate: [77.591, 12.97], heading: 180, finished: false, progress: .5, distanceM: 100 };
+const actors = mapActors([77.59, 12.97], true, people, activeGhost, timestamp);
+assert.equal(actors.length, MAX_MAP_ACTORS);
+assert.equal(actors[0].id, 'self');
+assert.equal(actors[1].id, 'ghost');
+assert.equal(actors[1].heading, 180);
+assert.equal(freshFriends([friend('stale', 12.97, 90001), friend('fresh')], timestamp).length, 1);
+assert.equal(mapActors([77.59, 12.97], false, [friend('far', 13.1)], null, timestamp).length, 1);
+assert.equal(mapActors([77.59, 12.97], false, [], null, timestamp).length, 1, 'revoked sharing removes friend model');
+const { ghostAt } = load('src/features/social/ghostPlayback.ts');
+assert.equal(ghostAt([[77, 12, 0], [77.01, 12, 10000]], 5000).heading, 90);
+assert.equal(ghostAt([[77, 12, 0], [77, 12.01, 10000]], 5000).heading, 0);
+console.log('Avatar population: ghost priority, friend privacy expiry, distance and instance budgets pass.');

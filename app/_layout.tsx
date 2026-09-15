@@ -1,29 +1,32 @@
 import {
-  Barlow_400Regular,
-  Barlow_500Medium,
-  Barlow_600SemiBold,
-  Barlow_700Bold,
+  Manrope_400Regular,
+  Manrope_500Medium,
+  Manrope_600SemiBold,
+  Manrope_700Bold,
   useFonts,
-} from '@expo-google-fonts/barlow';
+} from '@expo-google-fonts/manrope';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import 'react-native-reanimated';
+import { useReducedMotion } from 'react-native-reanimated';
 
+import { useTabMotion } from '@/components/tabMotion';
 import { colors, ui } from '@/theme';
 
 export const unstable_settings = {
   anchor: 'index',
 };
 
-// Barlow is bundled, so this resolves in a frame or two; holding the splash
+// Manrope is bundled, so this resolves in a frame or two; holding the splash
 // avoids one frame of system type before the app's own.
 void SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
 export default function RootLayout() {
-  const [loaded, error] = useFonts({ Barlow_400Regular, Barlow_500Medium, Barlow_600SemiBold, Barlow_700Bold });
+  const reducedMotion = useReducedMotion();
+  const tabAnimation = useTabMotion(s => s.animation);
+  const [loaded, error] = useFonts({ Manrope_400Regular, Manrope_500Medium, Manrope_600SemiBold, Manrope_700Bold });
 
   useEffect(() => {
     if (loaded || error) void SplashScreen.hideAsync().catch(() => undefined);
@@ -40,8 +43,8 @@ export default function RootLayout() {
         }}
       >
         {/* Friends and Profile behave as tabs over the map, not as pushed pages. */}
-        <Stack.Screen name="friends" options={{ animation: 'none' }} />
-        <Stack.Screen name="profile" options={{ animation: 'none' }} />
+        <Stack.Screen name="friends" options={{ animation: reducedMotion ? 'none' : tabAnimation, animationDuration: 220, gestureEnabled: false }} />
+        <Stack.Screen name="profile" options={{ animation: reducedMotion ? 'none' : tabAnimation, animationDuration: 220, gestureEnabled: false }} />
         <Stack.Screen
           name="goal"
           options={{

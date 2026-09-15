@@ -1,13 +1,6 @@
-/**
- * The app's own palette, separate from the map's.
- *
- * The map keeps `colors` and the lighting palette; everything around it — tab
- * bar, profile, friends, settings — reads from here. Teal is the athlete's
- * colour: icons carry `icon`, and `accent` is the same hue deepened until white
- * text and small labels stay legible on it.
- */
+/** Warm surfaces, ink labels and honey-to-bumblebee accents. */
 export const ui = {
-  gradientTop: '#ADEBB3',
+  gradientTop: '#FFF5CC',
   gradientBottom: '#FFFFFF',
   surface: '#FFFFFF',
   ink: '#0E1A13',
@@ -15,25 +8,26 @@ export const ui = {
   // 4.7:1 on white, so small labels on cards stay legible.
   ink3: '#6B766F',
   line: '#E2E6E0',
-  icon: '#1ABC9C',
-  accent: '#0E7C66',
-  accentPressed: '#0A5F4E',
-  accentSoft: '#D4F3EA',
-  chartCurrent: '#1ABC9C',
-  chartPast: '#A6E3D3',
+  icon: '#C88900',
+  iconGradient: ['#A96B00', '#F0B900', '#FFD83D'] as const,
+  accent: '#765000',
+  accentPressed: '#593C00',
+  accentSoft: '#FFF1B8',
+  chartCurrent: '#C88900',
+  chartPast: '#F5D77E',
   segment: 'rgba(14,26,19,0.07)',
-  start: '#C5F26A',
+  start: '#FFD42A',
   startInk: '#0E1A13',
   danger: '#B42318',
   scrim: 'rgba(14,26,19,0.32)',
 } as const;
 
-/** Barlow, loaded once in the root layout. Weight lives in the family name. */
+/** Manrope, loaded once in the root layout. Weight lives in the family name. */
 export const fonts = {
-  regular: 'Barlow_400Regular',
-  medium: 'Barlow_500Medium',
-  semibold: 'Barlow_600SemiBold',
-  bold: 'Barlow_700Bold',
+  regular: 'Manrope_400Regular',
+  medium: 'Manrope_500Medium',
+  semibold: 'Manrope_600SemiBold',
+  bold: 'Manrope_700Bold',
 } as const;
 
 export const typeScale = {

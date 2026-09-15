@@ -1,10 +1,13 @@
-import { router } from 'expo-router';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { router, useNavigation } from 'expo-router';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useReducedMotion } from 'react-native-reanimated';
+import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { tabAnimation, useTabMotion } from './tabMotion';
 import { fonts, ui } from '@/theme';
 
-import { FriendsIcon, MapIcon, ProfileIcon } from './icons';
+import { FriendsIcon, MapIcon, ProfileIcon, StartIcon } from './icons';
 
 export type TabKey = 'map' | 'friends' | 'profile';
 
@@ -21,16 +24,38 @@ const TABS: { key: TabKey; label: string; path: '/' | '/friends' | '/profile' }[
  * renderers alive, Friends and Profile sit over it, and switching between those
  * two replaces one with the other instead of stacking them.
  */
-export function TabBar({ active, badge }: { active: TabKey; badge?: boolean }) {
+export function TabBar({ active, badge, onStart, onStartOptions }: {
+  active: TabKey; badge?: boolean; onStart?: () => void; onStartOptions?: () => void;
+}) {
+  const navigation = useNavigation();
+  const reducedMotion = useReducedMotion();
   const insets = useSafeAreaInsets();
   const go = (tab: (typeof TABS)[number]) => {
     if (tab.key === active) return;
-    if (tab.key === 'map') router.navigate('/');
-    else if (active === 'map') router.push(tab.path);
-    else router.replace(tab.path);
+    const animation = tabAnimation(active, tab.key);
+    useTabMotion.setState({ animation });
+    navigation.setOptions({
+      animation: reducedMotion ? 'none' : animation,
+      animationDuration: 220,
+      animationTypeForReplace: 'push',
+    });
+    requestAnimationFrame(() => {
+      if (tab.key === 'map') router.navigate('/');
+      else if (active === 'map') router.push(tab.path);
+      else router.replace(tab.path);
+    });
   };
   return (
-    <View style={[styles.bar, { paddingBottom: Math.max(insets.bottom, 8) }]} accessibilityRole="tabbar">
+    <View style={styles.dock}>
+      {onStart && <Pressable accessibilityRole="button" accessibilityLabel="Start a run"
+        accessibilityHint={onStartOptions ? 'Long press for developer run options' : undefined}
+        onPress={onStart} onLongPress={onStartOptions}
+        style={({ pressed }) => [styles.start, pressed && { opacity: 0.85 }]}>
+        <LinearGradient colors={['#FFE878', '#FFD42A', '#F5B700']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.startFill}>
+          <StartIcon size={22} color={ui.startInk} /><Text style={styles.startLabel}>Start run</Text>
+        </LinearGradient>
+      </Pressable>}
+    <View style={[styles.bar, { paddingBottom: Platform.OS === 'ios' ? Math.max(8, insets.bottom - 16) : Math.max(insets.bottom, 6) }]} accessibilityRole="tabbar">
       {TABS.map((tab) => {
         const selected = tab.key === active;
         const Icon = tab.key === 'map' ? MapIcon : tab.key === 'friends' ? FriendsIcon : ProfileIcon;
@@ -52,10 +77,15 @@ export function TabBar({ active, badge }: { active: TabKey; badge?: boolean }) {
         );
       })}
     </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  dock: { backgroundColor: ui.surface, borderTopLeftRadius: 26, borderTopRightRadius: 26, overflow: 'hidden' },
+  start: { marginHorizontal: 18, marginTop: 12, marginBottom: 8, borderRadius: 18, overflow: 'hidden' },
+  startFill: { minHeight: 50, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
+  startLabel: { fontFamily: fonts.bold, color: ui.startInk, fontSize: 16 },
   bar: {
     flexDirection: 'row',
     backgroundColor: ui.surface,
@@ -65,7 +95,7 @@ const styles = StyleSheet.create({
   },
   tab: { flex: 1, alignItems: 'center', gap: 3 },
   icon: { width: 28, height: 26, alignItems: 'center', justifyContent: 'center' },
-  iconIdle: { opacity: 0.5 },
+  iconIdle: { opacity: 0.75 },
   badge: {
     position: 'absolute',
     top: 0,

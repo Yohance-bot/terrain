@@ -1,3 +1,4 @@
+import { ActionSheet, type SheetAction } from '@/components/ActionSheet';
 import { router, useLocalSearchParams } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useCallback, useEffect, useState } from 'react';
@@ -33,6 +34,7 @@ export default function ActivityScreen() {
   const [failed, setFailed] = useState(false);
   const [title, setTitle] = useState('');
   const [note, setNote] = useState('');
+  const [shoeActions, setShoeActions] = useState<SheetAction[] | null>(null);
 
   const load = useCallback(async () => {
     try {
@@ -69,10 +71,9 @@ export default function ActivityScreen() {
         ]);
         return;
       }
-      Alert.alert('Shoes for this run', undefined, [
-        ...shoes.map((shoe) => ({ text: shoe.name, onPress: () => void save({ shoe_id: shoe.id }) })),
-        { text: 'None', onPress: () => void save({ shoe_id: null }) },
-        { text: 'Cancel', style: 'cancel' as const },
+      setShoeActions([
+        ...shoes.map((shoe) => ({ label: shoe.name, onPress: () => void save({ shoe_id: shoe.id }) })),
+        { label: 'None', onPress: () => void save({ shoe_id: null }) },
       ]);
     } catch {
       Alert.alert('Could not load your shoes');
@@ -109,6 +110,7 @@ export default function ActivityScreen() {
 
   return (
     <Screen>
+      <ActionSheet title="Shoes for this run" actions={shoeActions} onClose={() => setShoeActions(null)} />
       <StatusBar style="dark" />
       <NavHeader title={run.title ?? runTitle(started)} onBack={() => router.back()} />
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">

@@ -1,75 +1,41 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import type { LayoutChangeEvent } from 'react-native';
 import { useSharedValue, type ISharedValue } from 'react-native-worklets-core';
+import { cameraDistance, cameraEye, cameraUp, groundOffset, avatarYaw, type Float3, type MapPose } from './mapCamera';
 
-import {
-  cameraDistance,
-  cameraEye,
-  cameraUp,
-  groundOffset,
-  type Float3,
-  type MapPose,
-} from './mapCamera';
-
-/**
- * The map's camera, handed to Filament without going through React.
- *
- * The avatar has to be re-aimed every time the map moves, and the map moves on
- * the UI thread at the display's refresh rate. Routing that through component
- * state meant a full re-render of the map screen per frame — dozens of layers
- * reconciled to move one character — and on a phone with real work to do the
- * renders coalesce, the events queue behind them, and the avatar stops moving
- * with the ground it is standing on. It looks pinned to the glass.
- *
- * So the pose lands in shared values instead. Handling an event is now three
- * assignments and some trigonometry; the Filament render callback reads the
- * latest values on the render thread every frame, and no React render happens
- * during a pan at all.
- */
-
+export type AvatarFrame = { eye: Float3; target: Float3; up: Float3; yaw: number; pose: MapPose; origin: [number, number] };
 export type AvatarCamera = {
-  eye: ISharedValue<Float3>;
-  target: ISharedValue<Float3>;
-  up: ISharedValue<Float3>;
-  /** True once a real camera has been seen. Changes once, not per frame. */
+  frame: ISharedValue<AvatarFrame>;
   placed: boolean;
-  /** Measures the surface the avatar is drawn on. */
   onLayout: (event: LayoutChangeEvent) => void;
-  /** Aim at `coordinate` as seen from `pose`. Cheap enough to call per frame. */
-  track: (pose: MapPose, coordinate: [number, number] | null) => void;
-  /** Forget the camera, so nothing is drawn from a stale one. */
+  track: (pose: MapPose, coordinate: [number, number] | null, heading: number) => void;
   clear: () => void;
 };
 
+/** Publish an entire camera atomically. Separate eye/target writes can tear a frame. */
 export function useAvatarCamera(): AvatarCamera {
-  const eye = useSharedValue<Float3>([0, 1, 0]);
-  const target = useSharedValue<Float3>([0, 0, 0]);
-  const up = useSharedValue<Float3>([0, 0, -1]);
+  const frame = useSharedValue<AvatarFrame>({ eye: [0, 1, 0], target: [0, 0, 0], up: [0, 0, -1], yaw: Math.PI, pose: { center: [0, 0], zoom: 0, bearing: 0, pitch: 0 }, origin: [0, 0] });
   const height = useRef(0);
+  const last = useRef<{ pose: MapPose; coordinate: [number, number]; heading: number } | null>(null);
+  const placedRef = useRef(false);
   const [placed, setPlaced] = useState(false);
-
+  const track = useCallback((pose: MapPose, coordinate: [number, number] | null, heading: number) => {
+    if (!coordinate) return;
+    last.current = { pose, coordinate, heading };
+    if (height.current <= 0) return;
+    const ground = groundOffset(pose, coordinate);
+    const back = cameraEye(pose.pitch, cameraDistance(height.current));
+    const target: Float3 = [-ground.x, 0, -ground.z];
+    frame.value = { target, eye: [target[0] + back[0], back[1], target[2] + back[2]], up: cameraUp(pose.pitch), yaw: avatarYaw(heading, pose.bearing), pose, origin: coordinate };
+    if (!placedRef.current) { placedRef.current = true; setPlaced(true); }
+  }, [frame]);
   const onLayout = useCallback((event: LayoutChangeEvent) => {
     height.current = event.nativeEvent.layout.height;
+    if (last.current) track(last.current.pose, last.current.coordinate, last.current.heading);
+  }, [track]);
+  const clear = useCallback(() => {
+    last.current = null;
+    if (placedRef.current) { placedRef.current = false; setPlaced(false); }
   }, []);
-
-  const track = useCallback(
-    (pose: MapPose, coordinate: [number, number] | null) => {
-      if (!coordinate || height.current <= 0) return;
-      const ground = groundOffset(pose, coordinate);
-      const back = cameraEye(pose.pitch, cameraDistance(height.current));
-      // The model stays at the origin and the camera moves around it: Filament
-      // multiplies transform props onto an entity's existing transform, so a
-      // model that moved every frame would compound itself out of the world.
-      const at: Float3 = [-ground.x, 0, -ground.z];
-      target.value = at;
-      eye.value = [at[0] + back[0], at[1] + back[1], at[2] + back[2]];
-      up.value = cameraUp(pose.pitch);
-      setPlaced(true);
-    },
-    [eye, target, up],
-  );
-
-  const clear = useCallback(() => setPlaced(false), []);
-
-  return { eye, target, up, placed, onLayout, track, clear };
+  return useMemo(() => ({ frame, placed, onLayout, track, clear }), [frame, placed, onLayout, track, clear]);
 }

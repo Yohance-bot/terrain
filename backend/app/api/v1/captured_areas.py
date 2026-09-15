@@ -14,7 +14,7 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import public_device_id
 from app.core.db import get_session
-from app.models import CapturedArea, DeviceLink, Run, SandboxAccount
+from app.models import Account, CapturedArea, DeviceLink, Run, SandboxAccount
 
 router = APIRouter(prefix="/captured-areas", tags=["captured-areas"])
 
@@ -28,19 +28,13 @@ def list_captured_areas(
     # One exact topological union per owner. Old captures are normalised when
     # read: touching/overlapping loops become a single Polygon, gaps stay a
     # MultiPolygon. No buffer or proximity rule is applied.
+    merged = func.ST_UnaryUnion(func.ST_Collect(func.ST_MakeValid(CapturedArea.geom.cast(Geometry))))
     statement = (
         select(
             CapturedArea.owner_device_id,
             func.min(CapturedArea.run_id.cast(String)).label("run_id"),
-            func.ST_AsGeoJSON(
-                func.ST_UnaryUnion(
-                    func.ST_Collect(
-                        func.ST_MakeValid(
-                            CapturedArea.geom.cast(Geometry(geometry_type="GEOMETRY", srid=4326))
-                        )
-                    )
-                )
-            ).label("geometry"),
+            func.ST_AsGeoJSON(merged).label("geometry"),
+            func.ST_AsGeoJSON(func.ST_PointOnSurface(merged)).label("label_point"),
         )
         .join(Run, Run.id == CapturedArea.run_id)
         .where(
@@ -55,6 +49,9 @@ def list_captured_areas(
     if linked_only:
         statement = statement.join(DeviceLink, DeviceLink.device_id == CapturedArea.owner_device_id)
     rows = session.execute(statement).all()
+    names = dict(session.execute(select(DeviceLink.device_id, Account.display_name)
+        .join(Account, Account.id == DeviceLink.account_id)
+        .where(DeviceLink.device_id.in_([row[0] for row in rows]))).all()) if rows else {}
     return {
         "type": "FeatureCollection",
         "features": [
@@ -65,10 +62,12 @@ def list_captured_areas(
                 "properties": {
                     "run_id": str(run_id),
                     "owner_device_id": str(owner_device_id),
+                    "owner_display_name": names.get(owner_device_id, f"Runner {str(owner_device_id)[:5]}"),
+                    "label_coordinate": json.loads(label_point)["coordinates"] if label_point else None,
                     "is_owned_by_you": owner_device_id == device_id,
                 },
             }
-            for owner_device_id, run_id, geojson in rows
+            for owner_device_id, run_id, geojson, label_point in rows
             if geojson
         ],
     }

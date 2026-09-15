@@ -1,6 +1,6 @@
 import Constants from 'expo-constants';
 
-export const APP_NAME = 'run';
+export const APP_NAME = 'TerraRun';
 
 /**
  * Versioned OpenFreeMap Liberty fork. Keeping the style in the bundle prevents

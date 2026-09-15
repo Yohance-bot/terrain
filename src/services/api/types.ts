@@ -55,9 +55,13 @@ export type RunResult = {
   sample_count: number;
   samples_dropped: number;
   segments: SegmentResult[];
+  captured_area_id?: string | null;
+  captured_area_m2?: number;
 };
 
 export type TerritoryState = {
+  owner_display_name?: string | null;
+  label_coordinate?: [number, number] | null;
   territory_id: string;
   slug: string;
   name: string;
