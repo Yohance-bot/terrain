@@ -184,7 +184,13 @@ export const TerritoryMap = memo(function TerritoryMap({
   const locating = useBrowseLocation(presentationActive && !simulation);
   const nativePosition = useCurrentPosition({ enabled: locating && !recording && presentationActive && !simulation, minDisplacement: 5 });
   const browseFix = useMemo<RunFix | null>(() => nativePosition ? { coordinate: [nativePosition.coords.longitude, nativePosition.coords.latitude], ts: nativePosition.timestamp, speedMps: 0, bearing: null, accuracyM: nativePosition.coords.accuracy, segment: 0 } : null, [nativePosition]);
-  const effectiveFix = recording || simulation ? fix : browseFix ?? fix;
+  const lastBrowse = useRef<RunFix | null>(null);
+  if (browseFix) lastBrowse.current = browseFix;
+  // A run starts by clearing `liveFix`. Using only that empty value unmounts
+  // Filament for a beat; Android does not recreate the scene when the first
+  // sample arrives, so the runner vanishes at Start. iOS remounts. Keep the
+  // browse position until the recorder has one of its own.
+  const effectiveFix = (recording || simulation ? fix : browseFix) ?? lastBrowse.current ?? browseFix ?? fix;
   const follow = useRunCamera(cameraRef, effectiveFix, recording, presentationActive, reducedMotion, economy, mapReady);
   const [zoom, setZoom] = useState(DEFAULT_ZOOM);
   const runId = useRecorder(s => s.runId);
