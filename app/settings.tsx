@@ -6,6 +6,7 @@ import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 
 
 import { ShoeIcon } from '@/components/icons';
 import { Button, Card, EmptyState, ErrorState, Loading, NavHeader, Row, Screen, SectionLabel, Segmented, Toggle } from '@/components/ui';
+import { AVATAR_3D_SUPPORTED } from '@/features/avatar/support';
 import { useHudPreferences } from '@/features/hud/usePresentation';
 import { setDevRunnerId } from '@/lib/device';
 import {
@@ -238,12 +239,21 @@ export default function SettingsScreen() {
         <Card>
           <View style={[styles.stack, styles.divider]}>
             <Text style={typeScale.rowTitle}>You on the map</Text>
-            <Segmented
-              compact
-              value={playerMarker}
-              onChange={(value) => useHudPreferences.getState().setPlayerMarker(value)}
-              options={[{ value: 'avatar', label: '3D runner' }, { value: 'classic', label: 'Classic marker' }]}
-            />
+            {/* Offering a choice that cannot be honoured is worse than offering
+                none, so while the 3D runner is disabled the reason is shown in
+                its place. The stored preference is untouched and comes back. */}
+            {AVATAR_3D_SUPPORTED ? (
+              <Segmented
+                compact
+                value={playerMarker}
+                onChange={(value) => useHudPreferences.getState().setPlayerMarker(value)}
+                options={[{ value: 'avatar', label: '3D runner' }, { value: 'classic', label: 'Classic marker' }]}
+              />
+            ) : (
+              <Text style={typeScale.meta}>
+                The classic marker, for now. The 3D runner is turned off while a crash in the 3D renderer is fixed.
+              </Text>
+            )}
           </View>
           <Row
             title="Weather lighting"

@@ -1,0 +1,68 @@
+diff --git a/node_modules/react-native-filament/ios/src/RNFFilamentMetalView.mm b/node_modules/react-native-filament/ios/src/RNFFilamentMetalView.mm
+index 4ceb9fa..6677629 100644
+--- a/node_modules/react-native-filament/ios/src/RNFFilamentMetalView.mm
++++ b/node_modules/react-native-filament/ios/src/RNFFilamentMetalView.mm
+@@ -3,6 +3,10 @@
+ #import <React/RCTViewManager.h>
+ #import <UIKit/UIKit.h>
+ 
++@interface FilamentMetalView ()
++- (void)mountIfReady;
++@end
++
+ @implementation FilamentMetalView {
+   bool isMounted;
+ }
+@@ -28,11 +32,37 @@ - (instancetype)init {
+ - (void)didMoveToWindow {
+   [super didMoveToWindow];
+ 
+-  if (self.window != nil && !isMounted) {
+-    isMounted = true;
+-    self.metalLayer.opaque = self.enableTransparentRendering ? NO : YES;
+-    self.onViewReady(@{});
++  [self mountIfReady];
++}
++
++/**
++ * Report the view as ready only once it is in a window *and* has a real size.
++ *
++ * Moving to a window happens before the first layout pass, so reporting readiness
++ * there created the Filament surface — and the swapchain built from it — against a
++ * 0x0 drawable. The true size then arrived from `layoutSubviews` a few frames
++ * later, as a resize. Whether that resize landed before or after the render loop
++ * started was a race, and when it landed after, resizing the surface underneath
++ * in-flight frames segfaulted.
++ *
++ * Waiting for a size collapses both problems: the swapchain is created once, at
++ * the size it will keep, and the KVO observer that reports resizes is installed
++ * afterwards — so the startup resize it used to see no longer exists. A genuine
++ * later resize still goes down the old path; on a portrait-locked, full-screen
++ * view there isn't one.
++ */
++- (void)mountIfReady {
++  if (isMounted || self.window == nil || self.onViewReady == nil) {
++    return;
+   }
++  CGSize size = self.metalLayer.drawableSize;
++  if (size.width <= 0 || size.height <= 0) {
++    return;
++  }
++
++  isMounted = true;
++  self.metalLayer.opaque = self.enableTransparentRendering ? NO : YES;
++  self.onViewReady(@{});
+ }
+ 
+ - (void)layoutSubviews {
+@@ -46,6 +76,10 @@ - (void)layoutSubviews {
+   [self.metalLayer willChangeValueForKey:@"drawableSize"];
+   self.metalLayer.drawableSize = newSize;
+   [self.metalLayer didChangeValueForKey:@"drawableSize"];
++
++  // The first layout is what makes the view mountable, and it can arrive either
++  // side of `didMoveToWindow`, so both call this.
++  [self mountIfReady];
+ }
+ 
+ @end

@@ -38,6 +38,7 @@ import { RecenterIcon } from '@/components/icons';
 import { MapAttribution } from './MapAttribution';
 import { PlayerAvatar } from '@/features/avatar/PlayerAvatar';
 import { useAvatarCamera } from '@/features/avatar/useAvatarCamera';
+import { AVATAR_3D_SUPPORTED } from '@/features/avatar/support';
 import type { TerritoryState, GhostSummary } from '@/services/api/types';
 import { CueMapLayers } from '@/features/hud/CueMapLayers';
 import { ContestedBorders } from '@/features/hud/ContestedBorders';
@@ -185,7 +186,10 @@ export const TerritoryMap = memo(function TerritoryMap({
   const routeDisplay = useHudPreferences(s => s.routeDisplay);
   // Some people want the character, some want the dot they already knew where
   // to look for. Both are drawn from the same fix, so this only swaps the marks.
-  const wantsAvatar = useHudPreferences(s => s.playerMarker) === 'avatar';
+  // The character is additionally gated on being renderable at all: while it
+  // crashes the app, a stored preference for it must not be obeyed.
+  const playerMarker = useHudPreferences(s => s.playerMarker);
+  const wantsAvatar = AVATAR_3D_SUPPORTED && playerMarker === 'avatar';
   const palette = useLighting(effectiveFix, presentationActive, simulation);
   useEffect(() => { onDayChange?.(palette.isDay); }, [palette.isDay, onDayChange]);
   const hasOwnedAreaGeometry = Boolean(ownedTerritoryAreas?.features.length);

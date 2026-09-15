@@ -8,6 +8,17 @@ export type RouteDisplay = 'streets' | 'gps';
  *  cheaper, and some people just want a dot. */
 export type PlayerMarker = 'avatar' | 'classic';
 
+/**
+ * The character is opt-in, because on iOS it currently takes the app down.
+ *
+ * Filament is killed on its first rendered frame — see `docs/18_AVATAR_CRASH.md`
+ * — and since the avatar is mounted by the map on the opening screen, that reads
+ * as "the app crashes when I open it". The marker is drawn from the same fix and
+ * costs nothing but the character, so it is what an unset preference resolves to
+ * until the first frame is survivable. Flip this back to `avatar` then.
+ */
+export const DEFAULT_PLAYER_MARKER: PlayerMarker = 'classic';
+
 export const useHudPreferences = create<{
   routeDisplay: RouteDisplay; setRouteDisplay: (value: RouteDisplay) => void;
   playerMarker: PlayerMarker; setPlayerMarker: (value: PlayerMarker) => void;
@@ -16,7 +27,7 @@ export const useHudPreferences = create<{
 }>((set) => ({
   routeDisplay: 'streets',
   setRouteDisplay: routeDisplay => { set({ routeDisplay }); void setMeta('hud.route-display.v1', routeDisplay).catch(() => undefined); },
-  playerMarker: 'avatar',
+  playerMarker: DEFAULT_PLAYER_MARKER,
   setPlayerMarker: playerMarker => { set({ playerMarker }); void setMeta('hud.player-marker.v1', playerMarker).catch(() => undefined); },
   economy: false, haptics: true, weather: true, units: 'km',
   setEconomy: economy => { set({ economy }); void setMeta('hud.economy.v1', String(economy)).catch(() => undefined); },

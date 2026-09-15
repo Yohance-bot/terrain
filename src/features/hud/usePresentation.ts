@@ -4,7 +4,7 @@ import { AccessibilityInfo, AppState } from 'react-native';
 import { getMeta } from '@/lib/db';
 import { getNotificationsEnabled, getUnits } from '@/lib/preferences';
 
-import { useHudPreferences } from './preferences';
+import { DEFAULT_PLAYER_MARKER, useHudPreferences } from './preferences';
 
 export { useHudPreferences, type RouteDisplay, type PlayerMarker } from './preferences';
 
@@ -24,7 +24,7 @@ export function usePresentation() {
     if (!focused) return;
     let mounted = true;
     void Promise.all([getMeta('hud.economy.v1'), getNotificationsEnabled(), getUnits(), getMeta('hud.weather.v1'), getMeta('hud.route-display.v1'), getMeta('hud.player-marker.v1')])
-      .then(([e, haptics, units, w, routeDisplay, playerMarker]) => { if (mounted) useHudPreferences.setState({ economy: e === 'true', haptics, units, weather: w !== 'false', routeDisplay: routeDisplay === 'gps' ? 'gps' : 'streets', playerMarker: playerMarker === 'classic' ? 'classic' : 'avatar' }); })
+      .then(([e, haptics, units, w, routeDisplay, playerMarker]) => { if (mounted) useHudPreferences.setState({ economy: e === 'true', haptics, units, weather: w !== 'false', routeDisplay: routeDisplay === 'gps' ? 'gps' : 'streets', playerMarker: playerMarker === 'avatar' || playerMarker === 'classic' ? playerMarker : DEFAULT_PLAYER_MARKER }); })
       .catch(() => undefined);
     return () => { mounted = false; };
   }, [focused]);
