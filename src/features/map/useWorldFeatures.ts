@@ -1,3 +1,5 @@
+import { Platform } from 'react-native';
+import { ANDROID_WORLD_BUDGET, ANDROID_WORLD_INTERVAL_MS, ANDROID_WORLD_BATCH_SIZE, nearestBuildings, buildInBatches } from './androidPerformance';
 import type { MapRef } from '@maplibre/maplibre-react-native';
 import { useEffect, useRef, useState, type RefObject } from 'react';
 import { buildingTerritoryPaint } from './territoryAppearance';
@@ -9,7 +11,7 @@ const ROAD_LAYERS = (MAP_STYLE.layers as { id: string; type: string }[]).filter(
 const EMPTY: GeoJSON.FeatureCollection<GeoJSON.Polygon> = { type: 'FeatureCollection', features: [] };
 /** Loaded vector geometry only. No extra map provider or GPS upload. Native
  * queries are bounded to one batch every 3/6 seconds, with one batch in flight. */
-export function useWorldFeatures(map: RefObject<MapRef | null>, ready: boolean, active: boolean, economy: boolean, zoom: number, runId: string | null, territories: GeoJSON.Feature[], buildingColor: string) {
+export function useWorldFeatures(map: RefObject<MapRef | null>, ready: boolean, active: boolean, economy: boolean, zoom: number, runId: string | null, territories: GeoJSON.Feature[], buildingColor: string, lastGesture?: RefObject<number>) {
   const [facadeTint, setFacadeTint] = useState<ExpressionSpecification | string>(buildingColor);
   const [roads, setRoads] = useState<GeoJSON.Feature[]>([]);
   const [details, setDetails] = useState(EMPTY);
@@ -22,11 +24,14 @@ export function useWorldFeatures(map: RefObject<MapRef | null>, ready: boolean, 
   }, [runId]);
   useEffect(() => {
     if (!ready || !active) return;
+    const android = Platform.OS === 'android';
     let alive = true;
     let lastView = '', lastQueryAt = 0;
     const update = async () => {
+      if (android && Date.now() - (lastGesture?.current ?? 0) < 500) return;
       if (running.current || !map.current || zoomRef.current < 14) return;
       running.current = true;
+      const gestureAtStart = lastGesture?.current ?? 0;
       try {
         const view = await map.current.getViewState();
         if (!alive) return;
@@ -38,8 +43,17 @@ export function useWorldFeatures(map: RefObject<MapRef | null>, ready: boolean, 
         ]);
         if (!alive) return;
         lastView = viewKey; lastQueryAt = Date.now();
-        const next = buildRoofDetails(buildings, view.center, economy, view.bounds, territories);
-        const tint = buildingTerritoryPaint(buildings, territories, buildingColor);
+        const selected = android ? nearestBuildings(buildings, view.center) : buildings;
+        let next: GeoJSON.FeatureCollection<GeoJSON.Polygon>;
+        if (android) {
+          const cancelled = () => !alive || (lastGesture?.current ?? 0) !== gestureAtStart;
+          const features = await buildInBatches(selected, ANDROID_WORLD_BATCH_SIZE,
+            (batch, remaining) => buildRoofDetails(batch, view.center, economy, view.bounds, territories, { ...ANDROID_WORLD_BUDGET, maxDetails: remaining }).features,
+            ANDROID_WORLD_BUDGET.maxDetails, cancelled);
+          if (!features) { lastView = ''; return; }
+          next = { type: 'FeatureCollection', features };
+        } else next = buildRoofDetails(buildings, view.center, economy, view.bounds, territories);
+        const tint = buildingTerritoryPaint(selected, territories, buildingColor);
         setFacadeTint(old => JSON.stringify(old) === JSON.stringify(tint) ? old : tint);
         setDetails(previous => JSON.stringify(previous) === JSON.stringify(next) ? previous : next);
         if (runId) {
@@ -67,9 +81,11 @@ export function useWorldFeatures(map: RefObject<MapRef | null>, ready: boolean, 
       } catch { /* Offline/missing vector tiles retain the last valid scene. */ }
       finally { running.current = false; }
     };
-    void update();
-    const timer = setInterval(() => void update(), economy ? 6000 : 3000);
-    return () => { alive = false; clearInterval(timer); };
-  }, [map, ready, active, economy, runId, territories, buildingColor]);
+    // Let the Android page transition finish before querying native geometry.
+    const kickoff = android ? setTimeout(() => void update(), 350) : null;
+    if (!android) void update();
+    const timer = setInterval(() => void update(), android ? ANDROID_WORLD_INTERVAL_MS : economy ? 6000 : 3000);
+    return () => { alive = false; if (kickoff) clearTimeout(kickoff); clearInterval(timer); };
+  }, [map, ready, active, economy, runId, territories, buildingColor, lastGesture]);
   return { roads, details, facadeTint };
 }

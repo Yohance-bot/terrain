@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
-import { Animator, DefaultLight, FilamentScene, FilamentView, ModelInstance, ModelRenderer, RenderCallbackContext, useFilamentContext, useModel, type AnimationItem } from 'react-native-filament';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Platform, StyleSheet, View } from 'react-native';
+import { Animator, DefaultLight, FilamentScene, FilamentView, ModelInstance, ModelRenderer, RenderCallbackContext, useFilamentContext, useModel, type AnimationItem, type DynamicResolutionOptions } from 'react-native-filament';
 import { useSharedValue } from 'react-native-worklets-core';
 import { useSocial } from '@/features/social/useSocial';
 import { useGhostRace } from '@/features/social/useGhostRace';
@@ -29,18 +29,25 @@ const SLOTS = Array.from({ length: MAX_MAP_ACTORS }, (_, i) => i);
  * the runner is ever re-exported at a different scale.
  */
 const AVATAR_HEIGHT_PX = 46;
-type Props = { camera: AvatarCamera; running: boolean };
+type Props = { camera: AvatarCamera; running: boolean; active?: boolean };
+const ANDROID = Platform.OS === 'android';
+const EMPTY_FRIENDS: ReturnType<typeof useSocial.getState>['friends'] = [];
+const ANDROID_RESOLUTION: DynamicResolutionOptions = { enabled: true, homogeneousScaling: true, minScale: [.65, .65], maxScale: [.85, .85], quality: 'LOW' };
+const ANDROID_FRAME_BUDGET = { interval: 2, headRoomRatio: .2 };
+type AppliedTransform = { state: number; x: number; z: number; yaw: number };
+const emptyTransforms = (): AppliedTransform[] => SLOTS.map(() => ({ state: -1, x: 0, z: 0, yaw: 0 }));
 
 /** One scene/asset shared by the player, nearby sharing friends and active ghost.
  * MapLibre and Filament do not share depth: buildings cannot occlude these models.
  */
-function Runners({ camera: rig, running }: Props) {
-  const { camera, view, transformManager } = useFilamentContext();
-  const friends = useSocial(s => s.friends);
-  const ghost = useGhostRace(s => s.ghostState);
+function Runners({ camera: rig, running, active = true }: Props) {
+  const rendering = !ANDROID || active;
+  const { camera, view, transformManager, choreographer } = useFilamentContext();
+  const friends = useSocial(s => rendering ? s.friends : EMPTY_FRIENDS);
+  const ghost = useGhostRace(s => rendering ? s.ghostState : null);
   const [now, setNow] = useState(Date.now);
-  useEffect(() => { const timer = setInterval(() => setNow(Date.now()), 5000); return () => clearInterval(timer); }, []);
-  const actors = mapActors(rig.frame.value.origin, running, friends, ghost, now);
+  useEffect(() => { if (!rendering) return; const timer = setInterval(() => setNow(Date.now()), 5000); return () => clearInterval(timer); }, [rendering]);
+  const actors = rendering ? mapActors(rig.frame.value.origin, running, friends, ghost, now) : [];
   const sharedActors = useSharedValue<MapActor[]>([]);
   useEffect(() => { sharedActors.value = actors; });
   const model = useModel(RUNNER, { instanceCount: MAX_MAP_ACTORS });
@@ -58,7 +65,7 @@ function Runners({ camera: rig, running }: Props) {
   const hidden = useMemo(() => transformManager.createIdentityMatrix().scaling([0, 0, 0]), [transformManager]);
   const signature = actors.map(a => a.id).join('|');
   useEffect(() => {
-    useAvatarVisibility.setState({ ids: asset ? signature.split('|') : [] });
+    useAvatarVisibility.setState({ ids: asset && signature ? signature.split('|') : [] });
     return () => { useAvatarVisibility.setState({ ids: [] }); };
   }, [asset, signature]);
   const [clips, setClips] = useState({ run: 0, idle: 0 });
@@ -67,8 +74,19 @@ function Runners({ camera: rig, running }: Props) {
   }, []);
   const lastAspect = useSharedValue(0);
   const { frame } = rig;
+  const renderActive = useSharedValue(rendering);
+  const applied = useSharedValue<AppliedTransform[]>(emptyTransforms());
+  useEffect(() => { if (ANDROID) applied.value = emptyTransforms(); }, [applied, base]);
+  useEffect(() => {
+    renderActive.value = rendering;
+    if (!ANDROID) return;
+    if (rendering) choreographer.start(); else choreographer.stop();
+  }, [rendering, renderActive, choreographer]);
   RenderCallbackContext.useRenderCallback(() => {
     'worklet';
+    // Surface recreation may start the native scheduler after the pause effect.
+    // Stop again on that first callback; do not keep rendering behind another tab.
+    if (ANDROID && !renderActive.value) { choreographer.stop(); return; }
     const aspect = view.getAspectRatio();
     if (aspect > 0 && lastAspect.value !== aspect) {
       lastAspect.value = aspect;
@@ -91,16 +109,27 @@ function Runners({ camera: rig, running }: Props) {
     const count = list.length;
     for (let i = 0; i < roots.length; i++) {
       const actor = i < count ? list[i] : undefined;
-      if (!actor || nowMs >= actor.expiresAt) { transformManager.setTransform(roots[i]!, hidden); continue; }
+      if (!actor || nowMs >= actor.expiresAt) {
+        if (!ANDROID || applied.value[i]!.state !== 0) {
+          transformManager.setTransform(roots[i]!, hidden);
+          if (ANDROID) applied.value[i] = { state: 0, x: 0, z: 0, yaw: 0 };
+        }
+        continue;
+      }
       const self = actor.id === 'self';
       const lat = (self ? f.origin[1] : actor.coordinate[1]) * Math.PI / 180;
       const east = self ? 0 : (actor.coordinate[0] - f.origin[0]) / 360 * size;
       const south = self ? 0 : (y0 - Math.log(Math.tan(lat) + 1 / Math.cos(lat))) / (2 * Math.PI) * size;
       const x = east * cos + south * sin, z = south * cos - east * sin;
       const yaw = self ? f.yaw : Math.PI - (actor.heading - f.pose.bearing) * Math.PI / 180;
+      if (ANDROID) {
+        const previous = applied.value[i]!;
+        if (previous.state === 1 && previous.x === x && previous.z === z && previous.yaw === yaw) continue;
+        applied.value[i] = { state: 1, x, z, yaw };
+      }
       transformManager.setTransform(roots[i]!, base.rotate(yaw, [0, 1, 0]).translate([x, 0, z]));
     }
-  }, [camera, view, lastAspect, frame, base, roots, sharedActors, transformManager, hidden]);
+  }, [camera, view, lastAspect, frame, base, roots, sharedActors, transformManager, hidden, applied, renderActive, choreographer]);
   return <ModelRenderer model={model}>
     {SLOTS.map(index => <ModelInstance key={index} index={index}>
       {actors[index] && <Animator animationIndex={actors[index]!.running ? clips.run : clips.idle} transitionDuration={.25} onAnimationsLoaded={index === 0 ? onAnimationsLoaded : undefined} />}
@@ -108,9 +137,13 @@ function Runners({ camera: rig, running }: Props) {
   </ModelRenderer>;
 }
 export function PlayerAvatar(props: Props) {
-  if (!props.camera.placed) return null;
-  return <View pointerEvents="none" style={StyleSheet.absoluteFill}>
-    <FilamentScene><FilamentView style={StyleSheet.absoluteFill} enableTransparentRendering>
+  const hasPlaced = useRef(false);
+  if (props.camera.placed) hasPlaced.current = true;
+  // Keep Android's engine/GLB alive across tab changes; pause the scheduler.
+  // iOS keeps its existing mount/unmount behaviour.
+  if (ANDROID ? !hasPlaced.current : !props.camera.placed) return null;
+  return <View pointerEvents="none" style={[StyleSheet.absoluteFill, ANDROID && props.active === false && { opacity: 0 }]}>
+    <FilamentScene {...(ANDROID ? { shadowing: false, screenSpaceRefraction: false, dynamicResolutionOptions: ANDROID_RESOLUTION, frameRateOptions: ANDROID_FRAME_BUDGET } : {})}><FilamentView style={StyleSheet.absoluteFill} enableTransparentRendering>
       <DefaultLight /><Runners {...props} />
     </FilamentView></FilamentScene>
   </View>;

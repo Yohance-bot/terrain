@@ -11,7 +11,7 @@ import {
   useCurrentPosition,
 } from '@maplibre/maplibre-react-native';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import {
   DEFAULT_BEARING,
@@ -280,7 +280,8 @@ export const TerritoryMap = memo(function TerritoryMap({
     ...(showTerritories ? ownerColouredAreas?.features ?? [] : []),
     ...(showTerritories ? decorated?.features ?? [] : []),
   ], [showCaptures, isRunning, styledCapturedAreas, showTerritories, ownerColouredAreas, decorated]);
-  const world = useWorldFeatures(mapRef, mapReady, presentationActive, economy, zoom, recording ? runId : null, buildingTerritories, palette.building);
+  const lastWorldGesture = useRef(0);
+  const world = useWorldFeatures(mapRef, mapReady, presentationActive, economy, zoom, recording ? runId : null, buildingTerritories, palette.building, lastWorldGesture);
   const streetTrail = useMemo(() => routeDisplay === 'streets' && recording ? illuminateStreets(traversedRoads, world.roads) : null, [routeDisplay, recording, traversedRoads, world.roads]);
 
   /**
@@ -382,10 +383,10 @@ export const TerritoryMap = memo(function TerritoryMap({
         logo={false}
         scaleBar={false}
         onDidFinishLoadingMap={() => setMapReady(true)}
-        onRegionWillChange={event => { follow.onGesture(event.nativeEvent); trackCamera(event.nativeEvent); }}
-        onRegionIsChanging={event => { trackCamera(event.nativeEvent); }}
+        onRegionWillChange={event => { if (Platform.OS === 'android' && event.nativeEvent.userInteraction) lastWorldGesture.current = Date.now(); follow.onGesture(event.nativeEvent); trackCamera(event.nativeEvent); }}
+        onRegionIsChanging={event => { if (Platform.OS === 'android' && event.nativeEvent.userInteraction) lastWorldGesture.current = Date.now(); trackCamera(event.nativeEvent); }}
         onDidFinishRenderingFrame={onRenderedFrame}
-        preferredFramesPerSecond={recording ? 30 : 60}
+        preferredFramesPerSecond={Platform.OS === 'android' ? (presentationActive ? 30 : 1) : recording ? 30 : 60}
         onRegionDidChange={event => { setZoom(event.nativeEvent.zoom); trackCamera(event.nativeEvent); }}
         onPress={(event) => {
           if (!onSimulationMove) return;
@@ -749,6 +750,7 @@ export const TerritoryMap = memo(function TerritoryMap({
           ground while the map is panned around it. */}
       <PlayerAvatar
         camera={avatarCamera}
+        active={avatarEnabled && avatarCamera.placed}
         running={recording && (effectiveFix?.speedMps ?? 0) > RUNNING_SPEED_MPS}
       />
 

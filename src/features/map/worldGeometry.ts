@@ -93,7 +93,8 @@ function orientShape(shape: Shape): Shape {
  * and economy buildings keep the signature volume so coverage never drops.
  * Nothing is persisted or sent to a server.
  */
-export function buildRoofDetails(features: GeoJSON.Feature[], center: Point, economy = false, bounds?: [number, number, number, number], territories: GeoJSON.Feature[] = []): GeoJSON.FeatureCollection<GeoJSON.Polygon> {
+export type RoofBudget = { maxDetails: number; detailScale: number };
+export function buildRoofDetails(features: GeoJSON.Feature[], center: Point, economy = false, bounds?: [number, number, number, number], territories: GeoJSON.Feature[] = [], budget?: RoofBudget): GeoJSON.FeatureCollection<GeoJSON.Polygon> {
   const colorAt = territoryColorAt(territories);
   const seen = new Set<string>();
   const candidates: { plan: Plan; distance: number }[] = [];
@@ -126,14 +127,16 @@ export function buildRoofDetails(features: GeoJSON.Feature[], center: Point, eco
 
   const result: GeoJSON.Feature<GeoJSON.Polygon>[] = [];
   for (const { plan, distance } of candidates) {
-    if (result.length >= MAX_DETAILS) break;
+    if (result.length >= (budget?.maxDetails ?? MAX_DETAILS)) break;
     // Windows and doors only exist on the block the player is standing in.
-    const detail = distance < 130 ? 3 : distance < 260 ? 2 : distance < 620 ? 1 : 0;
+    const scaledDistance = distance / (budget?.detailScale ?? 1);
+    const detail = scaledDistance < 130 ? 3 : scaledDistance < 260 ? 2 : scaledDistance < 620 ? 1 : 0;
     // Economy keeps one volume per building: less architecture, same coverage.
     const drawn = economy ? plan.volumes.slice(0, 1) : plan.volumes.filter(v => v.tier <= detail);
     const territoryColor = colorAt(plan.origin);
     const buildingKey = plan.seed.toString(36);
     for (const volume of drawn) {
+      if (budget && result.length >= budget.maxDetails) break;
       const coordinates = volume.shape.map(ring => {
         const out = ring.map(p => [plan.origin[0] + p[0] / plan.scale[0], plan.origin[1] + p[1] / plan.scale[1]] as GeoJSON.Position);
         out.push(out[0]!);

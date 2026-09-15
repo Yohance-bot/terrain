@@ -23,7 +23,9 @@
     "ios:device": "bash scripts/ios-device.sh",
     "ios:simulator": "bash scripts/ios-simulator.sh",
     "test:live-activity": "node scripts/test-live-activity.mjs",
-    "android:apk": "bash scripts/android-apk.sh"
+    "android:apk": "bash scripts/android-apk.sh",
+    "test:android-performance": "node scripts/test-android-performance.mjs",
+    "test:android-scheduler": "node scripts/test-android-choreographer.mjs"
   },
   "dependencies": {
     "@expo-google-fonts/manrope": "^0.4.2",

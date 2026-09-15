@@ -66,3 +66,60 @@ index 4ceb9fa..6677629 100644
  }
  
  @end
+diff --git a/node_modules/react-native-filament/android/src/main/java/com/margelo/filament/FilamentChoreographer.java b/node_modules/react-native-filament/android/src/main/java/com/margelo/filament/FilamentChoreographer.java
+index 9067059..e4c71ba 100644
+--- a/node_modules/react-native-filament/android/src/main/java/com/margelo/filament/FilamentChoreographer.java
++++ b/node_modules/react-native-filament/android/src/main/java/com/margelo/filament/FilamentChoreographer.java
+@@ -21,17 +21,28 @@ public class FilamentChoreographer {
+     @Keep
+     private final HybridData mHybridData;
+     private final Choreographer choreographer;
+-    private boolean isRunning;
++    private volatile boolean isRunning;
++    // Each running epoch owns one stable callback. Old in-flight frames must
++    // not start a second callback chain after pause/resume.
++    private Choreographer.FrameCallback frameCallback;
++    private long generation;
+ 
+     public FilamentChoreographer() {
+         mHybridData = initHybrid();
+         choreographer = Choreographer.getInstance();
+     }
+ 
+-    private void onFrameCallback(long timestamp) {
+-        if (!isRunning) return;
++    private void onFrameCallback(long timestamp, long frameGeneration) {
++        synchronized (this) {
++            if (!isRunning || frameGeneration != generation) return;
++        }
++        // Never hold our monitor across native callbacks (they may call stop).
+         onFrame(timestamp);
+-        choreographer.postFrameCallback(this::onFrameCallback);
++        synchronized (this) {
++            if (isRunning && frameGeneration == generation) {
++                choreographer.postFrameCallback(frameCallback);
++            }
++        }
+     }
+ 
+     /**
+@@ -42,7 +53,9 @@ public class FilamentChoreographer {
+     private synchronized void start() {
+         if (!isRunning) {
+             isRunning = true;
+-            choreographer.postFrameCallback(this::onFrameCallback);
++            final long startedGeneration = ++generation;
++            frameCallback = timestamp -> onFrameCallback(timestamp, startedGeneration);
++            choreographer.postFrameCallback(frameCallback);
+             Log.d("FilamentChoreographer", "Started choreographer!");
+         }
+     }
+@@ -55,7 +68,7 @@ public class FilamentChoreographer {
+     private synchronized void stop() {
+         if (isRunning) {
+             isRunning = false;
+-            choreographer.removeFrameCallback(this::onFrameCallback);
++            choreographer.removeFrameCallback(frameCallback);
+             Log.d("FilamentChoreographer", "Stopped choreographer!");
+         }
+     }
