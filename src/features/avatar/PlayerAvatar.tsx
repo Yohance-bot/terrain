@@ -20,12 +20,15 @@ const SLOTS = Array.from({ length: MAX_MAP_ACTORS }, (_, i) => i);
  * Judged against the screen, because that is the only place it means anything.
  * The version of this component that came before reached its size the roundabout
  * way, through `transformToUnitCube` and a scale of 20, and guessed in a comment
- * that the result was about 32 points. It was taller than that: the unit cube
- * spans -1 to 1, so the model came out around 40. Normalising the model's own
- * height says the same thing directly, and keeps saying it if the runner is ever
- * re-exported at a different scale.
+ * that the result was about 32 points; the unit cube spans -1 to 1, so it really
+ * stood nearer 40. This is a little larger again, by preference — enough to read
+ * as a person on the map rather than a token, while still short enough not to
+ * cover the streets it is standing on.
+ *
+ * Normalising against the model's own height means this number stays honest if
+ * the runner is ever re-exported at a different scale.
  */
-const AVATAR_HEIGHT_PX = 40;
+const AVATAR_HEIGHT_PX = 46;
 type Props = { camera: AvatarCamera; running: boolean };
 
 /** One scene/asset shared by the player, nearby sharing friends and active ghost.
