@@ -13,7 +13,7 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.runprototype.app",
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "Used to record your route while a run is in progress.",
+        "NSLocationWhenInUseUsageDescription": "Used to show where you are on the map and to record your route while a run is in progress.",
         "NSLocationAlwaysAndWhenInUseUsageDescription": "Used to keep recording your route while a run is in progress.",
         "UIBackgroundModes": [
           "location"
@@ -36,7 +36,7 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "versionCode": 3,
+      "versionCode": 4,
       "allowBackup": false,
       "blockedPermissions": [
         "android.permission.READ_EXTERNAL_STORAGE",
@@ -65,7 +65,7 @@
       [
         "expo-location",
         {
-          "locationWhenInUsePermission": "Used to record your route while a run is in progress.",
+          "locationWhenInUsePermission": "Used to show where you are on the map and to record your route while a run is in progress.",
           "locationAlwaysAndWhenInUsePermission": "Used to keep recording your route while a run is in progress.",
           "isAndroidBackgroundLocationEnabled": true,
           "isAndroidForegroundServiceEnabled": true,

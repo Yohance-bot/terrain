@@ -24,6 +24,7 @@ import { useHudDiagnostics } from '@/features/hud/useHudDiagnostics';
 import { useRunCamera } from '@/features/hud/useRunCamera';
 import { useRecorder } from '@/features/recorder/useRecorder';
 import { useHudPreferences } from '@/features/hud/usePresentation';
+import { useBrowseLocation } from './useBrowseLocation';
 import { territoryFill } from './territoryAppearance';
 import { WorldStructures } from './WorldStructures';
 import { GroundBorders } from './GroundBorderLayers';
@@ -177,7 +178,11 @@ export const TerritoryMap = memo(function TerritoryMap({
   const mapRef = useRef<MapRef>(null);
   const cameraRef = useRef<CameraRef>(null);
   const [mapReady, setMapReady] = useState(false);
-  const nativePosition = useCurrentPosition({ enabled: !recording && presentationActive && !simulation, minDisplacement: 5 });
+  // MapLibre will start its location feed without asking. On a fresh Android
+  // install that feed is empty until a run requests permission, so the camera
+  // stays on Jayanagar. Ask here, then start the feed only once it can succeed.
+  const locating = useBrowseLocation(presentationActive && !simulation);
+  const nativePosition = useCurrentPosition({ enabled: locating && !recording && presentationActive && !simulation, minDisplacement: 5 });
   const browseFix = useMemo<RunFix | null>(() => nativePosition ? { coordinate: [nativePosition.coords.longitude, nativePosition.coords.latitude], ts: nativePosition.timestamp, speedMps: 0, bearing: null, accuracyM: nativePosition.coords.accuracy, segment: 0 } : null, [nativePosition]);
   const effectiveFix = recording || simulation ? fix : browseFix ?? fix;
   const follow = useRunCamera(cameraRef, effectiveFix, recording, presentationActive, reducedMotion, economy, mapReady);

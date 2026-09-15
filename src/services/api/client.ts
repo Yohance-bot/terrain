@@ -49,12 +49,22 @@ export const DEFAULT_REQUEST_TIMEOUT_MS = 8_000;
 // The free Render instance can need 50+ seconds to wake up. Even a warm
 // account list took 10.45s across the Oregon → Mumbai database connection.
 export const ACCOUNT_REQUEST_TIMEOUT_MS = 90_000;
+// Boundary GeoJSON is about 1.4 MB. Eight seconds is enough on a desk and not
+// from a phone pulling Oregon through Indian Wi-Fi — the abort looked like
+// "offline" because the cache path swallows the timeout.
+export const TERRITORY_REQUEST_TIMEOUT_MS = 45_000;
 // Submitting a run requires PostGIS clipping, loop detection, and multiple ledger
 // updates on the server. On cloud deployments this legitimately takes 8.5–15 seconds.
 export const SUBMIT_RUN_TIMEOUT_MS = 45_000;
 
 export interface RequestOptions extends RequestInit {
   timeoutMs?: number;
+}
+
+function timeoutFor(path: string): number {
+  if (path.startsWith('/v1/account') || path.startsWith('/v1/auth')) return ACCOUNT_REQUEST_TIMEOUT_MS;
+  if (path.startsWith('/v1/territories') || path.startsWith('/v1/captured-areas')) return TERRITORY_REQUEST_TIMEOUT_MS;
+  return DEFAULT_REQUEST_TIMEOUT_MS;
 }
 
 function territoryPath(path: string, scope?: TerritoryScope): string {
@@ -71,8 +81,7 @@ async function requestResponse(path: string, init?: RequestOptions): Promise<Res
   const token = await readAuth("token");
   const controller = new AbortController();
   let timedOut = false;
-  const timeoutMs = init?.timeoutMs ?? (path.startsWith('/v1/account') || path.startsWith('/v1/auth')
-    ? ACCOUNT_REQUEST_TIMEOUT_MS : DEFAULT_REQUEST_TIMEOUT_MS);
+  const timeoutMs = init?.timeoutMs ?? timeoutFor(path);
   const timeout = setTimeout(() => {
     timedOut = true;
     controller.abort();

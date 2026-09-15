@@ -278,9 +278,9 @@ export default function MapScreen() {
       void fetchOwnedTerritoryAreas().then(setOwnedTerritoryAreas).catch(() => undefined);
       setNotice(
         fromCache
-          ? 'Offline — showing cached boundaries.'
+          ? 'Couldn’t refresh territories — showing last downloaded boundaries.'
           : ownership.fromCache
-            ? 'Offline — showing last known territory state.'
+            ? 'Couldn’t refresh ownership — showing last known territory state.'
           : forceRefresh
             ? `Loaded ${collection.features.length} territories.`
             : null
