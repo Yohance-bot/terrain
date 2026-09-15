@@ -50,11 +50,25 @@ xcodebuild -workspace "$ROOT/ios/run.xcworkspace" -scheme run \
   -derivedDataPath "$ROOT/ios/build/device-release" \
   -jobs "$JOBS" -allowProvisioningUpdates build
 
-APP="$ROOT/ios/build/device-release/Build/Products/Release-iphoneos/run.app"
-test -f "$APP/main.jsbundle" || {
-  echo "No embedded bundle — the app would need a Metro server." >&2
+# Discovered rather than hardcoded. The product was once `run.app` and is now
+# `TerraRun.app`; a hardcoded name silently installed the stale bundle sitting
+# beside the new one and reported success, which is a worse failure than not
+# finding it at all. Newest bundle carrying an embedded JS bundle wins.
+PRODUCTS="$ROOT/ios/build/device-release/Build/Products/Release-iphoneos"
+APP=""
+while IFS= read -r candidate; do
+  [ -f "$candidate/main.jsbundle" ] || continue
+  APP="$candidate"
+  break
+done < <(find "$PRODUCTS" -maxdepth 1 -name '*.app' -exec stat -f '%m %N' {} \; 2>/dev/null \
+  | sort -rn | cut -d' ' -f2-)
+
+if [ -z "$APP" ]; then
+  echo "No built app with an embedded bundle in $PRODUCTS." >&2
+  echo "Without one the app would need a Metro server to start." >&2
   exit 1
-}
+fi
+echo "→ Built $(basename "$APP")"
 
 # The phone is only needed from here on, so a locked or unplugged phone costs
 # the install rather than the whole build.
