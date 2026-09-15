@@ -1,16 +1,15 @@
 /**
  * Whether the 3D character may be rendered at all.
  *
- * Filament is killed on its first frame on iOS — see `docs/18_AVATAR_CRASH.md`.
- * The map mounts the avatar on the opening screen, so a stored `avatar`
- * preference makes the app impossible to open, and impossible to recover from
- * inside the app, since Settings sits behind the crash. That is why this is a
- * hard gate and not merely a default: the preference is still remembered and
- * still honoured the moment this flips, but it cannot take the app down.
+ * This exists because the avatar was, twice over, able to kill the app on launch
+ * — the map mounts it on the opening screen, so "the renderer crashed" and "the
+ * app won't open" were the same sentence. Both faults are fixed (see
+ * `docs/18_AVATAR_CRASH.md`), so it is on.
  *
- * Android's surface lifecycle rules out the fault that was found and fixed on
- * iOS, but the first-frame kill has not been reproduced or ruled out on Android
- * hardware — there is no device or emulator image here to try it on. So it stays
- * off there too, rather than shipping a guess to testers.
+ * The switch is kept because the preference alone is not a safe place to put
+ * this. It is stored, and Settings — where it could be changed — is behind the
+ * crash, so a phone that has chosen the character cannot be talked out of it
+ * from inside the app. If the renderer starts taking the app down again, flip
+ * this to `false` and the map falls back to the marker it already draws.
  */
-export const AVATAR_3D_SUPPORTED = false;
+export const AVATAR_3D_SUPPORTED = true;

@@ -12,6 +12,20 @@ import { FAR_PLANE, FOCAL_LENGTH_MM, NEAR_PLANE } from './mapCamera';
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const RUNNER = require('../../../assets/avatar/runner.glb');
 const SLOTS = Array.from({ length: MAX_MAP_ACTORS }, (_, i) => i);
+
+/**
+ * How tall a runner stands, in map pixels — at the centre of a flat map, that is
+ * its height in points.
+ *
+ * Judged against the screen, because that is the only place it means anything.
+ * The version of this component that came before reached its size the roundabout
+ * way, through `transformToUnitCube` and a scale of 20, and guessed in a comment
+ * that the result was about 32 points. It was taller than that: the unit cube
+ * spans -1 to 1, so the model came out around 40. Normalising the model's own
+ * height says the same thing directly, and keeps saying it if the runner is ever
+ * re-exported at a different scale.
+ */
+const AVATAR_HEIGHT_PX = 40;
 type Props = { camera: AvatarCamera; running: boolean };
 
 /** One scene/asset shared by the player, nearby sharing friends and active ghost.
@@ -35,7 +49,7 @@ function Runners({ camera: rig, running }: Props) {
   // Applying React transform props repeatedly compounds the scale/rotation.
   const base = useMemo(() => {
     if (!box) return null;
-    const scale = 32 / Math.max(.001, box.max[1] - box.min[1]);
+    const scale = AVATAR_HEIGHT_PX / Math.max(.001, box.max[1] - box.min[1]);
     return transformManager.createIdentityMatrix().translate([-box.center[0], -box.min[1], -box.center[2]]).scaling([scale, scale, scale]);
   }, [box, transformManager]);
   const hidden = useMemo(() => transformManager.createIdentityMatrix().scaling([0, 0, 0]), [transformManager]);
@@ -67,8 +81,13 @@ function Runners({ camera: rig, running }: Props) {
     const y0 = Math.log(Math.tan(lat0) + 1 / Math.cos(lat0));
     const cos = Math.cos(bearing), sin = Math.sin(bearing);
     const nowMs = Date.now();
+    // `list` is a host object bridging two runtimes, not a JS array, and reading
+    // past its end reads past the backing vector instead of returning undefined.
+    // There are almost always fewer actors than instances — usually just this
+    // runner — so the length is a hard bound, not a formality.
+    const count = list.length;
     for (let i = 0; i < roots.length; i++) {
-      const actor = list[i];
+      const actor = i < count ? list[i] : undefined;
       if (!actor || nowMs >= actor.expiresAt) { transformManager.setTransform(roots[i]!, hidden); continue; }
       const self = actor.id === 'self';
       const lat = (self ? f.origin[1] : actor.coordinate[1]) * Math.PI / 180;

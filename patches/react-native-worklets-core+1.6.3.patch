@@ -1,0 +1,22 @@
+diff --git a/node_modules/react-native-worklets-core/cpp/wrappers/WKTJsiArrayWrapper.h b/node_modules/react-native-worklets-core/cpp/wrappers/WKTJsiArrayWrapper.h
+index 620f631..faa87ab 100644
+--- a/node_modules/react-native-worklets-core/cpp/wrappers/WKTJsiArrayWrapper.h
++++ b/node_modules/react-native-worklets-core/cpp/wrappers/WKTJsiArrayWrapper.h
+@@ -563,8 +563,16 @@ public:
+         std::all_of(nameStr.begin(), nameStr.end(), ::isdigit)) {
+       std::unique_lock lock(_readWriteMutex);
+ 
+-      // Return property by index
++      // Return property by index. Reading out of bounds is `undefined` in
++      // Javascript, but `_array[index]` on a vector is undefined *behaviour* — it
++      // returns whatever lies past the buffer as a shared_ptr and unwrapping that
++      // dereferences it. The crashes that produced looked nothing like an array
++      // overrun: a pointer made of ASCII text, a protection fault at address
++      // zero, a codesigning "invalid page". Match Javascript instead.
+       auto index = std::stoi(nameStr.c_str());
++      if (index < 0 || static_cast<size_t>(index) >= _array.size()) {
++        return jsi::Value::undefined();
++      }
+       auto prop = _array[index];
+       return JsiWrapper::unwrap(runtime, prop);
+     }
